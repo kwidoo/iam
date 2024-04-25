@@ -65,8 +65,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
-
+            //
         ];
     }
 
@@ -106,7 +105,7 @@ class User extends Authenticatable
         return $this->hasOne(Email::class, 'user_uuid', 'uuid')->ofMany([
             'is_primary' => 'max'
         ], function ($query) {
-            $query->where('is_primary', true)->orWhere(['is_primary' => 0, 'updated_at' => 'max']);
+            $query->where('is_primary', true)->orWhere(['is_primary' => 0, 'updated_at' => 'min']);
         });
     }
 

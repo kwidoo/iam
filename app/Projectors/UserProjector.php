@@ -16,17 +16,18 @@ class UserProjector extends Projector
      *
      * @return [type]
      */
-    public function onUserCreated(UserCreated $event)
+    public function onUserCreated(UserCreated $event): void
     {
-        $password = request()->input('password');
-        $user = (new User([
-            'uuid' => $event->data['uuid'],
-            'password' => $password,
-        ]));
+        $user = (new User(
+            [
+                'uuid' => $event->data['uuid'],
+                'password' => $event->data['password'],
+            ]
+        ));
         $user->save();
 
         $data = [
-            'email' => request()->input('email'),
+            'email' => $event->data['email'],
             'user_uuid' => $user->uuid,
             'is_primary' => false,
         ];

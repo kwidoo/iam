@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Data\EmailData;
 use App\Traits\EmailEventsTrait;
 use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -54,7 +53,7 @@ class Email extends Projection implements MustVerifyEmail
     protected $casts = [
         // 'email' => 'encrypted',
         'is_primary' => 'boolean',
-        'data' => EmailData::class,
+        'data' => 'array',
     ];
 
     public function user(): BelongsTo

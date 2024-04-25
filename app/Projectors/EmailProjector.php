@@ -9,6 +9,7 @@ use App\Events\Email\PrimaryEmailSet;
 use App\Events\Emails\PrimaryEmailUnset;
 use App\Events\VerifyEmail;
 use App\Models\Email;
+use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailNotification;
 use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
@@ -23,9 +24,20 @@ class EmailProjector extends Projector
     {
         $data = $event->data;
 
+        $user = User::find($data['user_uuid']);
+
+        $shouldDelete = null;
+        if ($user->emails()->count() === 1 && !$user->hasVerifiedEmail()) {
+            $shouldDelete = $user->email;
+        }
+
         $email = (new Email($data));
         $email->writeable()->save();
         $email->sendEmailVerificationNotification();
+
+        if ($shouldDelete) {
+            $shouldDelete->removeEmail();
+        }
     }
 
     /**
@@ -87,13 +99,6 @@ class EmailProjector extends Projector
         $email = $event->email;
         if (!$email->hasVerifiedEmail()) {
             abort(422, 'Cannot set an unverified email as primary');
-        }
-
-        // @todo add separate event for this
-        $otherEmail = $email->user->emails()->where('is_primary', true)->first();
-        if ($otherEmail) {
-            $otherEmail->is_primary = false;
-            $otherEmail->writeable()->save();
         }
 
         $email->is_primary = true;
