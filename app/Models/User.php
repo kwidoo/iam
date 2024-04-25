@@ -113,6 +113,6 @@ class User extends Authenticatable
 
     public function hasVerifiedEmail(): bool
     {
-        return $this->email?->email?->hasVerifiedEmail();
+        return $this->email?->hasVerifiedEmail();
     }
 }
