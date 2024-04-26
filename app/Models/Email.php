@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToUser;
 use App\Traits\EmailEventsTrait;
 use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Spatie\EventSourcing\Projections\Projection;
@@ -21,6 +21,7 @@ class Email extends Projection implements MustVerifyEmail
     use SoftDeletes;
     use AuthMustVerifyEmail;
     use Notifiable;
+    use BelongsToUser;
 
     /**
      * @var string
@@ -55,11 +56,6 @@ class Email extends Projection implements MustVerifyEmail
         'is_primary' => 'boolean',
         'data' => 'array',
     ];
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_uuid', 'uuid');
-    }
 
     /**
      * @param Builder $query

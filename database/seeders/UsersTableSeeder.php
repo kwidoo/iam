@@ -25,6 +25,7 @@ class UsersTableSeeder extends Seeder
             'name' => 'Oleg Pashkovsky',
             'email' => 'oleg@pashkovsky.me',
             'password' => bcrypt('test'),
+            'type' => 'admin',
             'reference_id' => Str::uuid()->toString(),
         ]);;
     }

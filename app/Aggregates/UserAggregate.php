@@ -6,6 +6,7 @@ use App\Events\Email\EmailCreated;
 use App\Events\Email\EmailRemoved;
 use App\Events\Email\PrimaryEmailSet;
 use App\Events\Email\PrimaryEmailUnset;
+use App\Events\Profile\ProfileCreated;
 use App\Events\User\UserCreated;
 use App\Events\User\UserLoggedIn;
 use App\Events\User\UserLoginFailed;
@@ -125,6 +126,19 @@ class UserAggregate extends AggregateRoot
             ->setMetaData([
                 'reference_id' => $data['reference_id']
             ]));
+
+        return $this;
+    }
+
+    /**
+     * @param string $uuid
+     *
+     * @return self
+     */
+    public function createProfile(array $data): self
+    {
+        $this->recordThat((new ProfileCreated($data))
+            ->setMetaData(['reference_id' => $data['reference_id']]));
 
         return $this;
     }
