@@ -17,6 +17,13 @@ class UserResource extends JsonResource
         return [
             'uuid' => $this->uuid,
             'primary_email' => $this->email?->email,
+            'roles' => $this->whenLoaded('roles', $this->roles->map(fn ($role) => [
+                'name' => $role->name,
+                'permissions' => $role->permissions->map(fn ($permission) => [
+                    'name' => $permission->name,
+                ])
+            ])),
+
         ];
     }
 }

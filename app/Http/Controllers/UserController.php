@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\CreateUserService;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -28,6 +29,11 @@ class UserController extends Controller
     public function heartBeat()
     {
         return response()->json('', 200);
+    }
+
+    public function getUser(Request $request)
+    {
+        return new UserResource($request->user()->load('roles.permissions'));
     }
 
 

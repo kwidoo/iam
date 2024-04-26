@@ -106,10 +106,11 @@ class UserAggregate extends AggregateRoot
      */
     public function userLoggedIn(User $user, array $data): self
     {
-        $this->recordThat((new UserLoggedIn($user, $data))
-            ->setMetaData([
-                'reference_id' => $data['reference_id']
-            ]));
+        $event = (new UserLoggedIn($user, $data))->setMetaData([
+            'reference_id' => $data['reference_id']
+        ]);
+        event($event);
+        $this->recordThat($event);
 
         return $this;
     }

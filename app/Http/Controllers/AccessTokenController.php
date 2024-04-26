@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\User\UserLoggedIn;
 use App\Events\User\UserLoginFailed;
 use App\Models\User;
 use App\Services\LoginService;
@@ -60,6 +61,7 @@ class AccessTokenController extends ControllersAccessTokenController
         $data['reference_id'] = $uuid;
 
         LoginService::login($user, $data);
+        event(new UserLoggedIn($user, $data));
 
         return response()->json($data, 200);
     }

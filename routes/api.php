@@ -22,7 +22,8 @@ Route::group([
 
 
 Route::resource('users', UserController::class)->only(['store', 'update', 'destroy']);
-Route::get('/users/heartbeat', [UserController::class, 'heartBeat']);
+Route::get('/heartbeat', [UserController::class, 'heartBeat'])->middleware('auth:api');
+Route::get('/users/me', [UserController::class, 'getUser'])->middleware('auth:api');
 
 Route::group(['middleware' => 'auth:api'], function () {
 
