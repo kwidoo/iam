@@ -6,16 +6,28 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Services\CreateUserService;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
     /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('auth:api', except: ['store']),
+        ];
+    }
+
+    /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function heartBeat()
     {
-        //
+        return response()->json('', 200);
     }
 
 
@@ -25,17 +37,12 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $validated = $request->validated();
+        $validated['uuid'] = Str::uuid()->toString();
         $validated['password'] = bcrypt($validated['password']);
+        $validated['reference_id'] = Str::uuid()->toString();
 
-        return new UserResource(User::createUser($validated));
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
-    {
-        return new UserResource($user);
+        CreateUserService::createUser($validated);
+        return ['status' => 'ok', 'reference_id' => $validated['reference_id']];
     }
 
     /**

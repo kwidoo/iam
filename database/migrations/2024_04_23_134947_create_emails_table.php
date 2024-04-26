@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('emails', function (Blueprint $table) {
-            $table->ulid('uuid')->primary();
+            $table->uuid('uuid')->primary();
             $table->string('email');
-            $table->string('user_uuid');
+            $table->uuid('user_uuid');
             $table->boolean('is_primary')->default(false);
             $table->json('data')->nullable();
             $table->timestamp('email_verified_at')->nullable();

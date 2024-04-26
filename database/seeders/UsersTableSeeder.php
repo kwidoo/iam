@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Services\CreateUserService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class UsersTableSeeder extends Seeder
 {
@@ -19,10 +20,12 @@ class UsersTableSeeder extends Seeder
 
         \DB::table('users')->delete();
 
-        User::createUser([
+        CreateUserService::createUser([
+            'uuid' => Str::uuid()->toString(),
             'name' => 'Oleg Pashkovsky',
             'email' => 'oleg@pashkovsky.me',
             'password' => bcrypt('test'),
-        ]);
+            'reference_id' => Str::uuid()->toString(),
+        ]);;
     }
 }

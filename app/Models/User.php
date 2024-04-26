@@ -4,9 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Events\User\UserCreated;
 use App\Traits\UserEventsTrait;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -18,7 +17,7 @@ use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
-    use HasUlids;
+    use HasUuids;
     use SoftDeletes;
     use UserEventsTrait;
 
@@ -81,13 +80,13 @@ class User extends Authenticatable
         }
     }
 
-    /**
-     * @return HasMany
-     */
-    public function profile(): HasMany
-    {
-        return $this->hasMany(Profile::class, 'user_uuid', 'uuid');
-    }
+    // /**
+    //  * @return HasMany
+    //  */
+    // public function profile(): HasMany
+    // {
+    //     return $this->hasMany(Profile::class, 'user_uuid', 'uuid');
+    // }
 
     /**
      * @return HasMany

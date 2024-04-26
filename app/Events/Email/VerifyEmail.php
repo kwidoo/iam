@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace App\Events\Email;
 
 use App\Models\Email;
 use Illuminate\Broadcasting\InteractsWithSockets;

@@ -6,7 +6,7 @@ use App\Traits\EmailEventsTrait;
 use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,7 +16,7 @@ use Spatie\EventSourcing\Projections\Projection;
 class Email extends Projection implements MustVerifyEmail
 {
     use HasFactory;
-    use HasUlids;
+    use HasUuids;
     use EmailEventsTrait;
     use SoftDeletes;
     use AuthMustVerifyEmail;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace App\Events\User;
 
 use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -16,7 +16,7 @@ class UserLoginFailed extends ShouldBeStored
      * Create a new event instance.
      */
     public function __construct(
-        public User $user,
+        public ?User $user,
     ) {
         //
     }

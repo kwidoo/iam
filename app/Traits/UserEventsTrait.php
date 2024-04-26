@@ -3,9 +3,10 @@
 namespace App\Traits;
 
 use App\Events\User\UserCreated;
-use App\Events\UserLoggedIn;
-use App\Events\UserLoginFailed;
+use App\Events\User\UserLoggedIn;
+use App\Events\User\UserLoginFailed;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 trait UserEventsTrait
 {
@@ -16,7 +17,9 @@ trait UserEventsTrait
      */
     public static function createUser(array $data): User
     {
-        $data['uuid'] = (new self)->newUniqueId();
+        if (!array_key_exists('uuid', $data)) {
+            $data['uuid'] = (new self)->newUniqueId();
+        }
         event(new UserCreated($data));
 
         return static::find($data['uuid']);
@@ -25,9 +28,9 @@ trait UserEventsTrait
     /**
      * @return void
      */
-    public function loginUser(): void
+    public function loginUser($data): void
     {
-        event(new UserLoggedIn($this));
+        event(new UserLoggedIn($this, $data));
     }
 
     /**

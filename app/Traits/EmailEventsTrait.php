@@ -6,7 +6,7 @@ use App\Events\Email\EmailConfirmed;
 use App\Events\Email\EmailCreated;
 use App\Events\Email\EmailRemoved;
 use App\Events\Email\PrimaryEmailSet;
-use App\Events\Emails\PrimaryEmailUnset;
+use App\Events\Email\PrimaryEmailUnset;
 use App\Models\Email;
 
 trait EmailEventsTrait
@@ -38,14 +38,16 @@ trait EmailEventsTrait
     }
 
     /**
-     * @param string $uuid
-     * @param string $emailUuid
+     * @param string $referenceId
      *
      * @return void
      */
-    public function removeEmail(): void
+    public function removeEmail(string $referenceId): void
     {
-        event(new EmailRemoved($this));
+        event((new EmailRemoved($this))
+            ->setMetaData([
+                'reference_id' => $referenceId
+            ]));
     }
 
     /**

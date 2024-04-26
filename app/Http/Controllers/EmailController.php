@@ -2,41 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ConfirmEmailRequest;
-use App\Http\Requests\SetPrimaryEmailRequest;
 use App\Http\Requests\StoreEmailRequest;
 use App\Models\Email;
+use App\Services\AddEmailService;
+use App\Services\RemoveEmailService;
+use App\Services\SetPrimaryEmailService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
+use Exception;
+
 
 class EmailController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
-    {
-        $emails = $request->user()->emails;
-
-        return response()->json($emails);
-    }
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreEmailRequest $request)
     {
-        $data = [
-            'email' => $request->input('email'),
-            'user_uuid' => $request->user()->uuid,
-        ];
+        $uuid = Str::uuid()->toString();
 
-        $email = Email::createEmail($data);
+        AddEmailService::addEmail($request->user(), $request->input('email'), $uuid);
 
         return response()->json([
-            'message' => 'Email created',
-            'email' => $email->email,
-            'user_uuid' => $email->user_uuid
+            'status' => 'ok',
+            'reference' => $uuid
         ]);
     }
 
@@ -47,19 +36,14 @@ class EmailController extends Controller
 
     public function setPrimary(Email $email)
     {
-        $email->unsetPrimaryEmail();
-        return response()->json(['message' => 'Email set as primary']);
-    }
+        $uuid = Str::uuid()->toString();
+        if (!$email->is_primary) {
+            SetPrimaryEmailService::setPrimaryEmail($email, $uuid);
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Email $email)
-    {
         return response()->json([
-            'message' => 'Email retrieved',
-            'email' => $email->email,
-            'user_uuid' => $email->user_uuid
+            'status' => 'ok',
+            'reference' => $uuid
         ]);
     }
 
@@ -68,7 +52,7 @@ class EmailController extends Controller
      */
     public function update(Request $request, Email $email)
     {
-        //
+        throw new Exception('Not implemented');
     }
 
     /**
@@ -76,8 +60,12 @@ class EmailController extends Controller
      */
     public function destroy(Email $email)
     {
-        $email->removeEmail();
+        $uuid = Str::uuid()->toString();
+        RemoveEmailService::removeEmail($email, $uuid);
 
-        return response()->json(['message' => 'Email removed']);
+        return response()->json([
+            'status' => 'ok',
+            'reference' => $uuid
+        ]);
     }
 }

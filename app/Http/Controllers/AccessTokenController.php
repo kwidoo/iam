@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\UserLoggedIn;
-use App\Events\UserLoginFailed;
+use App\Events\User\UserLoginFailed;
 use App\Models\User;
+use App\Services\LoginService;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Laravel\Passport\Exceptions\OAuthServerException;
 use Laravel\Passport\Http\Controllers\AccessTokenController as ControllersAccessTokenController;
 use Psr\Http\Message\ServerRequestInterface;
+use Illuminate\Support\Str;
 
 class AccessTokenController extends ControllersAccessTokenController
 {
@@ -20,6 +21,8 @@ class AccessTokenController extends ControllersAccessTokenController
      */
     public function issueToken(ServerRequestInterface $request)
     {
+        $uuid =  Str::uuid()->toString();
+
         $parsedBody = $request->getParsedBody();
 
         if (!isset($parsedBody['login'])) {
@@ -31,7 +34,13 @@ class AccessTokenController extends ControllersAccessTokenController
                 throw $e;
             }
         }
-        $user = User::whereHas('email', fn (Builder $q) => $q->where('email', $parsedBody['login']))->firstOrFail();
+
+        try {
+            $user = User::whereHas('email', fn (Builder $q) => $q->where('email', $parsedBody['login']))->firstOrFail();
+        } catch (\Exception $e) {
+            event(new UserLoginFailed(null, ['reference' => $uuid]));
+            throw new $e;
+        }
 
         $newParsedBody = array_merge($parsedBody, ['username' => $user->uuid]);
         unset($newParsedBody['login']);
@@ -41,18 +50,17 @@ class AccessTokenController extends ControllersAccessTokenController
         try {
             $response = parent::issueToken($newRequest);
         } catch (OAuthServerException $e) {
-            event(new UserLoginFailed($user));
+            event(new UserLoginFailed($user, ['reference' => $uuid]));
             throw $e;
         }
 
-        event(new UserLoggedIn($user));
-
         $data = json_decode($response->getContent(), true);
-        $data['email_validated'] = $user->hasVerifiedEmail();
+        $data['email_verified'] = $user->hasVerifiedEmail();
         $data['user_uuid'] = $user->uuid;
+        $data['reference_id'] = $uuid;
 
-        $response = $response->setContent($data);
+        LoginService::login($user, $data);
 
-        return $response;
+        return response()->json($data, 200);
     }
 }
