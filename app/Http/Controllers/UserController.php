@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
+use App\Jobs\CreateUserJob;
 use App\Models\User;
 use App\Services\CreateUserService;
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -43,7 +44,7 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $validated = $request->validated();
-        $validated['uuid'] = Str::uuid()->toString();
+        $validated['user_uuid'] = Str::uuid()->toString();
         $validated['password'] = bcrypt($validated['password']);
         $validated['reference_id'] = Str::uuid()->toString();
 

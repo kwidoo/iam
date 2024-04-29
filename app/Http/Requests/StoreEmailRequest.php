@@ -28,7 +28,7 @@ class StoreEmailRequest extends FormRequest
                 'email',
                 Rule::unique('emails', 'email')->where(function ($query) {
                     return $query->whereNull('deleted_at');
-                })->ignore($this->email, 'uuid'),
+                }),
             ],
         ];
     }

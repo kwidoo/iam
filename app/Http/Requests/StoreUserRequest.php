@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
                 'required', 'email',
                 Rule::unique('emails', 'email')->where(function ($query) {
                     return $query->whereNull('deleted_at');
-                })->ignore($this->email, 'uuid'),
+                }),
             ],
             'password' => ['required', 'string'],
         ];

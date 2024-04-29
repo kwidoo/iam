@@ -26,7 +26,7 @@ class UsersTableSeeder extends Seeder
 
         $userUuid = Str::uuid()->toString();
         CreateUserService::createUser([
-            'uuid' => $userUuid,
+            'user_uuid' => $userUuid,
             'name' => 'Oleg Pashkovsky',
             'email' => 'oleg@pashkovsky.me',
             'password' => bcrypt('test'),

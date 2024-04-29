@@ -10,6 +10,7 @@
         "laravel/octane": "^2.3",
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
+        "mongodb/laravel-mongodb": "^4.3",
         "spatie/laravel-data": "^4.5",
         "spatie/laravel-event-sourcing": "^7.5",
         "spatie/laravel-permission": "^6.7"

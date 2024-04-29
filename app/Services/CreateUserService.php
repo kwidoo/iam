@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Aggregates\UserAggregate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CreateUserService
 {
@@ -16,11 +17,24 @@ class CreateUserService
     {
         try {
             DB::transaction(function () use ($data) {
+                $data['email_uuid'] = Str::uuid()->toString();
+                $data['organization_uuid'] = Str::uuid()->toString();
+                $data['organization_name'] = $data['organization_name'] ?? 'default';
+                $data['profile_uuid'] = Str::uuid()->toString();
+                $data['profile_name'] = $data['profile_name'] ?? 'default';
 
-                (new UserAggregate)->retrieve($data['uuid'])
+                (new UserAggregate)->retrieve($data['user_uuid'])
+                    //
                     ->createUser($data)
-                    ->createEmail([...$data, 'user_uuid' => $data['uuid']])
-                    ->createProfile([...$data, 'user_uuid' => $data['uuid']])
+                    //
+                    ->createEmail($data)
+                    //
+                    ->createOrganization($data)
+                    //
+                    ->createProfile($data)
+                    //
+                    ->updateUserAfterCreate($data)
+                    //
                     ->persist($data['reference_id']);
             });
         } catch (\Exception $e) {

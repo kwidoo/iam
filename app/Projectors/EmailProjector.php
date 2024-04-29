@@ -2,6 +2,7 @@
 
 namespace App\Projectors;
 
+use App\Events\Email\AfterEmailCreated;
 use App\Events\Email\EmailConfirmed;
 use App\Events\Email\EmailCreated;
 use App\Events\Email\EmailRemoved;
@@ -9,6 +10,7 @@ use App\Events\Email\PrimaryEmailSet;
 use App\Events\Email\PrimaryEmailUnset;
 use App\Events\Email\VerifyEmail;
 use App\Models\Email;
+use App\Models\UserProfile;
 use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailNotification;
 use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
@@ -72,6 +74,18 @@ class EmailProjector extends Projector
         $email = $event->email;
         $email->is_primary = true;
         $email->writeable()->save();
+
+        $userProfile = UserProfile::whereUuid($email->user->uuid)->firstOrFail();
+        $emails = $email->user->emails;
+
+        $userProfile->email = $email->email;
+        $userProfile->email_verified_at = $email->email_verified_at;
+
+        if ($emails->count() > 1) {
+            $userProfile->emails = $emails->pluck('email')->filter(fn ($needle) => $needle !== $email->email)->toArray();
+        }
+
+        $userProfile->save();
     }
 
     /**
@@ -89,5 +103,21 @@ class EmailProjector extends Projector
 
         $email->is_primary = false;
         $email->writeable()->save();
+    }
+
+    public function onAfterEmailCreated(AfterEmailCreated $event): void
+    {
+        $emails = Email::whereUserUuid($event->data['user_uuid'])->get();
+        $userProfile = UserProfile::whereUuid($event->data['user_uuid'])->firstOrFail();
+
+        if ($emails->count() === 1) {
+            $userProfile->email = $event->data['email'];
+        }
+
+        if ($emails->count() > 1) {
+            $userProfile->emails = $emails->pluck('email')->filter(fn ($email) => $email !== $userProfile->email)->toArray();
+        }
+
+        $userProfile->save();
     }
 }

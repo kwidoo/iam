@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
-            $table->string('type');
+            $table->string('name')->default('default');
+            $table->string('type')->default('default');
             $table->uuid('user_uuid');
             $table->foreign('user_uuid')->references('uuid')->on('users');
+            $table->uuid('organization_uuid');
+            $table->foreign('organization_uuid')->references('uuid')->on('organizations');
             $table->json('data')->nullable();
             $table->timestamps();
             $table->softDeletes();

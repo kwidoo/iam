@@ -2,10 +2,12 @@
 
 // use App\Http\Controllers\AuthController;
 
-use App\Http\Controllers\AccessTokenController;
+use App\Http\Controllers\Auth\AccessTokenController;
+use App\Http\Controllers\Autn\HeartbeatController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserReadController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -20,12 +22,15 @@ Route::group([
     ]);
 });
 
-
 Route::resource('users', UserController::class)->only(['store', 'update', 'destroy']);
-Route::get('/heartbeat', [UserController::class, 'heartBeat'])->middleware('auth:api');
-Route::get('/users/me', [UserController::class, 'getUser'])->middleware('auth:api');
 
-Route::group(['middleware' => 'auth:api'], function () {
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::get('/heartbeat', HeartbeatController::class);
+
+    Route::resource('users', UserReadController::class)->only(['index', 'show']);
+
+
+
 
     Route::resource('emails', EmailController::class)->only(['store', 'update', 'destroy'])->middleware('auth:api');
     Route::get('/emails/confirm', [EmailController::class, 'confirm'])->name('verification.verify')->middleware(['signed', 'auth:api']);

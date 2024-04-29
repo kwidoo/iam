@@ -5,18 +5,16 @@ namespace App\Data;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 
-class ProfileData extends Data
+class OrganizationData extends Data
 {
     public function __construct(
-        #[MapInputName('profile_uuid')]
+        #[MapInputName('organization_uuid')]
         public string $uuid,
-        #[MapInputName('profile_name')]
+        #[MapInputName('organization_name')]
         public string $name,
         #[MapInputName('user_uuid')]
         public string $userUuid,
-        #[MapInputName('organization_uuid')]
-        public string $organizationUuid,
-        public string $type = 'default',
+
     ) {
     }
 }
