@@ -3,9 +3,9 @@
 namespace App\Projectors;
 
 use App\Events\Email\AfterEmailCreated;
-use App\Events\Email\EmailConfirmed;
 use App\Events\Email\EmailCreated;
 use App\Events\Email\EmailRemoved;
+use App\Events\Email\EmailVerified;
 use App\Events\Email\PrimaryEmailSet;
 use App\Events\Email\PrimaryEmailUnset;
 use App\Events\Email\VerifyEmail;
@@ -27,25 +27,25 @@ class EmailProjector extends Projector
         $email->writeable()->save();
     }
 
-    /**
-     * @param VerifyEmail $event
-     *
-     * @return void
-     */
-    public function onVerifyEmailSend(VerifyEmail $event): void
-    {
-        $email = $event->email;
-        $email->notify(new VerifyEmailNotification);
-    }
+    // /**
+    //  * @param VerifyEmail $event
+    //  *
+    //  * @return void
+    //  */
+    // public function onVerifyEmailSend(VerifyEmail $event): void
+    // {
+    //     $email = $event->email;
+    //     $email->notify(new VerifyEmailNotification);
+    // }
 
     /**
-     * @param EmailConfirmed $event
+     * @param EmailVerified $event
      *
      * @return void
      */
-    public function onEmailConfirmed(EmailConfirmed $event): void
+    public function onEmailVerified(EmailVerified $event): void
     {
-        $email = Email::find($event->emailUuid);
+        $email = $event->email;
         $email->email_verified_at = now();
         if ($email->user?->has_primary_email !== true) {
             $email->is_primary = true;
@@ -65,7 +65,7 @@ class EmailProjector extends Projector
     }
 
     /**
-     * @param PrimaryEmailSet $event
+     * @param PrimaryEmailSet $eventq
      *
      * @return void
      */

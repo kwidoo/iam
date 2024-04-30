@@ -4,16 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\UserResource;
-use App\Jobs\CreateUserJob;
+
 use App\Models\User;
-use App\Services\CreateUserService;
-use Illuminate\Http\Request;
+use App\Contracts\CreateUserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 
+/**
+ * Class UserController
+ * @package App\Http\Controllers
+ */
 class UserController extends Controller
 {
+    /**
+     * UserController constructor.
+     */
+    public function __construct(
+        protected CreateUserService $createUserService
+    ) {
+    }
+
     /**
      * Get the middleware that should be assigned to the controller.
      */
@@ -25,31 +36,24 @@ class UserController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     */
-    public function heartBeat()
-    {
-        return response()->json('', 200);
-    }
-
-    public function getUser(Request $request)
-    {
-        return new UserResource($request->user()->load('roles.permissions'));
-    }
-
-
-    /**
      * Store a newly created resource in storage.
+     *
+     * @param StoreUserRequest $request
+     *
+     * @return JsonResponse
      */
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $validated = $request->validated();
         $validated['user_uuid'] = Str::uuid()->toString();
         $validated['password'] = bcrypt($validated['password']);
         $validated['reference_id'] = Str::uuid()->toString();
 
-        CreateUserService::createUser($validated);
-        return ['status' => 'ok', 'reference_id' => $validated['reference_id']];
+        ($this->createUserService)($validated);
+        return response()->json([
+            'status' => 'ok',
+            'reference' => $validated['reference_id'],
+        ]);
     }
 
     /**

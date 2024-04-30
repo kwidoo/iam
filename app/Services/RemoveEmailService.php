@@ -2,18 +2,23 @@
 
 namespace App\Services;
 
-use App\Aggregates\UserAggregate;
+use App\Contracts\CreateEmail;
+use App\Contracts\RemoveEmailService as ContractsRemoveEmailService;
 use App\Models\Email;
 use Illuminate\Support\Facades\DB;
 
-class RemoveEmailService
+class RemoveEmailService implements ContractsRemoveEmailService
 {
+    public function __construct(protected CreateEmail $aggregate)
+    {
+    }
+
     /**
      * @param array $data
      *
      * @return void
      */
-    public static function removeEmail(Email $email, string $referenceId = null)
+    public function __invoke(Email $email, string $referenceId = null)
     {
         try {
             DB::transaction(function () use ($email, $referenceId) {
@@ -29,14 +34,14 @@ class RemoveEmailService
                 if ($email->is_primary) {
                     $shouldSet = $email->user->emails()->where('uuid', '!=', $email->uuid)->isVerified()->firstOrFail();
                     if ($shouldSet) {
-                        (new UserAggregate)->retrieve($email->user->uuid)
+                        $this->aggregate->retrieve($email->user->uuid)
                             ->unsetPrimaryEmail($email, $referenceId)
                             ->setPrimaryEmail($shouldSet, $referenceId)
                             ->persist($referenceId);
                     }
                 }
 
-                (new UserAggregate)->retrieve($email->user->uuid)
+                $this->aggregate->retrieve($email->user->uuid)
                     ->removeEmail($email, $referenceId)
                     ->persist($referenceId);
             });

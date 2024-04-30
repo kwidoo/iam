@@ -5,8 +5,10 @@ namespace App\Aggregates\UserPartials;
 use App\Events\Email\AfterEmailCreated;
 use App\Events\Email\EmailCreated;
 use App\Events\Email\EmailRemoved;
+use App\Events\Email\EmailVerified;
 use App\Events\Email\PrimaryEmailSet;
 use App\Events\Email\PrimaryEmailUnset;
+use App\Events\Email\VerifyEmail;
 use App\Models\Email;
 
 trait EmailActions
@@ -80,6 +82,38 @@ trait EmailActions
         $this->recordThat((new AfterEmailCreated($data))
             ->setMetaData([
                 'reference_id' => $data['reference_id']
+            ]));
+
+        return $this;
+    }
+
+    /**
+     * @param Email $email
+     * @param string $referenceId
+     *
+     * @return self
+     */
+    public function sendEmailVerification(Email $email, string $referenceId): self
+    {
+        $this->recordThat((new VerifyEmail($email))
+            ->setMetaData([
+                'reference_id' => $referenceId
+            ]));
+
+        return $this;
+    }
+
+    /**
+     * @param Email $email
+     *
+     * @return self
+     */
+
+    public function verifyEmail(Email $email, string $referenceId): self
+    {
+        $this->recordThat((new EmailVerified($email))
+            ->setMetaData([
+                'reference_id' => $referenceId
             ]));
 
         return $this;

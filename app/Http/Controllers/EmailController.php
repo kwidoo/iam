@@ -4,41 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmailRequest;
 use App\Models\Email;
-use App\Services\AddEmailService;
-use App\Services\RemoveEmailService;
+use App\Contracts\AddEmailService;
+use App\Contracts\RemoveEmailService;
+use App\Contracts\SendEmailVerificationService;
+use App\Contracts\VerifyEmailService;
+use App\Http\Requests\SendEmailVerificationRequest;
 use App\Services\SetPrimaryEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Exception;
-
+use Illuminate\Http\JsonResponse;
 
 class EmailController extends Controller
 {
+
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreEmailRequest $request)
+    public function store(StoreEmailRequest $request, AddEmailService $addEmailService): JsonResponse
     {
-        $uuid = Str::uuid()->toString();
+        $referenceId = Str::uuid()->toString();
 
-        AddEmailService::addEmail($request->user(), $request->input('email'), $uuid);
+        $addEmailService(
+            $request->user(),
+            $request->input('email'),
+            $referenceId
+        );
 
         return response()->json([
             'status' => 'ok',
-            'reference' => $uuid
+            'reference' => $referenceId
         ]);
     }
 
-    public function confirm(Request $request)
+    /**
+     * @param Request $request
+     * @param VerifyEmailService $verifyEmailService
+     *
+     * @return [type]
+     */
+    public function confirm(Request $request, VerifyEmailService $verifyEmailService): JsonResponse
     {
-        return response()->json(['message' => 'Email confirmed']);
+        $referenceId = Str::uuid()->toString();
+
+        $email = Email::findOrFail($request->query('id'));
+
+        $verifyEmailService($email);
+
+        return response()->json(['status' => 'ok', 'reference' => $referenceId]);
     }
 
-    public function setPrimary(Email $email)
+    /**
+     * Resend the email verification notification.
+     */
+    public function resend(SendEmailVerificationRequest $request, SendEmailVerificationService $emailVerification): JsonResponse
+    {
+        $referenceId = Str::uuid()->toString();
+
+        $email = Email::where('email', $request->input('email'))->first();
+        if ($email->email_verified_at === null) {
+            $emailVerification($email);
+        }
+
+        return response()->json(['status' => 'ok', 'reference' => $referenceId]);
+    }
+
+    public function setPrimary(Email $email, SetPrimaryEmailService $primaryEmailService): JsonResponse
     {
         $uuid = Str::uuid()->toString();
         if (!$email->is_primary) {
-            SetPrimaryEmailService::setPrimaryEmail($email, $uuid);
+            $primaryEmailService($email, $uuid);
         }
 
         return response()->json([
@@ -47,25 +81,18 @@ class EmailController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Email $email)
-    {
-        throw new Exception('Not implemented');
-    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Email $email)
+    public function destroy(Email $email, RemoveEmailService $removeEmailService): JsonResponse
     {
-        $uuid = Str::uuid()->toString();
-        RemoveEmailService::removeEmail($email, $uuid);
+        $referenceId = Str::uuid()->toString();
+        $removeEmailService($email, $referenceId);
 
         return response()->json([
             'status' => 'ok',
-            'reference' => $uuid
+            'reference' => $referenceId
         ]);
     }
 }

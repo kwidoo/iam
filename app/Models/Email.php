@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Traits\BelongsToUser;
-use App\Traits\EmailEventsTrait;
 use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -17,7 +16,6 @@ class Email extends Projection implements MustVerifyEmail
 {
     use HasFactory;
     use HasUuids;
-    use EmailEventsTrait;
     use SoftDeletes;
     use AuthMustVerifyEmail;
     use Notifiable;

@@ -10,7 +10,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserReadController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::group([
     'as' => 'passport.',
     'prefix' => config('passport.path', 'oauth'),
@@ -24,6 +23,10 @@ Route::group([
 
 Route::resource('users', UserController::class)->only(['store', 'update', 'destroy']);
 
+Route::get('/emails/confirm', [EmailController::class, 'confirm'])
+    ->name('verification.verify')->middleware('signed:relative');
+
+
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/heartbeat', HeartbeatController::class);
 
@@ -32,9 +35,9 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 
 
-    Route::resource('emails', EmailController::class)->only(['store', 'update', 'destroy'])->middleware('auth:api');
-    Route::get('/emails/confirm', [EmailController::class, 'confirm'])->name('verification.verify')->middleware(['signed', 'auth:api']);
-    Route::patch('/emails/{email}/primary', [EmailController::class, 'setPrimary'])->middleware(['auth:api']);
+    Route::resource('emails', EmailController::class)->only(['store', 'destroy']);
+    Route::patch('/emails/{email}/primary', [EmailController::class, 'setPrimary']);
+    Route::post('/emails/resend', [EmailController::class, 'resend']);
 
-    Route::resource('profiles', ProfileController::class)->only(['store', 'update', 'destroy'])->middleware('auth:api');
+    Route::resource('profiles', ProfileController::class)->only(['store', 'update', 'destroy']);
 });

@@ -2,18 +2,23 @@
 
 namespace  App\Services;
 
-use App\Aggregates\UserAggregate;
+use App\Contracts\CreateEmail;
+use App\Contracts\SetPrimaryEmailService as ContractsSetPrimaryEmailService;
 use App\Models\Email;
 use Illuminate\Support\Facades\DB;
 
-class SetPrimaryEmailService
+class SetPrimaryEmailService implements ContractsSetPrimaryEmailService
 {
+    public function __construct(protected CreateEmail $aggregate)
+    {
+    }
+
     /**
      * @param array $data
      *
      * @return void
      */
-    public static function setPrimaryEmail(Email $email, string $referenceId = null)
+    public function __invoke(Email $email, string $referenceId = null)
     {
         try {
             DB::transaction(function () use ($email, $referenceId) {
@@ -21,14 +26,18 @@ class SetPrimaryEmailService
                     abort(422, 'Cannot set an unverified email as primary');
                 }
 
-                $aggregate = (new UserAggregate)->retrieve($email->user->uuid);
                 $otherEmail = $email->user->emails()->isPrimary()->first();
                 if ($otherEmail) {
-                    $aggregate->unsetPrimaryEmail($otherEmail, $referenceId);
+                    $this->aggregate
+                        ->retrieve($email->user->uuid)
+                        ->unsetPrimaryEmail($otherEmail, $referenceId)
+                        ->persist($referenceId);
                 }
 
-                $aggregate->setPrimaryEmail($email, $referenceId);
-                $aggregate->persist($referenceId);
+                $this->aggregate
+                    ->retrieve($email->user->uuid)
+                    ->setPrimaryEmail($email, $referenceId)
+                    ->persist($referenceId);
             });
         } catch (\Exception $e) {
             throw $e;

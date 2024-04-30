@@ -4,8 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
-use App\Services\CreateUserService;
+use App\Contracts\CreateUserService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -25,14 +24,15 @@ class UsersTableSeeder extends Seeder
         \DB::table('users')->delete();
 
         $userUuid = Str::uuid()->toString();
-        CreateUserService::createUser([
+        $userService = app(CreateUserService::class);
+        $userService([
             'user_uuid' => $userUuid,
             'name' => 'Oleg Pashkovsky',
             'email' => 'oleg@pashkovsky.me',
             'password' => bcrypt('test'),
             'type' => 'admin',
             'reference_id' => Str::uuid()->toString(),
-        ]);;
+        ]);
 
 
         Role::create([

@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Traits\UserEventsTrait;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,7 +19,6 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasApiTokens;
     use HasUuids;
     use SoftDeletes;
-    use UserEventsTrait;
     use HasRoles;
 
     /**
@@ -113,5 +111,10 @@ class User extends Authenticatable
     public function hasVerifiedEmail(): bool
     {
         return $this->email?->hasVerifiedEmail();
+    }
+
+    public function getHasPrimaryEmailAttribute(): bool
+    {
+        return $this->email?->is_primary;
     }
 }

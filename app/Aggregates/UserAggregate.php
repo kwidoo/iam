@@ -4,31 +4,18 @@ namespace App\Aggregates;
 
 use App\Aggregates\UserPartials\EmailActions;
 use App\Aggregates\UserPartials\LoginActions;
-use App\Events\AfterUserCreated;
+use App\Aggregates\UserPartials\UserActions;
+use App\Contracts\CreateEmail;
+use App\Contracts\UserAggregate as ContractsUserAggregate;
 use App\Events\Organization\OrganizationCreated;
 use App\Events\Profile\ProfileCreated;
-use App\Events\User\UserCreated;
 use Spatie\EventSourcing\AggregateRoots\AggregateRoot;
 
-class UserAggregate extends AggregateRoot
+class UserAggregate extends AggregateRoot implements ContractsUserAggregate, CreateEmail
 {
     use EmailActions;
     use LoginActions;
-
-    /**
-     * @param array $data
-     *
-     * @return self
-     */
-    public function createUser(array $data): self
-    {
-        $this->recordThat((new UserCreated([
-            'uuid' => $data['user_uuid'],
-            'password' => $data['password'],
-        ]))->setMetaData(['reference_id' => $data['reference_id']]));
-
-        return $this;
-    }
+    use UserActions;
 
     /**
      * @param array $data
@@ -53,7 +40,6 @@ class UserAggregate extends AggregateRoot
         return $this;
     }
 
-
     /**
      * @param string $uuid
      *
@@ -75,21 +61,6 @@ class UserAggregate extends AggregateRoot
         ]))->setMetaData([
             'reference_id' => $data['reference_id']
         ]));
-
-        return $this;
-    }
-
-    /**
-     * @param array $data
-     *
-     * @return self
-     */
-    public function updateUserAfterCreate(array $data): self
-    {
-        $this->recordThat((new AfterUserCreated($data))
-            ->setMetaData([
-                'reference_id' => $data['reference_id']
-            ]));
 
         return $this;
     }
