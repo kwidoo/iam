@@ -14,6 +14,12 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * Class User
+ * @package App\Models
+ *
+ * @property string $has_primary_email
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
@@ -79,14 +85,6 @@ class User extends Authenticatable
         }
     }
 
-    // /**
-    //  * @return HasMany
-    //  */
-    // public function profile(): HasMany
-    // {
-    //     return $this->hasMany(Profile::class, 'user_uuid', 'uuid');
-    // }
-
     /**
      * @return HasMany
      */
@@ -108,11 +106,17 @@ class User extends Authenticatable
     }
 
 
+    /**
+     * @return bool
+     */
     public function hasVerifiedEmail(): bool
     {
         return $this->email?->hasVerifiedEmail();
     }
 
+    /**
+     * @return bool
+     */
     public function getHasPrimaryEmailAttribute(): bool
     {
         return $this->email?->is_primary;

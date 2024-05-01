@@ -3,7 +3,7 @@
 // use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\Auth\AccessTokenController;
-use App\Http\Controllers\Autn\HeartbeatController;
+use App\Http\Controllers\Auth\HeartbeatController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;

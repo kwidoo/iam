@@ -11,14 +11,24 @@ use Illuminate\Support\Str;
 
 class AddEmailService implements ContractsAddEmailService
 {
+    /**
+     * Create a new instance of the AddEmailService.
+     *
+     * @param CreateEmail $aggregate The CreateEmail implementation.
+     */
     public function __construct(protected CreateEmail $aggregate)
     {
         //
     }
+
     /**
-     * @param array $data
+     * Add an email to a user.
      *
+     * @param User $user The user to add the email to.
+     * @param string $email The email to add.
+     * @param string|null $referenceId The reference ID for the email.
      * @return void
+     * @throws EmailCreationFailed If the email creation fails.
      */
     public function __invoke(User $user, string $email, string $referenceId = null)
     {

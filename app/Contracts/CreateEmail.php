@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\Models\Email;
+use Spatie\EventSourcing\AggregateRoots\FakeAggregateRoot;
 
 interface CreateEmail
 {
@@ -16,4 +17,5 @@ interface CreateEmail
     public function updateUserAfterEmailCreated(array $data): self;
     public function verifyEmail(Email $email, string $referenceId): self;
     public function sendEmailVerification(Email $email, string $referenceId): self;
+    public static function fake(?string $uuid = null): FakeAggregateRoot;
 }

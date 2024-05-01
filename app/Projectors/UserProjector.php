@@ -2,7 +2,7 @@
 
 namespace App\Projectors;
 
-use App\Events\AfterUserCreated;
+use App\Events\User\AfterUserCreated;
 use App\Events\User\UserCreated;
 use App\Models\Email;
 use App\Models\Organization;

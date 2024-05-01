@@ -2,7 +2,7 @@
 
 namespace App\Aggregates\UserPartials;
 
-use App\Events\AfterUserCreated;
+use App\Events\User\AfterUserCreated;
 use App\Events\User\UserCreated;
 
 trait UserActions
