@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateUserRequest;
 
 use App\Models\User;
 use App\Contracts\CreateUserService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
@@ -61,7 +62,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        throw new Exception('Not implemented');
     }
 
     /**
@@ -69,6 +70,6 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        throw new Exception('Not implemented');
     }
 }

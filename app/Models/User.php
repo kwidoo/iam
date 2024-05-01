@@ -105,6 +105,11 @@ class User extends Authenticatable
         });
     }
 
+    public function iam_token()
+    {
+        return $this->hasMany(ApiToken::class, 'user_uuid', 'uuid')->whereRevokedAt(null)->latest();
+    }
+
 
     /**
      * @return bool

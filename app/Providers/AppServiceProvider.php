@@ -7,7 +7,9 @@ use App\Contracts\CreateUser;
 use App\Contracts\CreateUserService;
 use App\Contracts\LoginUser;
 use App\Contracts\UserAggregate as UserAggregateContract;
+use App\Guards\IamGuard;
 use App\Services\CreateRootUserService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -26,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Auth::extend('iam', function ($app, $name, array $config) {
+            return new IamGuard(Auth::createUserProvider($config['provider']), $app->make('request'));
+        });
 
         Passport::enablePasswordGrant();
 

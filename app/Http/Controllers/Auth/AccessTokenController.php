@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Events\User\UserLoggedIn;
 use App\Events\User\UserLoginFailed;
+use App\Models\ApiToken;
 use App\Models\User;
 use App\Services\LoginService;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -59,6 +60,11 @@ class AccessTokenController extends ControllersAccessTokenController
         $data['email_verified'] = $user->hasVerifiedEmail();
         $data['user_uuid'] = $user->uuid;
         $data['reference_id'] = $uuid;
+        $token = ApiToken::create([
+            'user_uuid' => $user->uuid,
+        ]);
+
+        $data['iam_token'] = $token->uuid;
 
         LoginService::login($user, $data);
         event(new UserLoggedIn($user, $data));
