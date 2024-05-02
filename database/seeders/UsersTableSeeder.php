@@ -64,6 +64,6 @@ class UsersTableSeeder extends Seeder
 
         $role->givePermissionTo($permission);
 
-        DB::insert('insert into model_has_roles (role_uuid, model_type, model_uuid) values (?, ?, ?)', [$role->uuid, 'App\Models\User', $userUuid]);
+        DB::insert('insert into model_has_roles (role_uuid, model_type, model_uuid) values (?, ?, ?)', [$role->uuid, 'user', $userUuid]);
     }
 }
