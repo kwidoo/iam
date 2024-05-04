@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Projectors\EmailProjector;
+use App\Projectors\MicroServiceProjector;
 use App\Projectors\OrganizationProjector;
 use App\Projectors\ProfileProjector;
 use App\Projectors\UserProjector;
@@ -19,6 +20,7 @@ class EventSourcingServiceProvider extends ServiceProvider
             EmailProjector::class,
             ProfileProjector::class,
             OrganizationProjector::class,
+            MicroServiceProjector::class,
         ]);
 
         Projectionist::addReactors([

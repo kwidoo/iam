@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Contracts\AclService;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Contracts\CreateUserService;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -33,6 +35,12 @@ class UsersTableSeeder extends Seeder
             'type' => 'admin',
             'reference_id' => Str::uuid()->toString(),
         ]);
+
+        $organization = User::find($userUuid)->organizations->first();
+        $profile = $organization->owner_profile;
+
+        app(AclService::class)->createOwnerRule($organization);
+        app(AclService::class)->createOwnerRule($profile);
 
 
         Role::create([

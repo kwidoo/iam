@@ -18768,6 +18768,24 @@ namespace Illuminate\Database\Schema {
                     /**
          * 
          *
+         * @see \Kalnoy\Nestedset\NestedSetServiceProvider::register()
+         * @static 
+         */        public static function nestedSet()
+        {
+                        return \Illuminate\Database\Schema\Blueprint::nestedSet();
+        }
+                    /**
+         * 
+         *
+         * @see \Kalnoy\Nestedset\NestedSetServiceProvider::register()
+         * @static 
+         */        public static function dropNestedSet()
+        {
+                        return \Illuminate\Database\Schema\Blueprint::dropNestedSet();
+        }
+                    /**
+         * 
+         *
          * @see \Spatie\SchemalessAttributes\SchemalessAttributesServiceProvider::registeringPackage()
          * @param string $columnName
          * @static 
@@ -18788,6 +18806,11 @@ namespace App\Http\Requests {
      * 
      *
      */        class StoreEmailRequest {
+            }
+            /**
+     * 
+     *
+     */        class StoreMicroServiceRequest {
             }
             /**
      * 

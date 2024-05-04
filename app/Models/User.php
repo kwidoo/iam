@@ -126,4 +126,14 @@ class User extends Authenticatable
     {
         return $this->email?->is_primary;
     }
+
+    public function organizations()
+    {
+        return $this->hasMany(Organization::class, 'user_uuid', 'uuid');
+    }
+
+    public function profiles()
+    {
+        return $this->hasMany(Profile::class, 'user_uuid', 'uuid');
+    }
 }
