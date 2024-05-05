@@ -2,6 +2,7 @@
 
 namespace App\Aggregates;
 
+use App\Contracts\Aggregates\RuleServiceAggregate;
 use App\Events\RuleList\EntityAttached;
 use App\Events\RuleList\RuleCreated;
 use App\Events\RuleList\RuleGroupAttached;
@@ -10,7 +11,7 @@ use App\Events\RuleList\RuleGroupCreated;
 use App\Events\RuleList\RuleToGroupAttached;
 use Spatie\EventSourcing\AggregateRoots\AggregateRoot;
 
-class RuleListAggregate extends AggregateRoot
+class RuleListAggregate extends AggregateRoot // implements RuleServiceAggregate
 {
     public function createRuleGroup(array $data): self
     {

@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\RuleAction;
+use App\Enums\RuleOperator;
+use App\Rules\Data\RuleConditionData;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,7 +36,7 @@ class Rule extends Projection
         'uuid',
         'rule_group_uuid',
         'description',
-        'type',
+        'action',
         'conditions',
         'operator',
         'order',
@@ -47,8 +50,9 @@ class Rule extends Projection
 
     protected $casts = [
         'order' => 'integer',
-        'operator' => 'string',
-        'conditions' => 'object',
+        'action' => RuleAction::class,
+        'operator' => RuleOperator::class,
+        'conditions' => RuleConditionData::class,
     ];
 
     /**
@@ -57,15 +61,5 @@ class Rule extends Projection
     public function ruleGroup(): BelongsTo
     {
         return $this->belongsTo(RuleGroup::class, 'rule_group_uuid');
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return void
-     */
-    public function setOperatorAttribute(string|null $value): void
-    {
-        $this->attributes['operator'] = $value ? Str::upper($value) : null;
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\HeartbeatController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserReadController;
 use Illuminate\Support\Facades\Route;
@@ -46,4 +47,5 @@ Route::group(['prefix' => 'e', 'middleware' => ['client']], function () {
     Route::group(['middleware' => ['auth:iam']], function () {
         Route::get('user', UserReadController::class);
     });
+    Route::post('/service/register', [ServiceController::class, 'store']);
 });

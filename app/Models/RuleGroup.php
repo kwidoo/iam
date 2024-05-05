@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Enums\RuleGroupType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Kalnoy\Nestedset\NodeTrait;
 
 class RuleGroup extends Model
@@ -17,20 +17,41 @@ class RuleGroup extends Model
     use NodeTrait;
     use SoftDeletes;
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::saving(function (self $model) {
+            if (!is_null($model->user_uuid) && is_null($model->parent_id)) {
+                throw ValidationException::withMessages([
+                    'user_uuid' => 'Cannot set user_uuid when parent_id is NULL.'
+                ]);
+            }
+            if (!is_null($model->entity_uuid) && is_null($model->parent_id)) {
+                throw ValidationException::withMessages([
+                    'entity_uuid' => 'Cannot set entity_uuid when parent_id is NULL.'
+                ]);
+            }
+        });
+    }
+
     /**
      * @var array<string>
      */
     protected $fillable = [
         'id',
-        'parent_id',
         'uuid',
-        'operator',
-        'order',
+        'type',
+        'entity_type',
+        'entity_uuid',
+        'parent_id',
     ];
 
+    /**
+     * @var array<string>
+     */
     protected $casts = [
-        'order' => 'integer',
-        'operator' => 'string',
+        'type' => RuleGroupType::class,
     ];
 
     protected $hidden = [
@@ -48,16 +69,6 @@ class RuleGroup extends Model
             Rule::class,
             'rule_group_uuid',
             'uuid'
-        )->orderBy('order', 'asc');
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return void
-     */
-    public function setOperatorAttribute(string|null $value): void
-    {
-        $this->attributes['operator'] = $value ? Str::upper($value) : null;
+        )->orderBy('order', 'ASC');
     }
 }
