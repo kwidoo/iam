@@ -1,23 +1,24 @@
 <?php
 
-namespace App\Aggregates\UserPartials;
+namespace App\Aggregates\Manage;
 
+use App\Data\Create\UserData;
 use App\Events\User\AfterUserCreated;
 use App\Events\User\UserCreated;
 
-trait UserActions
+trait ManageUsers
 {
     /**
      * @param array $data
      *
      * @return self
      */
-    public function createUser(array $data): self
+    public function createUser(UserData $userData): self
     {
-        $this->recordThat((new UserCreated([
-            'uuid' => $data['user_uuid'],
-            'password' => $data['password'],
-        ]))->setMetaData(['reference_id' => $data['reference_id']]));
+        $this->recordThat(
+            (new UserCreated($userData))
+                ->setMetaData(['reference_id' => $userData->referenceId])
+        );
 
         return $this;
     }

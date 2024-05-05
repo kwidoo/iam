@@ -2,7 +2,7 @@
 
 namespace App\Events\Email;
 
-use App\Models\Email;
+use App\Data\Update\EmailData;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -16,7 +16,7 @@ class PrimaryEmailUnset extends ShouldBeStored
      * Create a new event instance.
      */
     public function __construct(
-        public Email $email
+        public EmailData $emailData
     ) {
         //
     }

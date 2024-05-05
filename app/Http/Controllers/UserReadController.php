@@ -9,6 +9,7 @@ class UserReadController extends Controller
 {
     public function __invoke(Request $request)
     {
+        info($request->user()?->token()?->client?->id);
         return UserProfile::find($request->user()->uuid);
     }
 }

@@ -10,7 +10,13 @@ class ProfileProjector extends Projector
 {
     public function onProfileCreated(ProfileCreated $event)
     {
-        $profile = new Profile($event->data);
+        $profileData = $event->data;
+        $profile = new Profile([
+            'uuid' => $profileData->uuid,
+            'name' => $profileData->name,
+            'user_uuid' => $profileData->userUuid,
+            'organization_uuid' => $profileData->organizationUuid,
+        ]);
         $profile->writeable()->save();
     }
 }

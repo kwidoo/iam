@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
-            $table->uuid('user_uuid')->foreign('user_uuid')->references('uuid')->on('users');
+            $table->uuid('user_uuid');
+            $table->foreign('user_uuid')->references('uuid')->on('users');
             $table->string('name')->default('default');
             $table->json('data')->nullable();
             $table->timestamps();

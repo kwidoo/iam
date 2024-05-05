@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Aggregates\UserPartials;
+namespace App\Aggregates\Manage;
 
+use App\Data\Create\EmailData;
+use App\Data\Update\EmailData as UpdateEmailData;
 use App\Events\Email\AfterEmailCreated;
 use App\Events\Email\EmailCreated;
 use App\Events\Email\EmailRemoved;
@@ -11,21 +13,21 @@ use App\Events\Email\PrimaryEmailUnset;
 use App\Events\Email\VerifyEmail;
 use App\Models\Email;
 
-trait EmailActions
+trait ManageEmails
 {
     /**
      * @param array $data
      *
      * @return self
      */
-    public function createEmail(array $data): self
+    public function createEmail(EmailData $emailData): self
     {
-        $this->recordThat((new EmailCreated([
-            'uuid' => $data['email_uuid'],
-            'email' => $data['email'],
-            'user_uuid' => $data['user_uuid'],
-            'is_primary' => false,
-        ]))->setMetaData(['reference_id' => $data['reference_id']]));
+        $this->recordThat(
+            (new EmailCreated($emailData))
+                ->setMetaData([
+                    'reference_id' => $emailData->referenceId
+                ])
+        );
 
         return $this;
     }
@@ -36,21 +38,21 @@ trait EmailActions
      *
      * @return self
      */
-    public function unsetPrimaryEmail(Email $email, string $referenceId): self
+    public function unsetPrimaryEmail(UpdateEmailData $emailData): self
     {
-        $this->recordThat((new PrimaryEmailUnset($email))
+        $this->recordThat((new PrimaryEmailUnset($emailData))
             ->setMetaData([
-                'reference_id' => $referenceId
+                'reference_id' => $emailData->referenceId
             ]));
 
         return $this;
     }
 
-    public function setPrimaryEmail(Email $email, string $referenceId): self
+    public function setPrimaryEmail(UpdateEmailData $emailData): self
     {
-        $this->recordThat((new PrimaryEmailSet($email))
+        $this->recordThat((new PrimaryEmailSet($emailData))
             ->setMetaData([
-                'reference_id' => $referenceId
+                'reference_id' => $emailData->referenceId
             ]));
 
         return $this;
@@ -62,11 +64,11 @@ trait EmailActions
      *
      * @return self
      */
-    public function removeEmail(Email $email, string $referenceId): self
+    public function removeEmail(UpdateEmailData $emailData): self
     {
-        $this->recordThat((new EmailRemoved($email))
+        $this->recordThat((new EmailRemoved($emailData))
             ->setMetaData([
-                'reference_id' => $referenceId
+                'reference_id' => $emailData->referenceId
             ]));
 
         return $this;

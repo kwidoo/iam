@@ -10,7 +10,12 @@ class OrganizationProjector extends Projector
 {
     public function onOrganizationCreated(OrganizationCreated $event)
     {
-        $organization = new Organization($event->data);
+        $organizationData = $event->data;
+        $organization = new Organization([
+            'uuid' => $organizationData->uuid,
+            'name' => $organizationData->name,
+            'user_uuid' => $organizationData->userUuid,
+        ]);
         $organization->writeable()->save();
     }
 }

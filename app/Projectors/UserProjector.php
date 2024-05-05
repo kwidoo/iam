@@ -22,8 +22,11 @@ class UserProjector extends Projector
      */
     public function onUserCreated(UserCreated $event): void
     {
-        $user = new User($event->data);
-        $user->save();
+        $userData = $event->data;
+        User::create([
+            'uuid' => $userData->uuid,
+            'password' => $userData->password,
+        ]);
     }
 
     /**

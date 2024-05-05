@@ -2,16 +2,9 @@
 
 namespace App\Providers;
 
-use App\Aggregates\MicroServiceAggregate;
-use App\Aggregates\UserAggregate;
 use App\Contracts\AclService as AclServiceContract;
-use App\Contracts\CreateMicroService as CreateMicroServiceContract;
-use App\Services\CreateMicroService;
-use App\Contracts\CreateUser;
-use App\Contracts\CreateUserService;
-use App\Contracts\LoginUser;
-use App\Contracts\MicroServiceAggregate as MicroServiceAggregateContract;
-use App\Contracts\UserAggregate as UserAggregateContract;
+
+use App\Contracts\Services\CreateUserService;
 use App\Guards\IamGuard;
 use App\Models\Organization;
 use App\Models\Profile;
@@ -56,12 +49,10 @@ class AppServiceProvider extends ServiceProvider
             CreateRootUserService::class
         );
 
-        $this->app->bind(UserAggregateContract::class, UserAggregate::class);
-        $this->app->bind(CreateUser::class, UserAggregate::class);
-        $this->app->bind(LoginUser::class, UserAggregate::class);
 
-        $this->app->bind(MicroServiceAggregateContract::class, MicroServiceAggregate::class);
-        $this->app->bind(CreateMicroServiceContract::class, CreateMicroService::class);
+
+        //  $this->app->bind(MicroServiceAggregateContract::class, MicroServiceAggregate::class);
+        // $this->app->bind(CreateMicroServiceContract::class, CreateMicroService::class);
 
         $this->app->bind(AclServiceContract::class, AclService::class);
     }

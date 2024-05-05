@@ -8,10 +8,8 @@ use App\Events\Email\EmailRemoved;
 use App\Events\Email\EmailVerified;
 use App\Events\Email\PrimaryEmailSet;
 use App\Events\Email\PrimaryEmailUnset;
-use App\Events\Email\VerifyEmail;
 use App\Models\Email;
 use App\Models\UserProfile;
-use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailNotification;
 use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
 class EmailProjector extends Projector
@@ -23,7 +21,13 @@ class EmailProjector extends Projector
      */
     public function onEmailCreated(EmailCreated $event): void
     {
-        $email = (new Email($event->data));
+        $emailData = $event->data;
+        $email = (new Email([
+            'uuid' => $emailData->uuid,
+            'user_uuid' => $emailData->userUuid,
+            'email' => $emailData->email,
+            'is_primary' => $emailData->isPrimary,
+        ]));
         $email->writeable()->save();
     }
 
@@ -60,18 +64,18 @@ class EmailProjector extends Projector
      */
     public function onEmailRemoved(EmailRemoved $event): void
     {
-        $email = $event->email;
+        $email = $event->emailData->email;
         $email->writeable()->delete();
     }
 
     /**
-     * @param PrimaryEmailSet $eventq
+     * @param PrimaryEmailSet $event
      *
      * @return void
      */
     public function onEmailPrimarySet(PrimaryEmailSet $event): void
     {
-        $email = $event->email;
+        $email = $event->emailData->email;
         $email->is_primary = true;
         $email->writeable()->save();
 
@@ -95,7 +99,7 @@ class EmailProjector extends Projector
      */
     public function onEmailPrimaryUnset(PrimaryEmailUnset $event): void
     {
-        $email = $event->email;
+        $email = $event->emailData->email;
 
         if ($email->user->emails()->count() === 1) {
             abort(422, 'Cannot unset the last primary email');
@@ -105,6 +109,11 @@ class EmailProjector extends Projector
         $email->writeable()->save();
     }
 
+    /**
+     * @param AfterEmailCreated $event
+     *
+     * @return void
+     */
     public function onAfterEmailCreated(AfterEmailCreated $event): void
     {
         $emails = Email::whereUserUuid($event->data['user_uuid'])->get();

@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
-use App\Contracts\CreateUserService;
-use App\Contracts\UserAggregate;
+use App\Contracts\Aggregates\UserAggregate;
+use App\Contracts\Services\CreateUserService;
+use App\Data\Create\EmailData;
+use App\Data\Create\OrganizationData;
+use App\Data\Create\ProfileData;
+use App\Data\Create\UserData;
 use App\Exceptions\UserCreationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -34,10 +38,10 @@ class CreateRootUserService implements CreateUserService
                 $data['profile_name'] = $data['profile_name'] ?? 'default';
 
                 $this->userAggregate->retrieve($data['user_uuid'])
-                    ->createUser($data)
-                    ->createEmail($data)
-                    ->createOrganization($data)
-                    ->createProfile($data)
+                    ->createUser(UserData::from($data))
+                    ->createEmail(EmailData::from($data))
+                    ->createOrganization(OrganizationData::from($data))
+                    ->createProfile(ProfileData::from($data))
                     ->updateUserAfterCreated($data)
                     //
                     ->persist($data['reference_id']);

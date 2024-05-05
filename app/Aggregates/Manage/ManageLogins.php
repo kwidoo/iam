@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Aggregates\UserPartials;
+namespace App\Aggregates\Manage;
 
 use App\Events\User\UserLoggedIn;
 use App\Events\User\UserLoginFailed;
 use App\Models\User;
 
-trait LoginActions
+trait ManageLogins
 {
     /**
      * @param User $user

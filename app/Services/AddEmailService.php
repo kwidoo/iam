@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\AddEmailService as ContractsAddEmailService;
+use App\Contracts\Aggregates\UserAggregate;
 use App\Contracts\CreateEmail;
 use App\Exceptions\EmailCreationFailed;
 use App\Models\User;
@@ -16,7 +17,7 @@ class AddEmailService implements ContractsAddEmailService
      *
      * @param CreateEmail $aggregate The CreateEmail implementation.
      */
-    public function __construct(protected CreateEmail $aggregate)
+    public function __construct(protected UserAggregate $aggregate)
     {
         //
     }

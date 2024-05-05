@@ -2,7 +2,7 @@
 
 namespace App\Events\Profile;
 
-use App\Models\User;
+use App\Data\Create\ProfileData;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -16,7 +16,7 @@ class ProfileCreated extends ShouldBeStored
      * Create a new event instance.
      */
     public function __construct(
-        public array $data,
+        public ProfileData $data,
     ) {
     }
 }
