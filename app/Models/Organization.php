@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use App\Data\OrganizationData;
+use App\Data\Create\OrganizationData;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\EventSourcing\Projections\Projection;
 
 class Organization extends Projection

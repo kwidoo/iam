@@ -3,13 +3,14 @@
 namespace App\Aggregates\Manage;
 
 use App\Data\Create\UserData;
+use App\Data\Update\UserData as UpdateUserData;
 use App\Events\User\AfterUserCreated;
 use App\Events\User\UserCreated;
 
 trait ManageUsers
 {
     /**
-     * @param array $data
+     * @param UserData $data
      *
      * @return self
      */
@@ -17,7 +18,9 @@ trait ManageUsers
     {
         $this->recordThat(
             (new UserCreated($userData))
-                ->setMetaData(['reference_id' => $userData->referenceId])
+                ->setMetaData([
+                    'reference_id' => $userData->referenceId
+                ])
         );
 
         return $this;
@@ -25,13 +28,18 @@ trait ManageUsers
 
 
     /**
-     * @param array $data
+     * @param UpdateUserData $data
      *
      * @return self
      */
-    public function updateUserAfterCreated(array $data): self
+    public function updateUserAfterCreated(UpdateUserData $userData): self
     {
-        $this->recordThat((new AfterUserCreated($data))->setMetaData(['reference_id' => $data['reference_id']]));
+        $this->recordThat(
+            (new AfterUserCreated($userData))
+                ->setMetaData([
+                    'reference_id' => $userData->referenceId
+                ])
+        );
 
         return $this;
     }

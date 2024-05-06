@@ -36,15 +36,12 @@ class UserProjector extends Projector
      */
     public function onAfterUserCreated(AfterUserCreated $event): void
     {
-        $userProfile = new UserProfile();
-        $userProfile->uuid = $event->data['user_uuid'];
-        $userProfile->email = $event->data['email'];
-        $userProfile->email_verified_at = null;
-        $userProfile->password = $event->data['name'];
-        $userProfile->organization_uuid = $event->data['organization_uuid'];
-        $userProfile->organization_name = $event->data['organization_name'];
-        $userProfile->profile_uuid = $event->data['profile_uuid'];
-        $userProfile->profile_name = $event->data['profile_name'];
+        $userData = $event->userData;
+        $user = User::findOrFail($userData->uuid);
+        $userProfile = new UserProfile([
+            ...$userData->toArray(),
+            'organizations' => $user->organizations->toArray(),
+        ]);
 
         $userProfile->save();
     }

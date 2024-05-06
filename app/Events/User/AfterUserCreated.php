@@ -2,6 +2,7 @@
 
 namespace App\Events\User;
 
+use App\Data\Update\UserData;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -15,7 +16,7 @@ class AfterUserCreated extends ShouldBeStored implements ShouldQueue
     /**
      * Create a new event instance.
      */
-    public function __construct(public array $data)
+    public function __construct(public UserData $userData)
     {
         //
     }
