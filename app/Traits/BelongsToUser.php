@@ -10,7 +10,7 @@ trait BelongsToUser
     /**
      * Define a belongsTo relationship.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<User,self>
      */
     public function user(): BelongsTo
     {

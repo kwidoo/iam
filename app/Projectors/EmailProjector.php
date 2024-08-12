@@ -10,6 +10,7 @@ use App\Events\Email\PrimaryEmailSet;
 use App\Events\Email\PrimaryEmailUnset;
 use App\Models\Email;
 use App\Models\UserProfile;
+use Illuminate\Database\Eloquent\Collection;
 use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
 class EmailProjector extends Projector
@@ -51,7 +52,7 @@ class EmailProjector extends Projector
     {
         $email = $event->email;
         $email->email_verified_at = now();
-        if ($email->user?->has_primary_email !== true) {
+        if ($email->user->has_primary_email !== true) {
             $email->is_primary = true;
         }
         $email->writeable()->save();
@@ -75,18 +76,26 @@ class EmailProjector extends Projector
      */
     public function onEmailPrimarySet(PrimaryEmailSet $event): void
     {
+        /** @var Email $email */
         $email = $event->emailData->email;
         $email->is_primary = true;
         $email->writeable()->save();
 
+        /** @var UserProfile $userProfile */
         $userProfile = UserProfile::whereUuid($email->user->uuid)->firstOrFail();
+
+        /** @var Collection<int,Email>|null */
         $emails = $email->user->emails;
 
         $userProfile->email = $email->email;
         $userProfile->email_verified_at = $email->email_verified_at;
 
-        if ($emails->count() > 1) {
-            $userProfile->emails = $emails->pluck('email')->filter(fn ($needle) => $needle !== $email->email)->toArray();
+        if ($emails && $emails->count() > 1) {
+            $userProfile->emails = $emails
+                ->pluck('email')
+                ->filter(
+                    fn ($needle) => $needle !== $email->email
+                )->toArray();
         }
 
         $userProfile->save();
@@ -99,6 +108,7 @@ class EmailProjector extends Projector
      */
     public function onEmailPrimaryUnset(PrimaryEmailUnset $event): void
     {
+        /** @var Email $email */
         $email = $event->emailData->email;
 
         if ($email->user->emails()->count() === 1) {
@@ -116,7 +126,10 @@ class EmailProjector extends Projector
      */
     public function onAfterEmailCreated(AfterEmailCreated $event): void
     {
+        /** @var Collection<int,Email> */
         $emails = Email::whereUserUuid($event->data['user_uuid'])->get();
+
+        /** @var UserProfile $userProfile */
         $userProfile = UserProfile::whereUuid($event->data['user_uuid'])->firstOrFail();
 
         if ($emails->count() === 1) {
@@ -124,7 +137,11 @@ class EmailProjector extends Projector
         }
 
         if ($emails->count() > 1) {
-            $userProfile->emails = $emails->pluck('email')->filter(fn ($email) => $email !== $userProfile->email)->toArray();
+            $userProfile->emails = $emails
+                ->pluck('email')
+                ->filter(
+                    fn ($email) => $email !== $userProfile->email
+                )->toArray();
         }
 
         $userProfile->save();

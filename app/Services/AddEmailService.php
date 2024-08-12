@@ -2,20 +2,21 @@
 
 namespace App\Services;
 
-use App\Contracts\AddEmailService as ContractsAddEmailService;
 use App\Contracts\Aggregates\UserAggregate;
-use App\Contracts\CreateEmail;
+use App\Contracts\Services\AddEmailService as AddEmailServiceContract;
+use App\Data\Create\EmailData;
+use App\Data\Update\EmailData as UpdateEmailData;
 use App\Exceptions\EmailCreationFailed;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class AddEmailService implements ContractsAddEmailService
+class AddEmailService implements AddEmailServiceContract
 {
     /**
      * Create a new instance of the AddEmailService.
      *
-     * @param CreateEmail $aggregate The CreateEmail implementation.
+     * @param UserAggregate $aggregate The CreateEmail implementation.
      */
     public function __construct(protected UserAggregate $aggregate)
     {
@@ -31,7 +32,7 @@ class AddEmailService implements ContractsAddEmailService
      * @return void
      * @throws EmailCreationFailed If the email creation fails.
      */
-    public function __invoke(User $user, string $email, string $referenceId = null)
+    public function __invoke(User $user, string $email, string $referenceId = null): void
     {
         try {
             DB::transaction(function () use ($user, $email, $referenceId) {
@@ -42,28 +43,36 @@ class AddEmailService implements ContractsAddEmailService
                     $shouldDelete = $user->email;
                 }
 
+                if ($referenceId === null) {
+                    $referenceId = Str::uuid()->toString();
+                }
                 $this->aggregate
                     ->retrieve($user->uuid)
-                    ->createEmail([
-                        'email_uuid' => Str::uuid()->toString(),
-                        'email' => $email,
-                        'user_uuid' => $user->uuid,
-                        'reference_id' => $referenceId
+                    ->createEmail(new EmailData(
+                        uuid: Str::uuid()->toString(),
+                        email: $email,
+                        userUuid: $user->uuid,
+                        referenceId: $referenceId,
 
-                    ])->persist($referenceId);
+                    ))->persist();
 
                 if ($shouldDelete) {
                     $this->aggregate
                         ->retrieve($user->uuid)
-                        ->removeEmail($shouldDelete, $referenceId)
-                        ->persist($referenceId);
+                        ->removeEmail(new UpdateEmailData(
+                            emailValue: $shouldDelete,
+                            referenceId: $referenceId
+                        ))
+                        ->persist();
                 }
 
-                $this->aggregate->retrieve($user->uuid)->updateUserAfterEmailCreated([
-                    'email' => $email,
-                    'user_uuid' => $user->uuid,
-                    'reference_id' => $referenceId
-                ])->persist($referenceId);
+                $this->aggregate
+                    ->retrieve($user->uuid)
+                    ->updateUserAfterEmailCreated([
+                        'email' => $email,
+                        'user_uuid' => $user->uuid,
+                        'reference_id' => $referenceId,
+                    ])->persist();
             });
         } catch (\Exception $e) {
             $message = config('app.debug') ? 'Email creation failed: ' . $e->getMessage() : 'User creation failed';

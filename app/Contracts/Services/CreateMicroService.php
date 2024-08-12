@@ -1,8 +1,15 @@
 <?php
 
-namespace App\Contracts;
+namespace App\Contracts\Services;
+
+use App\Data\Create\MicroServiceData;
 
 interface CreateMicroService
 {
-    public function create(array $data): void;
+    /**
+     * @param MicroServiceData $data
+     *
+     * @return void
+     */
+    public function create(MicroServiceData $data): void;
 }

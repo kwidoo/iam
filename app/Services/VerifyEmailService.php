@@ -2,33 +2,43 @@
 
 namespace App\Services;
 
-use App\Contracts\CreateEmail;
+use App\Contracts\Aggregates\UserAggregate;
 use App\Models\Email;
-use App\Contracts\VerifyEmailService as VerifyEmailServiceContract;
+use App\Contracts\Services\VerifyEmailService as VerifyEmailServiceContract;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class VerifyEmailService implements VerifyEmailServiceContract
 {
-    public function __construct(protected CreateEmail $aggregate)
+    /**
+     * @param UserAggregate $aggregate
+     */
+    public function __construct(protected UserAggregate $aggregate)
     {
         //
     }
 
-    public function __invoke(Email $email)
+    public function __invoke(Email $email): void
     {
         $referenceId = Str::uuid()->toString();
         try {
             DB::transaction(function () use ($email, $referenceId) {
 
+                if ($email->user === null || $email->user_uuid === null) {
+                    throw new Exception('Email has no user');
+                }
+
                 $this->aggregate
                     ->retrieve($email->user_uuid)
-                    ->verifyEmail($email, $referenceId)
-                    ->persist($referenceId);
+                    ->verifyEmail(
+                        email: $email,
+                        referenceId: $referenceId,
+                    )
+                    ->persist();
             });
         } catch (\Exception $e) {
             throw $e;
-            abort(422, 'Email verification failed');
         }
     }
 }

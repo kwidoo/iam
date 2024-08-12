@@ -14,9 +14,13 @@ class UserLoginFailed extends ShouldBeStored
 
     /**
      * Create a new event instance.
+     *
+     * @param User|null $user
+     * @param array<string,mixed> $data
      */
     public function __construct(
         public ?User $user,
+        public array $data = [],
     ) {
         //
     }

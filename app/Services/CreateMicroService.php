@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Contracts\CreateMicroService as CreateMicroServiceContract;
-use App\Contracts\MicroServiceAggregate;
+use App\Contracts\Services\CreateMicroService as CreateMicroServiceContract;
+use App\Contracts\Aggregates\MicroServiceAggregate;
+use App\Data\Create\MicroServiceData;
 
 class CreateMicroService implements CreateMicroServiceContract
 {
@@ -12,14 +13,10 @@ class CreateMicroService implements CreateMicroServiceContract
         //
     }
 
-    public function create(array $data): void
+    public function create(MicroServiceData $data): void
     {
         $this->aggregate->retrieve(
-            $data['client_id']
-        )->create([
-            'uuid' => $data['service_uuid'],
-            'name' => $data['name'],
-            'client_id' => $data['client_id'],
-        ])->persist($data['reference_id']);
+            $data->clientId
+        )->create($data)->persist();
     }
 }

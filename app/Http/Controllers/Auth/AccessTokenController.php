@@ -2,73 +2,132 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App;
 use App\Events\User\UserLoggedIn;
-use App\Events\User\UserLoginFailed;
+use App\Http\Requests\Auth\SmsChallengeRequest;
 use App\Models\ApiToken;
 use App\Models\User;
-use App\Services\LoginService;
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Laravel\Passport\Exceptions\OAuthServerException;
-use Laravel\Passport\Http\Controllers\AccessTokenController as ControllersAccessTokenController;
-use Psr\Http\Message\ServerRequestInterface;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Laravel\Passport\Http\Controllers\AccessTokenController as BaseAccessTokenController;
+use Laravel\Passport\TokenRepository;
+use League\OAuth2\Server\AuthorizationServer;
 use Illuminate\Support\Str;
+use Laravel\Passport\Exceptions\OAuthServerException;
+use Psr\Http\Message\ServerRequestInterface;
+use Twilio\Rest\Client;
+use Twilio\Rest\Verify\V2\Service\VerificationCheckInstance;
 
-class AccessTokenController extends ControllersAccessTokenController
+class AccessTokenController extends BaseAccessTokenController
 {
     /**
-     * Overrides token issue to handle user_uuid
-     *
-     * @param  \Psr\Http\Message\ServerRequestInterface  $request
-     * @return \Illuminate\Http\Response
+     * @var string
      */
-    public function issueToken(ServerRequestInterface $request)
+    protected string $referenceUuid;
+
+    /**
+     * @param AuthorizationServer $server
+     * @param TokenRepository $tokens
+     */
+    public function __construct(AuthorizationServer $server, TokenRepository $tokens)
     {
-        $uuid =  Str::uuid()->toString();
+        $this->referenceUuid = Str::uuid()->toString();
+        parent::__construct($server, $tokens);
+    }
 
-        $parsedBody = $request->getParsedBody();
-
-        if (!isset($parsedBody['login'])) {
-            try {
-                $response = parent::issueToken($request);
-
-                return $response;
-            } catch (OAuthServerException $e) {
-                throw $e;
-            }
-        }
-
+    /**
+     * Handle default token issue process
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Laravel\Passport\Exceptions\OAuthServerException
+     */
+    protected function handleDefaultTokenIssue(ServerRequestInterface $request)
+    {
         try {
-            $user = User::whereHas('email', fn (Builder $q) => $q->where('email', $parsedBody['login']))->firstOrFail();
-        } catch (\Exception $e) {
-            event(new UserLoginFailed(null, ['reference' => $uuid]));
-            throw new $e;
-        }
-
-        $newParsedBody = array_merge($parsedBody, ['username' => $user->uuid]);
-        unset($newParsedBody['login']);
-
-        $newRequest = $request->withParsedBody($newParsedBody);
-
-        try {
-            $response = parent::issueToken($newRequest);
+            $response = parent::issueToken($request);
+            return response()->json(json_decode((string)$response->getContent())); // @todo should not decode/encode
         } catch (OAuthServerException $e) {
-            event(new UserLoginFailed($user, ['reference' => $uuid]));
             throw $e;
         }
+    }
 
-        $data = json_decode($response->getContent(), true);
+    /**
+     * Prepare the response after issuing token
+     *
+     * @param \Illuminate\Http\Response $response
+     * @param \App\Models\User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function prepareResponse($response, User $user)
+    {
+        $data = json_decode((string) $response->getContent(), true);
         $data['email_verified'] = $user->hasVerifiedEmail();
         $data['user_uuid'] = $user->uuid;
-        $data['reference_id'] = $uuid;
-        $token = ApiToken::create([
-            'user_uuid' => $user->uuid,
-        ]);
-
+        $data['reference_id'] = $this->referenceUuid;
+        $token = ApiToken::create(['user_uuid' => $user->uuid]);
         $data['iam_token'] = $token->uuid;
 
-        LoginService::login($user, $data);
         event(new UserLoggedIn($user, $data));
 
+        $this->updateUserPassword($user,  bcrypt(bin2hex(random_bytes(16))));
+
         return response()->json($data, 200);
+    }
+
+    /**
+     * @param SmsChallengeRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function getPhoneChallenge(SmsChallengeRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $validated['reference_id'] = Str::uuid()->toString();
+
+        if ($this->twilioAuthentication($request)) {
+
+            cache()->put('phone_validation_' . $validated['full_phone'], $validated, 3600);
+
+            return response()->json([
+                'status' => 'ok',
+                'reference' => $validated['reference_id'],
+            ]);
+        };
+
+        throw new AuthenticationException('Twilio authentication failed');
+    }
+
+    /**
+     * @param SmsChallengeRequest $request
+     *
+     * @return VerificationCheckInstance|bool
+     */
+    protected function twilioAuthentication(SmsChallengeRequest $request)
+    {
+        try {
+            // Get credentials from .env
+            $twilio = App::make(Client::class, [
+                'username' => config('twilio.sid'),
+                'password' => config('twilio.auth_token')
+            ]);
+
+            /** @var VerificationCheckInstance */
+            $verification = $twilio
+                ->verify
+                ->v2
+                ->services(config('twilio.verify_sid'))
+                ->verifications
+                ->create(
+                    str_replace(" ", "", $request->input('full_phone')),
+                    'sms'
+                );
+
+            return $verification;
+        } catch (\Exception $e) {
+            Log::error('Twilio authentication failed: ' . $e->getMessage());
+            return false;
+        }
     }
 }

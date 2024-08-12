@@ -16,7 +16,7 @@ use App\Models\Email;
 trait ManageEmails
 {
     /**
-     * @param array $data
+     * @param EmailData $emailData
      *
      * @return self
      */
@@ -33,8 +33,7 @@ trait ManageEmails
     }
 
     /**
-     * @param Email $email
-     * @param string $referenceId
+     * @param UpdateEmailData $emailData
      *
      * @return self
      */
@@ -48,6 +47,11 @@ trait ManageEmails
         return $this;
     }
 
+    /**
+     * @param UpdateEmailData $emailData
+     *
+     * @return self
+     */
     public function setPrimaryEmail(UpdateEmailData $emailData): self
     {
         $this->recordThat((new PrimaryEmailSet($emailData))
@@ -59,8 +63,7 @@ trait ManageEmails
     }
 
     /**
-     * @param Email $email
-     * @param string $referenceId
+     * @param UpdateEmailData $emailData
      *
      * @return self
      */
@@ -75,7 +78,7 @@ trait ManageEmails
     }
 
     /**
-     * @param array $data
+     * @param array<string,string> $data
      *
      * @return self
      */

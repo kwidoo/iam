@@ -2,19 +2,29 @@
 
 namespace App\Services;
 
-use App\Contracts\CreateEmail;
-use App\Contracts\SendEmailVerificationService as ContractsSendEmailVerificationService;
+use App\Contracts\Aggregates\UserAggregate;
+use App\Contracts\Services\SendEmailVerificationService as SendEmailVerificationServiceContract;
+use App\Models\Email;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class SendEmailVerificationService implements ContractsSendEmailVerificationService
+class SendEmailVerificationService implements SendEmailVerificationServiceContract
 {
-    public function __construct(public CreateEmail $aggregate)
+    /**
+     * @param UserAggregate $aggregate public
+     */
+    public function __construct(protected UserAggregate $aggregate)
     {
         //
     }
 
-    public function __invoke($email)
+    /**
+     * @param Email $email
+     *
+     * @return void
+     */
+    public function __invoke(Email $email): void
     {
         $referenceId = Str::uuid()->toString();
 
@@ -23,11 +33,10 @@ class SendEmailVerificationService implements ContractsSendEmailVerificationServ
                 $this->aggregate
                     ->retrieve($email->user_uuid)
                     ->sendEmailVerification($email, $referenceId)
-                    ->persist($referenceId);
+                    ->persist();
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
-            abort(422, 'Email verification failed');
         }
     }
 }

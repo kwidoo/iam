@@ -2,7 +2,14 @@
 
 namespace App\Contracts;
 
+use Illuminate\Database\Eloquent\Model;
+
 interface AclService
 {
-    public function createOwnerRule($entity);
+    /**
+     * @param Model $entity
+     *
+     * @return void
+     */
+    public function createOwnerRule($entity): void;
 }

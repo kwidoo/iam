@@ -24,8 +24,11 @@ class EmailController extends Controller
     {
         $referenceId = Str::uuid()->toString();
 
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
         $addEmailService(
-            $request->user(),
+            $user,
             $request->input('email'),
             $referenceId
         );
@@ -40,7 +43,7 @@ class EmailController extends Controller
      * @param Request $request
      * @param VerifyEmailService $verifyEmailService
      *
-     * @return [type]
+     * @return JsonResponse
      */
     public function confirm(Request $request, VerifyEmailService $verifyEmailService): JsonResponse
     {
@@ -55,12 +58,17 @@ class EmailController extends Controller
 
     /**
      * Resend the email verification notification.
+     *
+     * @param SendEmailVerificationRequest $request
+     * @param SendEmailVerificationService $emailVerification
+     *
+     * @return JsonResponse
      */
     public function resend(SendEmailVerificationRequest $request, SendEmailVerificationService $emailVerification): JsonResponse
     {
         $referenceId = Str::uuid()->toString();
 
-        $email = Email::where('email', $request->input('email'))->first();
+        $email = Email::where('email', $request->input('email'))->firstOrFail();
         if ($email->email_verified_at === null) {
             $emailVerification($email);
         }

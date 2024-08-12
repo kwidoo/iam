@@ -5,6 +5,12 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Class StoreEmailRequest
+ * @package App\Http\Requests
+ *
+ * @method \App\Models\User user()
+ */
 class StoreEmailRequest extends FormRequest
 {
     /**

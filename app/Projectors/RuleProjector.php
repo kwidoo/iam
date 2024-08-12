@@ -3,16 +3,18 @@
 namespace App\Projectors;
 
 use App\Events\RuleList\RuleCreated;
-use App\Events\RuleList\RuleGroupAttached;
-use App\Events\RuleList\RuleToGroupAdded;
 use App\Events\RuleList\RuleToGroupAttached;
 use App\Models\Rule;
-use App\Models\RuleGroup;
 use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
 class RuleProjector extends Projector
 {
-    public function onRuleCreated(RuleCreated $event)
+    /**
+     * @param RuleCreated $event
+     *
+     * @return void
+     */
+    public function onRuleCreated(RuleCreated $event): void
     {
         $rule = new Rule([
             'uuid' => $event->data['ruleUuid'],
@@ -26,9 +28,15 @@ class RuleProjector extends Projector
         $rule->writeable()->save();
     }
 
-    public function onRuleToGroupAdded(RuleToGroupAttached $event)
+    /**
+     * @param RuleToGroupAttached $event
+     *
+     * @return void
+     */
+    public function onRuleToGroupAdded(RuleToGroupAttached $event): void
     {
-        $rule = Rule::find($event->data['ruleUuid']);
+        /** @var Rule $rule */
+        $rule = Rule::findOrFail($event->data['ruleUuid']);
         $rule->rule_group_uuid = $event->data['ruleGroupUuid'];
         $rule->writeable()->save();
     }

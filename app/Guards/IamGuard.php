@@ -6,6 +6,7 @@ use App\Models\ApiToken;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Class IamGuard
@@ -15,9 +16,10 @@ use Illuminate\Http\Request;
  */
 class IamGuard implements Guard
 {
-    protected $user;
-    protected $provider;
-    protected $request;
+    /**
+     * @var Authenticatable
+     */
+    protected ?Authenticatable $user;
 
     /**
      * Create a new IamGuard instance.
@@ -25,10 +27,9 @@ class IamGuard implements Guard
      * @param UserProvider $provider The user provider instance.
      * @param Request $request The request instance.
      */
-    public function __construct(UserProvider $provider, Request $request)
+    public function __construct(protected UserProvider $provider, protected Request $request)
     {
-        $this->provider = $provider;
-        $this->request = $request;
+        //
     }
 
     /**
@@ -58,7 +59,7 @@ class IamGuard implements Guard
      */
     public function user()
     {
-        if (!is_null($this->user)) {
+        if (!isset($this->user->id)) {
             return $this->user;
         }
 
@@ -77,7 +78,7 @@ class IamGuard implements Guard
      * Validate the IAM token and get the user ID.
      *
      * @param string $token The IAM token to validate.
-     * @return int|null The user ID if the token is valid, null otherwise.
+     * @return string|null The user ID if the token is valid, null otherwise.
      */
     protected function validateTokenAndGetUserId($token)
     {
@@ -101,7 +102,7 @@ class IamGuard implements Guard
     /**
      * Validate the user credentials.
      *
-     * @param array $credentials The user credentials.
+     * @param array<string,string> $credentials The user credentials.
      * @return bool True if the credentials are valid, false otherwise.
      */
     public function validate(array $credentials = [])

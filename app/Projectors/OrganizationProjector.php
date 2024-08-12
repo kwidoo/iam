@@ -8,7 +8,12 @@ use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
 class OrganizationProjector extends Projector
 {
-    public function onOrganizationCreated(OrganizationCreated $event)
+    /**
+     * @param OrganizationCreated $event
+     *
+     * @return void
+     */
+    public function onOrganizationCreated(OrganizationCreated $event): void
     {
         $organizationData = $event->data;
         $organization = new Organization([

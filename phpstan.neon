@@ -1,0 +1,20 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+
+    paths:
+        - app/
+
+    # Level 9 is the highest level
+    level: 8
+
+    ignoreErrors:
+#        - '#PHPDoc tag @var#'
+#        - '#Parameter #1 $username of class Twilio\Rest\Client constructor expects string|null, mixed given.d#'
+
+#
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php
+#
+#    checkMissingIterableValueType: false

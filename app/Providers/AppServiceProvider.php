@@ -5,12 +5,12 @@ namespace App\Providers;
 use App\Contracts\AclService as AclServiceContract;
 
 use App\Contracts\Services\CreateUserService;
+use App\Exceptions\AuthGuardSetupException;
 use App\Guards\IamGuard;
 use App\Models\Organization;
 use App\Models\Profile;
 use App\Models\User;
 use App\Services\AclService;
-use App\Services\CreateRootUserService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
@@ -39,14 +39,22 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Auth::extend('iam', function ($app, $name, array $config) {
-            return new IamGuard(Auth::createUserProvider($config['provider']), $app->make('request'));
+            if (!array_key_exists('provider', $config)) {
+                throw new AuthGuardSetupException("The iam guard requires a 'provider' config key");
+            }
+            /** @var string|null */
+            $provider = $config['provider'];
+            return new IamGuard(Auth::createUserProvider($provider), $app->make('request'));
         });
 
         Passport::enablePasswordGrant();
 
+        $userField = ucfirst(config('iam.user_field', 'email'));
+        $class = "App\\Services\\Create" . $userField . "UserService";
+
         $this->app->bind(
             CreateUserService::class,
-            CreateRootUserService::class
+            $class
         );
 
 

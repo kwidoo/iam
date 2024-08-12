@@ -10,7 +10,7 @@ trait ManageLogins
 {
     /**
      * @param User $user
-     * @param array $data
+     * @param array<string,string> $data
      *
      * @return self
      */
@@ -26,12 +26,12 @@ trait ManageLogins
     }
 
     /**
-     * @param User $user
-     * @param array $data
+     * @param User|null $user
+     * @param array<string,string> $data
      *
      * @return self
      */
-    public function userLoginFailed(User $user, array $data): self
+    public function userLoginFailed(?User $user, array $data): self
     {
         $this->recordThat((new UserLoginFailed($user, $data))
             ->setMetaData([

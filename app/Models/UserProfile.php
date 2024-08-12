@@ -4,6 +4,17 @@ namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
 
+/**
+ *
+ * Class UserProfile
+ * @package App\Models
+ * @property string $uuid
+ * @property string $user_uuid
+ * @property string $name
+ * @property string $email
+ * @property string|null $email_verified_at
+ * @property array<int,Email>|null $emails
+ */
 class UserProfile extends Model
 {
     /**

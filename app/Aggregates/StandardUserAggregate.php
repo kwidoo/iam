@@ -7,6 +7,7 @@ use App\Aggregates\Manage\{
     ManageEmails,
     ManageLogins,
     ManageOrganizations,
+    ManagePhones,
     ManageProfiles,
     ManageUsers
 };
@@ -19,4 +20,5 @@ class StandardUserAggregate extends AggregateRoot implements UserAggregate
     use ManageUsers;
     use ManageOrganizations;
     use ManageProfiles;
+    use ManagePhones;
 }

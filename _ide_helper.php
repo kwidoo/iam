@@ -18800,17 +18800,12 @@ namespace App\Http\Requests {
             /**
      * 
      *
-     */        class SendEmailVerificationRequest {
+     */        class UpdateUserRequest {
             }
             /**
      * 
      *
      */        class StoreEmailRequest {
-            }
-            /**
-     * 
-     *
-     */        class StoreMicroServiceRequest {
             }
             /**
      * 
@@ -18825,7 +18820,12 @@ namespace App\Http\Requests {
             /**
      * 
      *
-     */        class UpdateUserRequest {
+     */        class StoreMicroServiceRequest {
+            }
+            /**
+     * 
+     *
+     */        class SendEmailVerificationRequest {
             }
     }
 

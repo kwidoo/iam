@@ -2,13 +2,11 @@
 
 namespace App\Providers;
 
-use App\Aggregates\UserAggregate;
-use App\Contracts\AddEmailService as AddEmailServiceContract;
-use App\Contracts\CreateEmail;
-use App\Contracts\RemoveEmailService as RemoveEmailServiceContract;
-use App\Contracts\SendEmailVerificationService as SendEmailVerificationServiceContract;
-use App\Contracts\SetPrimaryEmailService as SetPrimaryEmailServiceContract;
-use App\Contracts\VerifyEmailService as VerifyEmailServiceContract;
+use App\Contracts\Services\AddEmailService as AddEmailServiceContract;
+use App\Contracts\Services\RemoveEmailService as RemoveEmailServiceContract;
+use App\Contracts\Services\SendEmailVerificationService as SendEmailVerificationServiceContract;
+use App\Contracts\Services\SetPrimaryEmailService as SetPrimaryEmailServiceContract;
+use App\Contracts\Services\VerifyEmailService as VerifyEmailServiceContract;
 use App\Services\AddEmailService;
 use App\Services\RemoveEmailService;
 use App\Services\SendEmailVerificationService;
@@ -40,8 +38,6 @@ class EmailServiceProvider extends ServiceProvider
             AddEmailServiceContract::class,
             AddEmailService::class
         );
-
-        $this->app->bind(CreateEmail::class, UserAggregate::class);
 
         VerifyEmail::$createUrlCallback = function ($notifiable) {
             URL::forceRootUrl('http://rentapp.home');

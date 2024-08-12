@@ -16,9 +16,9 @@ class ProfileData extends Data
         public string $userUuid,
         #[MapInputName('organization_uuid')]
         public string $organizationUuid,
-        public string $type = 'default',
         #[MapInputName('reference_id')]
         public string $referenceId,
+        public string $type = 'default',
     ) {
     }
 }

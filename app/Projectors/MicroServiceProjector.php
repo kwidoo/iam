@@ -8,12 +8,18 @@ use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
 class MicroServiceProjector extends Projector
 {
-    public function onMicroServiceCreated(MicroServiceCreated $event)
+    /**
+     * @param MicroServiceCreated $event
+     *
+     * @return void
+     */
+    public function onMicroServiceCreated(MicroServiceCreated $event): void
     {
-        $microService = MicroService::where('client_id', $event->data['client_id'])
+        $microServiceData = $event->data;
+        $microService = MicroService::where('client_id', $microServiceData->clientId)
             ->firstOrNew([
-                'name' => $event->data['name'],
-                'client_id' => $event->data['client_id']
+                'name' => $microServiceData->name,
+                'client_id' => $microServiceData->clientId,
             ]);
         $microService->writeable()->save();
     }

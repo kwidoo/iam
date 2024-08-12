@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b1b761c5b4adc89c616e6c06a41fdf96",
+    "content-hash": "79583bd8ec2e580e5ad198b36ef7dcec",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1804,6 +1804,89 @@
                 }
             ],
             "time": "2023-10-12T05:21:21+00:00"
+        },
+        {
+            "name": "giggsey/libphonenumber-for-php-lite",
+            "version": "8.13.37",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/giggsey/libphonenumber-for-php-lite.git",
+                "reference": "3e9d76a9e39fc4b6767a54910aed795d49edcd23"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php-lite/zipball/3e9d76a9e39fc4b6767a54910aed795d49edcd23",
+                "reference": "3e9d76a9e39fc4b6767a54910aed795d49edcd23",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/polyfill-mbstring": "^1.17"
+            },
+            "conflict": {
+                "giggsey/libphonenumber-for-php": "*"
+            },
+            "require-dev": {
+                "ext-dom": "*",
+                "friendsofphp/php-cs-fixer": "^3.12",
+                "infection/infection": "^0.28",
+                "pear/pear-core-minimal": "^1.10.11",
+                "pear/pear_exception": "^1.0.2",
+                "pear/versioncontrol_git": "^0.7",
+                "phing/phing": "^2.17.4",
+                "phpstan/extension-installer": "^1.2",
+                "phpstan/phpstan": "^1.8",
+                "phpstan/phpstan-phpunit": "^1.2",
+                "phpunit/phpunit": "^10.5",
+                "symfony/console": "^6.0",
+                "symfony/var-exporter": "^6.0"
+            },
+            "suggest": {
+                "giggsey/libphonenumber-for-php": "Use libphonenumber-for-php for geocoding, carriers, timezones and matching"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "8.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "libphonenumber\\": "src/"
+                },
+                "exclude-from-classmap": [
+                    "/src/data/",
+                    "/src/carrier/data/",
+                    "/src/geocoding/data/",
+                    "/src/timezone/data/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Joshua Gigg",
+                    "email": "giggsey@gmail.com",
+                    "homepage": "https://giggsey.com/"
+                }
+            ],
+            "description": "A lite version of giggsey/libphonenumber-for-php, which is a PHP Port of Google's libphonenumber",
+            "homepage": "https://github.com/giggsey/libphonenumber-for-php-lite",
+            "keywords": [
+                "geocoding",
+                "geolocation",
+                "libphonenumber",
+                "mobile",
+                "phonenumber",
+                "validation"
+            ],
+            "support": {
+                "issues": "https://github.com/giggsey/libphonenumber-for-php-lite/issues",
+                "source": "https://github.com/giggsey/libphonenumber-for-php-lite"
+            },
+            "time": "2024-05-16T09:01:25+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -5160,6 +5243,78 @@
                 "source": "https://github.com/phpstan/phpdoc-parser/tree/1.28.0"
             },
             "time": "2024-04-03T18:51:33+00:00"
+        },
+        {
+            "name": "propaganistas/laravel-phone",
+            "version": "5.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Propaganistas/Laravel-Phone.git",
+                "reference": "44efd6edc181616c49f895fff97ad1cc0f3fecb2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Propaganistas/Laravel-Phone/zipball/44efd6edc181616c49f895fff97ad1cc0f3fecb2",
+                "reference": "44efd6edc181616c49f895fff97ad1cc0f3fecb2",
+                "shasum": ""
+            },
+            "require": {
+                "giggsey/libphonenumber-for-php-lite": "^8.13.35",
+                "illuminate/contracts": "^10.0|^11.0",
+                "illuminate/support": "^10.0|^11.0",
+                "illuminate/validation": "^10.0|^11.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "larastan/larastan": "^2.9",
+                "laravel/pint": "^1.14",
+                "orchestra/testbench": "*",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Propaganistas\\LaravelPhone\\PhoneServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Propaganistas\\LaravelPhone\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Propaganistas",
+                    "email": "Propaganistas@users.noreply.github.com"
+                }
+            ],
+            "description": "Adds phone number functionality to Laravel based on Google's libphonenumber API.",
+            "keywords": [
+                "laravel",
+                "libphonenumber",
+                "phone",
+                "validation"
+            ],
+            "support": {
+                "issues": "https://github.com/Propaganistas/Laravel-Phone/issues",
+                "source": "https://github.com/Propaganistas/Laravel-Phone/tree/5.3.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Propaganistas",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-04-24T09:18:58+00:00"
         },
         {
             "name": "psr/clock",
@@ -9325,6 +9480,59 @@
             "time": "2023-12-08T13:03:43+00:00"
         },
         {
+            "name": "twilio/sdk",
+            "version": "8.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twilio/twilio-php.git",
+                "reference": "161fbeb588f367e35e70a86841406ff6f0810b14"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/161fbeb588f367e35e70a86841406ff6f0810b14",
+                "reference": "161fbeb588f367e35e70a86841406ff6f0810b14",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^6.3 || ^7.0",
+                "phpunit/phpunit": ">=7.0 < 10"
+            },
+            "suggest": {
+                "guzzlehttp/guzzle": "An HTTP client to execute the API requests"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Twilio\\": "src/Twilio/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Twilio API Team",
+                    "email": "api@twilio.com"
+                }
+            ],
+            "description": "A PHP wrapper for Twilio's API",
+            "homepage": "https://github.com/twilio/twilio-php",
+            "keywords": [
+                "api",
+                "sms",
+                "twilio"
+            ],
+            "support": {
+                "issues": "https://github.com/twilio/twilio-php/issues",
+                "source": "https://github.com/twilio/twilio-php/tree/8.0.1"
+            },
+            "time": "2024-04-18T11:15:50+00:00"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.6.0",
             "source": {
@@ -10084,6 +10292,108 @@
             "time": "2020-07-09T08:09:16+00:00"
         },
         {
+            "name": "larastan/larastan",
+            "version": "v2.9.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/larastan/larastan.git",
+                "reference": "93d5b95d2e29cdb8203363d44abfdbc0bc7ef57f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/larastan/larastan/zipball/93d5b95d2e29cdb8203363d44abfdbc0bc7ef57f",
+                "reference": "93d5b95d2e29cdb8203363d44abfdbc0bc7ef57f",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/console": "^9.52.16 || ^10.28.0 || ^11.0",
+                "illuminate/container": "^9.52.16 || ^10.28.0 || ^11.0",
+                "illuminate/contracts": "^9.52.16 || ^10.28.0 || ^11.0",
+                "illuminate/database": "^9.52.16 || ^10.28.0 || ^11.0",
+                "illuminate/http": "^9.52.16 || ^10.28.0 || ^11.0",
+                "illuminate/pipeline": "^9.52.16 || ^10.28.0 || ^11.0",
+                "illuminate/support": "^9.52.16 || ^10.28.0 || ^11.0",
+                "php": "^8.0.2",
+                "phpmyadmin/sql-parser": "^5.9.0",
+                "phpstan/phpstan": "^1.10.66"
+            },
+            "require-dev": {
+                "doctrine/coding-standard": "^12.0",
+                "nikic/php-parser": "^4.19.1",
+                "orchestra/canvas": "^7.11.1 || ^8.11.0 || ^9.0.2",
+                "orchestra/testbench": "^7.33.0 || ^8.13.0 || ^9.0.3",
+                "phpunit/phpunit": "^9.6.13 || ^10.5.16"
+            },
+            "suggest": {
+                "orchestra/testbench": "Using Larastan for analysing a package needs Testbench"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                },
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Larastan\\Larastan\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Can Vural",
+                    "email": "can9119@gmail.com"
+                },
+                {
+                    "name": "Nuno Maduro",
+                    "email": "enunomaduro@gmail.com"
+                }
+            ],
+            "description": "Larastan - Discover bugs in your code without running it. A phpstan/phpstan wrapper for Laravel",
+            "keywords": [
+                "PHPStan",
+                "code analyse",
+                "code analysis",
+                "larastan",
+                "laravel",
+                "package",
+                "php",
+                "static analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/larastan/larastan/issues",
+                "source": "https://github.com/larastan/larastan/tree/v2.9.6"
+            },
+            "funding": [
+                {
+                    "url": "https://www.paypal.com/paypalme/enunomaduro",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/canvural",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nunomaduro",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/nunomaduro",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2024-05-09T11:53:26+00:00"
+        },
+        {
             "name": "laravel/pint",
             "version": "v1.15.3",
             "source": {
@@ -10777,6 +11087,152 @@
                 }
             ],
             "time": "2023-12-11T08:22:20+00:00"
+        },
+        {
+            "name": "phpmyadmin/sql-parser",
+            "version": "5.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpmyadmin/sql-parser.git",
+                "reference": "011fa18a4e55591fac6545a821921dd1d61c6984"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpmyadmin/sql-parser/zipball/011fa18a4e55591fac6545a821921dd1d61c6984",
+                "reference": "011fa18a4e55591fac6545a821921dd1d61c6984",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2 || ^8.0",
+                "symfony/polyfill-mbstring": "^1.3",
+                "symfony/polyfill-php80": "^1.16"
+            },
+            "conflict": {
+                "phpmyadmin/motranslator": "<3.0"
+            },
+            "require-dev": {
+                "phpbench/phpbench": "^1.1",
+                "phpmyadmin/coding-standard": "^3.0",
+                "phpmyadmin/motranslator": "^4.0 || ^5.0",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan": "^1.9.12",
+                "phpstan/phpstan-phpunit": "^1.3.3",
+                "phpunit/php-code-coverage": "*",
+                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.5",
+                "psalm/plugin-phpunit": "^0.16.1",
+                "vimeo/psalm": "^4.11",
+                "zumba/json-serializer": "~3.0.2"
+            },
+            "suggest": {
+                "ext-mbstring": "For best performance",
+                "phpmyadmin/motranslator": "Translate messages to your favorite locale"
+            },
+            "bin": [
+                "bin/highlight-query",
+                "bin/lint-query",
+                "bin/sql-parser",
+                "bin/tokenize-query"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PhpMyAdmin\\SqlParser\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "The phpMyAdmin Team",
+                    "email": "developers@phpmyadmin.net",
+                    "homepage": "https://www.phpmyadmin.net/team/"
+                }
+            ],
+            "description": "A validating SQL lexer and parser with a focus on MySQL dialect.",
+            "homepage": "https://github.com/phpmyadmin/sql-parser",
+            "keywords": [
+                "analysis",
+                "lexer",
+                "parser",
+                "query linter",
+                "sql",
+                "sql lexer",
+                "sql linter",
+                "sql parser",
+                "sql syntax highlighter",
+                "sql tokenizer"
+            ],
+            "support": {
+                "issues": "https://github.com/phpmyadmin/sql-parser/issues",
+                "source": "https://github.com/phpmyadmin/sql-parser"
+            },
+            "funding": [
+                {
+                    "url": "https://www.phpmyadmin.net/donate/",
+                    "type": "other"
+                }
+            ],
+            "time": "2024-01-20T20:34:02+00:00"
+        },
+        {
+            "name": "phpstan/phpstan",
+            "version": "1.11.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/phpstan.git",
+                "reference": "e524358f930e41a2b4cca1320e3b04fc26b39e0b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e524358f930e41a2b4cca1320e3b04fc26b39e0b",
+                "reference": "e524358f930e41a2b4cca1320e3b04fc26b39e0b",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8.0"
+            },
+            "conflict": {
+                "phpstan/phpstan-shim": "*"
+            },
+            "bin": [
+                "phpstan",
+                "phpstan.phar"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPStan - PHP Static Analysis Tool",
+            "keywords": [
+                "dev",
+                "static analysis"
+            ],
+            "support": {
+                "docs": "https://phpstan.org/user-guide/getting-started",
+                "forum": "https://github.com/phpstan/phpstan/discussions",
+                "issues": "https://github.com/phpstan/phpstan/issues",
+                "security": "https://github.com/phpstan/phpstan/security/policy",
+                "source": "https://github.com/phpstan/phpstan-src"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/ondrejmirtes",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/phpstan",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-05-15T08:00:59+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Services\CreateUserService;
+use App\Http\Controllers\Traits\PhoneChallenge;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-
 use App\Models\User;
-use App\Contracts\CreateUserService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\Middleware;
@@ -18,6 +18,8 @@ use Illuminate\Support\Str;
  */
 class UserController extends Controller
 {
+    use PhoneChallenge;
+
     /**
      * UserController constructor.
      */
@@ -28,6 +30,8 @@ class UserController extends Controller
 
     /**
      * Get the middleware that should be assigned to the controller.
+     *
+     * @return array<int,Middleware>
      */
     public static function middleware(): array
     {
@@ -47,8 +51,16 @@ class UserController extends Controller
     {
         $validated = $request->validated();
         $validated['user_uuid'] = Str::uuid()->toString();
-        $validated['password'] = bcrypt($validated['password']);
         $validated['reference_id'] = Str::uuid()->toString();
+
+        if (config('iam.user_field') === 'phone') {
+            $this->makePhoneChallenge($validated);
+
+            return response()->json([
+                'status' => 'ok',
+                'reference' => $validated['reference_id'],
+            ]);
+        }
 
         ($this->createUserService)($validated);
         return response()->json([
@@ -59,17 +71,28 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param UpdateUserRequest $request
+     * @param User $user
+     *
+     * @return void
      */
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user): void
     {
+        info('User update called', ['user' => $user->uuid, ...$request->validated()]);
         throw new Exception('Not implemented');
     }
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param User $user
+     *
+     * @return void
      */
-    public function destroy(User $user)
+    public function destroy(User $user): void
     {
+        info('User destroy called', ['user' => $user->uuid]);
         throw new Exception('Not implemented');
     }
 }

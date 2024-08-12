@@ -2,27 +2,28 @@
 
 namespace App\Services;
 
-use App\Aggregates\UserAggregate;
+use App\Aggregates\StandardUserAggregate;
+use App\Data\Create\ProfileData;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class CreateProfileService
 {
     /**
-     * @param array $data
+     * @param ProfileData $profileData
      *
      * @return void
      */
-    public static function createProfile(array $data)
+    public static function createProfile(ProfileData $profileData): void
     {
         try {
-            DB::transaction(function () use ($data) {
+            DB::transaction(function () use ($profileData) {
 
-                (new UserAggregate)->retrieve($data['user_uuid'])
-                    ->createProfile($data)
-                    ->persist($data['reference_id']);
+                (new StandardUserAggregate)->retrieve($profileData->userUuid)
+                    ->createProfile($profileData)
+                    ->persist();
             });
-        } catch (\Exception $e) {
-            throw $e;
+        } catch (Exception $e) {
             abort(422, 'Profile creation failed');
         }
     }

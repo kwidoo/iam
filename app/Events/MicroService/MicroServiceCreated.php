@@ -2,6 +2,7 @@
 
 namespace App\Events\MicroService;
 
+use App\Data\Create\MicroServiceData;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -14,7 +15,7 @@ class MicroServiceCreated extends ShouldBeStored
     /**
      * Create a new event instance.
      */
-    public function __construct(public array $data)
+    public function __construct(public MicroServiceData $data)
     {
         //
     }

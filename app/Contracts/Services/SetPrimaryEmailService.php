@@ -1,10 +1,16 @@
 <?php
 
-namespace App\Contracts;
+namespace App\Contracts\Services;
 
 use App\Models\Email;
 
 interface SetPrimaryEmailService
 {
-    public function __invoke(Email $email);
+    /**
+     * @param Email $email
+     * @param string $referenceId
+     *
+     * @return void
+     */
+    public function __invoke(Email $email, string $referenceId): void;
 }

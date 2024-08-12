@@ -3,13 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserProfile;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserReadController extends Controller
 {
-    public function __invoke(Request $request)
+    /**
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function __invoke(Request $request): JsonResponse
     {
-        info($request->user()?->token()?->client?->id);
-        return UserProfile::find($request->user()->uuid);
+        return response()->json(
+            (new UserProfile)
+                ->find(
+                    $request->user()?->uuid
+                )
+        );
     }
 }

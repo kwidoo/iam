@@ -2,26 +2,33 @@
 
 namespace App\Services;
 
-use App\Contracts\CreateEmail;
-use App\Contracts\RemoveEmailService as ContractsRemoveEmailService;
+use App\Contracts\Aggregates\UserAggregate;
+use App\Contracts\Services\RemoveEmailService as RemoveEmailServiceContract;
+use App\Data\Update\EmailData;
 use App\Models\Email;
 use Illuminate\Support\Facades\DB;
 
-class RemoveEmailService implements ContractsRemoveEmailService
+class RemoveEmailService implements RemoveEmailServiceContract
 {
-    public function __construct(protected CreateEmail $aggregate)
+    public function __construct(protected UserAggregate $aggregate)
     {
     }
 
+
     /**
-     * @param array $data
+     * @param Email $email
+     * @param string $referenceId
      *
      * @return void
      */
-    public function __invoke(Email $email, string $referenceId = null)
+    public function __invoke(Email $email, string $referenceId): void
     {
         try {
             DB::transaction(function () use ($email, $referenceId) {
+                if ($email->user === null || $email->user_uuid === null) {
+                    abort(422, 'Email has no user');
+                }
+
                 if ($email->user->emails()->count() === 1) {
                     abort(422, 'Cannot remove last email');
                 }
@@ -33,21 +40,27 @@ class RemoveEmailService implements ContractsRemoveEmailService
                 $shouldSet = null;
                 if ($email->is_primary) {
                     $shouldSet = $email->user->emails()->where('uuid', '!=', $email->uuid)->isVerified()->firstOrFail();
-                    if ($shouldSet) {
-                        $this->aggregate->retrieve($email->user->uuid)
-                            ->unsetPrimaryEmail($email, $referenceId)
-                            ->setPrimaryEmail($shouldSet, $referenceId)
-                            ->persist($referenceId);
-                    }
+                    $this->aggregate->retrieve($email->user->uuid)
+                        ->unsetPrimaryEmail(new EmailData(
+                            emailValue: $email,
+                            referenceId: $referenceId,
+                        ))
+                        ->setPrimaryEmail(new EmailData(
+                            emailValue: $shouldSet,
+                            referenceId: $referenceId,
+                        ))
+                        ->persist();
                 }
 
                 $this->aggregate->retrieve($email->user->uuid)
-                    ->removeEmail($email, $referenceId)
-                    ->persist($referenceId);
+                    ->removeEmail(new EmailData(
+                        emailValue: $email,
+                        referenceId: $referenceId,
+                    ))
+                    ->persist();
             });
         } catch (\Exception $e) {
             throw $e;
-            abort(422, 'Email removal failed');
         }
     }
 }

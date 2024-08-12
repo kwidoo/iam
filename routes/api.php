@@ -11,16 +11,24 @@ use App\Http\Controllers\UserReadController;
 use Illuminate\Support\Facades\Route;
 
 /** login */
-Route::group([
-    'as' => 'passport.',
-    'prefix' => config('passport.path', 'oauth'),
-], function () {
-    Route::post('/token', [
-        'uses' => AccessTokenController::class . '@issueToken',
-        'as' => 'token',
-        'middleware' => 'throttle',
-    ]);
-});
+Route::group(
+    [
+        'as' => 'passport.',
+        'prefix' => config('passport.path', 'oauth'),
+    ],
+    function () {
+        Route::post('/token', [
+            'uses' => AccessTokenController::class . '@issueToken',
+            'as' => 'token',
+            'middleware' => 'throttle',
+        ]);
+        Route::post('/token/challenge', [
+            'uses' => AccessTokenController::class . '@getPhoneChallenge',
+            'as' => 'token.challenge',
+            'middleware' => 'throttle',
+        ]);
+    }
+);
 
 /** register */
 Route::resource('users', UserController::class)->only(['store', 'update', 'destroy']);

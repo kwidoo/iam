@@ -16,6 +16,8 @@ class UserLoggedIn extends ShouldBeStored implements ShouldBroadcast
 
     /**
      * Create a new event instance.
+     * @param User $user
+     * @param array<string,mixed> $data
      */
     public function __construct(
         public User $user,

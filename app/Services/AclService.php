@@ -4,7 +4,8 @@ namespace App\Services;
 
 use App\Aggregates\RuleListAggregate;
 use Illuminate\Database\Eloquent\Model;
-use Str;
+use Illuminate\Support\Str;
+use Exception;
 
 class AclService
 {
@@ -13,10 +14,15 @@ class AclService
         //
     }
 
-    public function createOwnerRule($entity)
+    /**
+     * @param Model $entity
+     *
+     * @return void
+     */
+    public function createOwnerRule($entity): void
     {
         if (!$entity instanceof Model) {
-            throw new \InvalidArgumentException('Entity must be an instance of Illuminate\Database\Eloquent\Model');
+            throw new Exception('Entity must be an instance of Illuminate\Database\Eloquent\Model');
         }
         $rootUuid = Str::uuid()->toString();
         $ruleUuid = Str::uuid()->toString();

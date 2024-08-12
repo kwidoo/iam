@@ -8,7 +8,12 @@ use Spatie\EventSourcing\EventHandlers\Projectors\Projector;
 
 class ProfileProjector extends Projector
 {
-    public function onProfileCreated(ProfileCreated $event)
+    /**
+     * @param ProfileCreated $event
+     *
+     * @return void
+     */
+    public function onProfileCreated(ProfileCreated $event): void
     {
         $profileData = $event->data;
         $profile = new Profile([

@@ -10,9 +10,13 @@ class UserData extends Data
     public function __construct(
         #[MapInputName('user_uuid')]
         public string $uuid,
-        public string $password,
         #[MapInputName('reference_id')]
         public string $referenceId,
+        public ?string $password = null,
+
     ) {
+        if (!$password) {
+            $this->password = bcrypt(bin2hex(random_bytes(16)));
+        }
     }
 }

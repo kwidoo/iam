@@ -10,7 +10,7 @@ use App\Events\User\UserCreated;
 trait ManageUsers
 {
     /**
-     * @param UserData $data
+     * @param UserData $userData
      *
      * @return self
      */
@@ -28,7 +28,7 @@ trait ManageUsers
 
 
     /**
-     * @param UpdateUserData $data
+     * @param UpdateUserData $userData
      *
      * @return self
      */

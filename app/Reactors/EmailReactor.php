@@ -12,8 +12,8 @@ class EmailReactor extends Reactor implements ShouldQueue
 {
     public function onEmailCreated(EmailCreated $event): void
     {
-        $email = Email::whereEmail($event->data['email'])->firstOrFail();
         /** @var Email $email */
+        $email = Email::whereEmail($event->data->email)->firstOrFail();
         $email->sendEmailVerificationNotification();
     }
 

@@ -13,7 +13,7 @@ use App\Exceptions\UserCreationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class CreateRootUserService implements CreateUserService
+class CreateEmailUserService implements CreateUserService
 {
     public function __construct(protected UserAggregate $userAggregate)
     {
@@ -21,7 +21,7 @@ class CreateRootUserService implements CreateUserService
     }
 
     /**
-     * @param array $data
+     * @param array<string,string> $data
      *
      * @return void
      *
@@ -38,15 +38,16 @@ class CreateRootUserService implements CreateUserService
                 $data['organization_name'] = $data['organization_name'] ?? 'default';
                 $data['profile_uuid'] = Str::uuid()->toString();
                 $data['profile_name'] = $data['profile_name'] ?? 'default';
+                $data['type'] = $data['type'] ?? 'default';
 
-                $this->userAggregate->retrieve($data['user_uuid'])
+                $this->userAggregate->retrieve((string) $data['user_uuid'])
                     ->createUser(UserData::from($data))
                     ->createEmail(EmailData::from($data))
                     ->createOrganization(OrganizationData::from($data))
                     ->createProfile(ProfileData::from($data))
                     ->updateUserAfterCreated(UpdateUserData::from($data))
                     //
-                    ->persist($data['reference_id']);
+                    ->persist();
             });
         } catch (\Exception $e) {
             $message = config('app.debug') ? 'User creation failed: ' . $e->getMessage() : 'User creation failed';
