@@ -18796,15 +18796,39 @@ namespace Illuminate\Database\Schema {
             }
     }
 
+namespace Illuminate\Validation {
+            /**
+     * 
+     *
+     */        class Rule {
+                    /**
+         * 
+         *
+         * @see \Propaganistas\LaravelPhone\PhoneServiceProvider::registerValidator()
+         * @static 
+         */        public static function phone()
+        {
+                        return \Illuminate\Validation\Rule::phone();
+        }
+            }
+    }
+
 namespace App\Http\Requests {
+            /**
+     * 
+     *
+     */        class RefreshTokenRequest {
+            }
             /**
      * 
      *
      */        class UpdateUserRequest {
             }
             /**
-     * 
+     * Class StoreEmailRequest
      *
+     * @package App\Http\Requests
+     * @method \App\Models\User user()
      */        class StoreEmailRequest {
             }
             /**
@@ -18834,6 +18858,14 @@ namespace Illuminate\Foundation\Http {
      * 
      *
      */        class FormRequest {
+            }
+    }
+
+namespace App\Http\Requests\Auth {
+            /**
+     * 
+     *
+     */        class SmsChallengeRequest {
             }
     }
 

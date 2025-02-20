@@ -13,6 +13,7 @@
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
         "mongodb/laravel-mongodb": "^4.3",
+        "predis/predis": "^2.3",
         "propaganistas/laravel-phone": "*",
         "spatie/laravel-data": "^4.5",
         "spatie/laravel-event-sourcing": "^7.5",
