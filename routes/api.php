@@ -22,11 +22,6 @@ Route::group(
             'as' => 'token',
             'middleware' => 'throttle',
         ]);
-        Route::post('/token/challenge', [
-            'uses' => AccessTokenController::class . '@getPhoneChallenge',
-            'as' => 'token.challenge',
-            'middleware' => 'throttle',
-        ]);
     }
 );
 
@@ -46,7 +41,6 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::patch('/emails/{email}/primary', [EmailController::class, 'setPrimary']);
     Route::post('/emails/resend', [EmailController::class, 'resend']);
 
-    Route::resource('profiles', ProfileController::class)->only(['store', 'update', 'destroy']);
     Route::resource('organizations', OrganizationController::class)->middleware('can:viewAny,App\Models\Organization');
 });
 

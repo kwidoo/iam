@@ -6,7 +6,6 @@ use App\Data\Create\EmailData;
 use App\Data\Create\OrganizationData;
 use App\Data\Create\PhoneData;
 use App\Data\Create\UserData;
-use App\Data\Create\ProfileData;
 use App\Data\Update\EmailData as UpdateEmailData;
 use App\Data\Update\UserData as UpdateUserData;
 use App\Models\Email;
@@ -17,7 +16,6 @@ interface UserAggregate extends Aggregate
     public function createUser(UserData $userData): self;
     public function updateUserAfterCreated(UpdateUserData $userData): self;
 
-    public function createProfile(ProfileData $data): self;
     public function createOrganization(OrganizationData $data): self;
 
     /**

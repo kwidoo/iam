@@ -14,9 +14,5 @@ class UserData extends Data
         public string $referenceId,
         public ?string $password = null,
 
-    ) {
-        if (!$password) {
-            $this->password = bcrypt(bin2hex(random_bytes(16)));
-        }
-    }
+    ) {}
 }

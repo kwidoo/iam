@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\PrimaryPhoneRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class StoreUserRequest extends FormRequest
 {
@@ -23,34 +25,48 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return array_merge([
+            'type' => ['required', 'string'],
             'name' => ['required', 'string'],
+            // 'user_uuid' => ['required', 'string'],
+            'reference_id' => ['required', 'string'],
 
         ], $this->rulesForRegisterUsing());
     }
 
     /**
+     * Set rules for registration using email or phone.
+     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     protected function rulesForRegisterUsing()
     {
-        $loginUsing = config('iam.user_field', 'email');
+        $loginUsing = $this->input('type', 'email');
+        $withPassword = config('iam.use_password', true) ? [
+            'password' => ['required', 'string']
+        ] : [];
+        if (config('with_password_confirmation', true)) {
+            $withPassword['password_confirmation'] = ['required', 'string', 'same:password'];
+        }
+
         switch ($loginUsing) {
             case 'phone':
                 return [
-                    'full_phone' => ['required', 'string', 'unique:phones,full_phone'],
+                    'full_phone' => ['required', 'string'],
                     'country_code' => ['required', 'string'],
                     'phone' => ['required', 'string'],
+                    'is_primary' => [new PrimaryPhoneRule($this->full_phone)],
                 ];
             case 'email':
             default:
                 return [
                     'email' => [
-                        'required', 'email',
+                        'required',
+                        'email',
                         Rule::unique('emails', 'email')->where(function ($query) {
                             return $query->whereNull('deleted_at');
                         }),
                     ],
-                    'password' => ['required', 'string'],
+                    ...$withPassword
                 ];
         }
     }
@@ -60,11 +76,16 @@ class StoreUserRequest extends FormRequest
      */
     public function prepareForValidation(): void
     {
-        $loginUsing = config('iam.user_field', 'phone');
+        $loginUsing = $this->input('type', 'email');
         if ($loginUsing === 'phone') {
             $this->merge([
                 'full_phone' => $this->input('country_code') . $this->input('phone'),
             ]);
         }
+
+        $this->merge([
+            'type' => $this->input('type', 'email'),
+            'reference_id' => Str::uuid()->toString(),
+        ]);
     }
 }

@@ -16,8 +16,5 @@ class AfterUserCreated extends ShouldBeStored implements ShouldQueue
     /**
      * Create a new event instance.
      */
-    public function __construct(public UserData $userData)
-    {
-        //
-    }
+    public function __construct(public UserData $userData) {}
 }

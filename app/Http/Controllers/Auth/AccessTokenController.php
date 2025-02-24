@@ -7,6 +7,7 @@ use App\Events\User\UserLoggedIn;
 use App\Http\Requests\Auth\SmsChallengeRequest;
 use App\Models\ApiToken;
 use App\Models\User;
+use Cache;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -53,81 +54,81 @@ class AccessTokenController extends BaseAccessTokenController
         }
     }
 
-    /**
-     * Prepare the response after issuing token
-     *
-     * @param \Illuminate\Http\Response $response
-     * @param \App\Models\User $user
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function prepareResponse($response, User $user)
-    {
-        $data = json_decode((string) $response->getContent(), true);
-        $data['email_verified'] = $user->hasVerifiedEmail();
-        $data['user_uuid'] = $user->uuid;
-        $data['reference_id'] = $this->referenceUuid;
-        $token = ApiToken::create(['user_uuid' => $user->uuid]);
-        $data['iam_token'] = $token->uuid;
+    // /**
+    //  * Overrides token issue to handle user_uuid
+    //  *
+    //  * @param  \Psr\Http\Message\ServerRequestInterface  $request
+    //  * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+    //  */
+    // public function issueToken(ServerRequestInterface $request)
+    // {
+    //     if (config('iam.user_field') === 'email') {
+    //         return parent::issueToken($request);
+    //     }
 
-        event(new UserLoggedIn($user, $data));
+    //     $body = (array)$request->getParsedBody();
+    //     try {
+    //         if ($this->twilioService->verify($request->input('phone'), $request->input('code'))) {
 
-        $this->updateUserPassword($user,  bcrypt(bin2hex(random_bytes(16))));
+    //             /** @var Customer */
+    //             $customer = $verificationData->getParent();
 
-        return response()->json($data, 200);
-    }
+    //             Cache::put("registration: $sanitizedPhoneNumber", ['parent' => $customer->id]);
 
-    /**
-     * @param SmsChallengeRequest $request
-     *
-     * @return JsonResponse
-     */
-    public function getPhoneChallenge(SmsChallengeRequest $request): JsonResponse
-    {
-        $validated = $request->validated();
-        $validated['reference_id'] = Str::uuid()->toString();
+    //             $loginAggregate->verificationSucceeded($verificationData)->persist();
 
-        if ($this->twilioAuthentication($request)) {
+    //             return response()->json(['message' => 'Phone number verified'], 200);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         $loginAggregate->verificationFailed(
+    //             $verificationData,
+    //             $th->getMessage(),
+    //             $th->getCode(),
+    //         )->persist();
+    //         return response()->json(['error' => 'Verification code could not be verified'], 422);
+    //     }
+    // }
 
-            cache()->put('phone_validation_' . $validated['full_phone'], $validated, 3600);
+    // /**
+    //  * @param VerificationRequest $request
+    //  *
+    //  * @return JsonResponse
+    //  */
+    // protected function verify(VerificationRequest $request): JsonResponse
+    // {
+    //     if (!$request->filled('code')) {
+    //         return response()->json(['error' => 'Verification code is required'], 422);
+    //     }
 
-            return response()->json([
-                'status' => 'ok',
-                'reference' => $validated['reference_id'],
-            ]);
-        };
+    //     $verificationData = CustomerVerificationData::fromRequest($request);
+    //     try {
+    //         $loginAggregate = LoginAggregate::retrieve($verificationData->userUuid);
+    //     } catch (\Throwable $th) {
+    //         info($th->getMessage(), ['exception' => $th]);
+    //         return response()->json(['error' => 'Verification code could not verified'], 401);
+    //     }
 
-        throw new AuthenticationException('Twilio authentication failed');
-    }
+    //     $sanitizedPhoneNumber = $this->twilioService->sanitizePhoneNumber($request->input('phone'));
 
-    /**
-     * @param SmsChallengeRequest $request
-     *
-     * @return VerificationCheckInstance|bool
-     */
-    protected function twilioAuthentication(SmsChallengeRequest $request)
-    {
-        try {
-            // Get credentials from .env
-            $twilio = App::make(Client::class, [
-                'username' => config('twilio.sid'),
-                'password' => config('twilio.auth_token')
-            ]);
+    //     try {
+    //         if ($this->twilioService->verify($request->input('phone'), $request->input('code'))) {
 
-            /** @var VerificationCheckInstance */
-            $verification = $twilio
-                ->verify
-                ->v2
-                ->services(config('twilio.verify_sid'))
-                ->verifications
-                ->create(
-                    str_replace(" ", "", $request->input('full_phone')),
-                    'sms'
-                );
+    //             /** @var Customer */
+    //             $customer = $verificationData->getParent();
 
-            return $verification;
-        } catch (\Exception $e) {
-            Log::error('Twilio authentication failed: ' . $e->getMessage());
-            return false;
-        }
-    }
+    //             Cache::put("registration: $sanitizedPhoneNumber", ['parent' => $customer->id]);
+
+    //             $loginAggregate->verificationSucceeded($verificationData)->persist();
+
+    //             return response()->json(['message' => 'Phone number verified'], 200);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         $loginAggregate->verificationFailed(
+    //             $verificationData,
+    //             $th->getMessage(),
+    //             $th->getCode(),
+    //         )->persist();
+    //         return response()->json(['error' => 'Verification code could not be verified'], 422);
+    //     }
+    // }
 }

@@ -18,13 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'client' => CheckClientCredentials::class
         ]);
-        $middleware
-            ->trustProxies(at: [
-                '172.18.0.0/16',
-            ])
-            ->trustHosts(
-                at: ['rentapp.home']
-            );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

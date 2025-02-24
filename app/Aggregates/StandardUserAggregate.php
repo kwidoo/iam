@@ -8,7 +8,6 @@ use App\Aggregates\Manage\{
     ManageLogins,
     ManageOrganizations,
     ManagePhones,
-    ManageProfiles,
     ManageUsers
 };
 use Spatie\EventSourcing\AggregateRoots\AggregateRoot;
@@ -19,6 +18,5 @@ class StandardUserAggregate extends AggregateRoot implements UserAggregate
     use ManageLogins;
     use ManageUsers;
     use ManageOrganizations;
-    use ManageProfiles;
     use ManagePhones;
 }

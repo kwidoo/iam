@@ -3,18 +3,21 @@
 namespace App\Providers;
 
 use App\Contracts\AclService as AclServiceContract;
-
+use App\Contracts\Services\TwilioService as TwilioServiceContract;
+use App\Services\TwilioService;
+use App\Contracts\Models\UserReadModel;
+use App\Contracts\Models\UserWriteModel;
 use App\Contracts\Services\CreateUserService;
 use App\Exceptions\AuthGuardSetupException;
 use App\Guards\IamGuard;
 use App\Models\Organization;
-use App\Models\Profile;
 use App\Models\User;
 use App\Services\AclService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
+use Twilio\Rest\Client;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,8 +37,6 @@ class AppServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'user' => User::class,
             'organization' => Organization::class,
-            'profile' => Profile::class,
-
         ]);
 
         Auth::extend('iam', function ($app, $name, array $config) {
@@ -57,6 +58,25 @@ class AppServiceProvider extends ServiceProvider
             $class
         );
 
+        $userWriteModel = config('iam.user_write_model');
+        $this->app->bind(
+            UserWriteModel::class,
+            $userWriteModel
+        );
+
+        $userReadModel = config('iam.user_read_model');
+        $this->app->bind(
+            UserReadModel::class,
+            $userReadModel
+        );
+
+        $this->app->singleton(TwilioServiceContract::class, function () {
+            $client = new Client(
+                config('twilio.sid'),
+                config('twilio.auth_token')
+            );
+            return app()->make(TwilioService::class, ['client' => $client]);
+        });
 
 
         //  $this->app->bind(MicroServiceAggregateContract::class, MicroServiceAggregate::class);

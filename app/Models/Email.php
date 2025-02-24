@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Traits\BelongsToUser;
+use App\Contracts\Models\UseForAuthentication;
+use App\Models\Traits\BelongsToUser;
 use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -49,7 +50,7 @@ use Spatie\EventSourcing\Projections\Projection;
  * @method static \Illuminate\Database\Eloquent\Builder|Email withoutTrashed()
  * @mixin \Eloquent
  */
-class Email extends Projection implements MustVerifyEmail
+class Email extends Projection implements MustVerifyEmail, UseForAuthentication
 {
     use HasFactory;
     use HasUuids;
@@ -83,14 +84,19 @@ class Email extends Projection implements MustVerifyEmail
         'email',
         'user_uuid',
         'is_primary',
-        'data',
     ];
 
-    protected $casts = [
-        // 'email' => 'encrypted',
-        'is_primary' => 'boolean',
-        'data' => 'array',
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_primary' => 'boolean',
+        ];
+    }
 
     /**
      * @param Builder $query
@@ -110,5 +116,15 @@ class Email extends Projection implements MustVerifyEmail
     public function scopeIsPrimary(Builder $query): void
     {
         $query->where('is_primary', true);
+    }
+
+    /**
+     * @param string $email
+     *
+     * @return self|null
+     */
+    public static function findByEmail(string $email): ?self
+    {
+        return self::where('email', $email)->where('is_primary', true)->first();
     }
 }

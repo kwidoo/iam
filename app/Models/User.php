@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Contracts\Models\UserReadModel;
+use App\Contracts\UserResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -65,7 +67,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static Builder|User withoutTrashed()
  * @mixin \Eloquent
  */
-class User extends Authenticatable
+class User extends Authenticatable implements UserReadModel
 {
     use HasFactory, Notifiable, HasApiTokens;
     use HasUuids;
@@ -125,13 +127,17 @@ class User extends Authenticatable
      *
      * @return User
      */
-    public function findForPassport(string $uuid): User
+    public function findForPassport(string $identifier): ?User
     {
-        try {
-            return $this->where('uuid', $uuid)->firstOrFail();
-        } catch (\Exception $e) {
-            abort(422, 'Incorrect user or password');
-        }
+        $resolver = app()->make(UserResolver::class);
+
+        return $resolver->resolve($identifier);
+    }
+
+    public function validateForPassportPasswordGrant(string $password): bool
+    {
+        dump($this);
+        return true;
     }
 
     /**
@@ -178,14 +184,6 @@ class User extends Authenticatable
     public function organizations(): HasMany
     {
         return $this->hasMany(Organization::class, 'user_uuid', 'uuid');
-    }
-
-    /**
-     * @return HasMany<Profile>
-     */
-    public function profiles(): HasMany
-    {
-        return $this->hasMany(Profile::class, 'user_uuid', 'uuid');
     }
 
     /**

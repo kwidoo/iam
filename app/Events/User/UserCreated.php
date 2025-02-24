@@ -17,7 +17,5 @@ class UserCreated extends ShouldBeStored
      */
     public function __construct(
         public UserData $data,
-    ) {
-        //
-    }
+    ) {}
 }

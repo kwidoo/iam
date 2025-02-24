@@ -2,30 +2,29 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
+use App\Contracts\Models\UserReadModel;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- *
  * Class UserProfile
  * @package App\Models
  * @property string $uuid
- * @property string $user_uuid
  * @property string $name
  * @property string $email
  * @property string|null $email_verified_at
  * @property array<int,Email>|null $emails
  */
-class UserProfile extends Model
+class UserProfile extends Model implements UserReadModel
 {
     /**
      * @var string
      */
-    protected $connection = 'mongodb';
+    protected $connection = 'mariadb';
 
     /**
      * @var string
      */
-    protected $collection = 'user_profiles';
+    protected $table = 'user_profiles';
 
     /**
      * @var string
@@ -40,7 +39,6 @@ class UserProfile extends Model
 
     protected $fillable = [
         'uuid',
-        'user_uuid',
         'name',
         'email',
         'phone',

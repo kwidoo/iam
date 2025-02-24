@@ -30,7 +30,7 @@ class UsersTableSeeder extends Seeder
         \DB::table('users')->delete();
 
         $userUuid = Str::uuid()->toString();
-        $userService = app(CreateUserService::class);
+        $userService = app()->make(CreateUserService::class);
         $userService([
             'user_uuid' => $userUuid,
             'name' => 'Oleg Pashkovsky',

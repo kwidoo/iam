@@ -6,7 +6,6 @@ use App\Projectors\EmailProjector;
 use App\Projectors\MicroServiceProjector;
 use App\Projectors\OrganizationProjector;
 use App\Projectors\PhoneProjector;
-use App\Projectors\ProfileProjector;
 use App\Projectors\UserProjector;
 use App\Reactors\EmailReactor;
 use Illuminate\Support\ServiceProvider;
@@ -19,7 +18,6 @@ class EventSourcingServiceProvider extends ServiceProvider
         Projectionist::addProjectors([
             UserProjector::class,
             EmailProjector::class,
-            ProfileProjector::class,
             OrganizationProjector::class,
             MicroServiceProjector::class,
             PhoneProjector::class,

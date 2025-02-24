@@ -16,10 +16,11 @@ return new class extends Migration
             $table->string('country_code');
             $table->string('phone');
             $table->uuid('user_uuid');
+            $table->boolean('is_primary')->default(false);
+
             // Adding a virtual field for concatenation
             $table->string('full_phone')->virtualAs("CONCAT(country_code, phone)");
 
-            $table->json('data')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
@@ -29,8 +30,15 @@ return new class extends Migration
             // Index for general querying
             $table->index(['country_code', 'phone', 'user_uuid'], 'phone_user_uuid_index');
 
-            // Adding a unique index on the concatenated field considering soft delete
-            $table->unique(['country_code', 'phone']);
+            // Generated columns for conditional unique constraints
+            $table->string('value_for_unique')->virtualAs('IF(deleted_at IS NULL, full_phone, NULL)');
+            $table->string('user_uuid_for_primary')->virtualAs('IF(deleted_at IS NULL AND is_primary = 1, user_uuid, NULL)');
+
+            // Adjusting the unique index to ensure global uniqueness of phone when not deleted
+            $table->unique('value_for_unique', 'phones_phone_deleted_idx');
+
+            // Unique index to ensure only one primary phone per user when not deleted
+            $table->unique('user_uuid_for_primary', 'phones_primary_user_uuid_deleted_idx');
         });
     }
 

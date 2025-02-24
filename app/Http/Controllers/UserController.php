@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Models\UserWriteModel;
 use App\Contracts\Services\CreateUserService;
+use App\Contracts\Services\TwilioService;
 use App\Http\Controllers\Traits\PhoneChallenge;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Str;
+use Exception;
 
 /**
  * Class UserController
@@ -24,9 +25,9 @@ class UserController extends Controller
      * UserController constructor.
      */
     public function __construct(
-        protected CreateUserService $createUserService
-    ) {
-    }
+        protected CreateUserService $createUserService,
+        protected TwilioService $twilioService
+    ) {}
 
     /**
      * Get the middleware that should be assigned to the controller.
@@ -50,16 +51,13 @@ class UserController extends Controller
     public function store(StoreUserRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $validated['user_uuid'] = Str::uuid()->toString();
-        $validated['reference_id'] = Str::uuid()->toString();
 
-        if (config('iam.user_field') === 'phone') {
-            $this->makePhoneChallenge($validated);
+        if ($validated['type'] === 'phone') {
+            return $this->makePhoneChallenge($validated);
+        }
 
-            return response()->json([
-                'status' => 'ok',
-                'reference' => $validated['reference_id'],
-            ]);
+        if (!config('iam.use_password', true)) {
+            // send link
         }
 
         ($this->createUserService)($validated);
@@ -77,7 +75,7 @@ class UserController extends Controller
      *
      * @return void
      */
-    public function update(UpdateUserRequest $request, User $user): void
+    public function update(UpdateUserRequest $request, UserWriteModel $user): void
     {
         info('User update called', ['user' => $user->uuid, ...$request->validated()]);
         throw new Exception('Not implemented');
@@ -90,7 +88,7 @@ class UserController extends Controller
      *
      * @return void
      */
-    public function destroy(User $user): void
+    public function destroy(UserWriteModel $user): void
     {
         info('User destroy called', ['user' => $user->uuid]);
         throw new Exception('Not implemented');

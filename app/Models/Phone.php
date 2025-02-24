@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Traits\BelongsToUser;
+use App\Contracts\Models\UseForAuthentication;
+use App\Models\Traits\BelongsToUser;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,7 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\EventSourcing\Projections\Projection;
 
 /**
- * 
+ *
  *
  * @property string $uuid
  * @property string $country_code
@@ -39,7 +40,7 @@ use Spatie\EventSourcing\Projections\Projection;
  * @method static \Illuminate\Database\Eloquent\Builder|Phone withoutTrashed()
  * @mixin \Eloquent
  */
-class Phone extends Projection
+class Phone extends Projection implements UseForAuthentication
 {
     use HasFactory;
     use HasUuids;
@@ -71,12 +72,30 @@ class Phone extends Projection
         'uuid',
         'country_code',
         'phone',
+        'is_primary',
         'user_uuid',
-        'data',
     ];
 
-    /** @var array<string,string> */
-    protected $casts = [
-        'data' => 'array',
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_primary' => 'boolean',
+        ];
+    }
+
+    /**
+     * Find a phone by its full phone number.
+     *
+     * @param string $fullPhone
+     * @return \App\Models\Phone|null
+     */
+    public static function findByFullPhone(string $fullPhone): ?self
+    {
+        return self::where('full_phone', $fullPhone)->where('is_primary', true)->first();
+    }
 }

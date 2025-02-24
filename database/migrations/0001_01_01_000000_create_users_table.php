@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
-            $table->string('password');
+            if (config('iam.use_password', true)) {
+                $table->string('password');
+            }
             $table->timestamps();
             $table->softDeletes();
         });
