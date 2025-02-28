@@ -15,9 +15,9 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'uuid' => $this->uuid,
-            'primary_email' => $this->email?->email,
-            'roles' => $this->whenLoaded('roles', $this->roles->map(fn ($role) => [
+            'uuid' => $this->resource->uuid,
+            'primary_email' => $this->resource->email?->email,
+            'roles' => $this->whenLoaded('roles', $this->resource->roles->map(fn ($role) => [
                 'name' => $role->name,
                 'permissions' => $role->permissions->map(fn ($permission) => [
                     'name' => $permission->name,

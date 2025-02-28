@@ -12,17 +12,17 @@ class StoreProfileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<int|string, array<int, \Illuminate\Validation\Rules\Unique|string>|string>
      */
     public function rules(): array
     {
-        $userUuid = $this->user()->uuid;
+        $userUuid = $this->user()?->uuid;
         return [
             'name' => 'required', 'string',
             'type' => [

@@ -2,32 +2,38 @@
 
 namespace App\Services;
 
-use App\Aggregates\UserAggregate;
+use App\Contracts\Aggregates\UserAggregate;
+use App\Contracts\Services\LoginService as LoginServiceContract;
 use App\Models\User;
 
-class LoginService
+class LoginService implements LoginServiceContract
 {
+    public function __construct(protected UserAggregate $aggregate)
+    {
+        //
+    }
     /**
-     * @param array $data
+     * @param array<string,string> $data
      *
      * @return void
      */
-    public static function login(User $user, array $data)
+    public function login(User $user, array $data): void
     {
-        $aggregate = (new UserAggregate)->retrieve($user->uuid);
-        $aggregate
+        $this->aggregate
             ->userLoggedIn($user, $data)
-            ->persist($data['reference_id']);
+            ->persist();
     }
 
-    public static function failed(?User $user, array $data)
+    /**
+     * @param User|null $user
+     * @param array<string,string> $data
+     *
+     * @return void
+     */
+    public function failed(?User $user, array $data): void
     {
-        if ($user) {
-            $aggregate = (new UserAggregate)->retrieve($user->uuid);
-            $aggregate->userLoginFailed($user, $data);
-        }
-        // else {
-        //     event(new UserLoginFailed(null, ['reference' => $data]));
-        // }
+        $this->aggregate
+            ->userLoginFailed($user, $data)
+            ->persist();
     }
 }

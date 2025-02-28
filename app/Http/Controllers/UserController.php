@@ -2,19 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Models\UserWriteModel;
+use App\Contracts\Services\CreateUserService;
+use App\Contracts\Services\TwilioService;
+use App\Http\Controllers\Traits\PhoneChallenge;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Services\CreateUserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Exception;
 
+/**
+ * Class UserController
+ * @package App\Http\Controllers
+ */
 class UserController extends Controller
 {
+    use PhoneChallenge;
+
+    /**
+     * UserController constructor.
+     */
+    public function __construct(
+        protected CreateUserService $createUserService,
+        protected TwilioService $twilioService
+    ) {}
+
     /**
      * Get the middleware that should be assigned to the controller.
+     *
+     * @return array<int,Middleware>
      */
     public static function middleware(): array
     {
@@ -24,46 +42,55 @@ class UserController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     */
-    public function heartBeat()
-    {
-        return response()->json('', 200);
-    }
-
-    public function getUser(Request $request)
-    {
-        return new UserResource($request->user()->load('roles.permissions'));
-    }
-
-
-    /**
      * Store a newly created resource in storage.
+     *
+     * @param StoreUserRequest $request
+     *
+     * @return JsonResponse
      */
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $validated['uuid'] = Str::uuid()->toString();
-        $validated['password'] = bcrypt($validated['password']);
-        $validated['reference_id'] = Str::uuid()->toString();
 
-        CreateUserService::createUser($validated);
-        return ['status' => 'ok', 'reference_id' => $validated['reference_id']];
+        if ($validated['type'] === 'phone') {
+            return $this->makePhoneChallenge($validated);
+        }
+
+        if (!config('iam.use_password', true)) {
+            // send link
+        }
+
+        ($this->createUserService)($validated);
+        return response()->json([
+            'status' => 'ok',
+            'reference' => $validated['reference_id'],
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param UpdateUserRequest $request
+     * @param User $user
+     *
+     * @return void
      */
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, UserWriteModel $user): void
     {
-        //
+        info('User update called', ['user' => $user->uuid, ...$request->validated()]);
+        throw new Exception('Not implemented');
     }
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param User $user
+     *
+     * @return void
      */
-    public function destroy(User $user)
+    public function destroy(UserWriteModel $user): void
     {
-        //
+        info('User destroy called', ['user' => $user->uuid]);
+        throw new Exception('Not implemented');
     }
 }

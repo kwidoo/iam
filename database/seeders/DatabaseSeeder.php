@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(OauthClientsTableSeeder::class);
         $this->call(UsersTableSeeder::class);
+        // $this->call(AccessControlSeeder::class);
     }
 }

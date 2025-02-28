@@ -5,6 +5,12 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Class StoreEmailRequest
+ * @package App\Http\Requests
+ *
+ * @method \App\Models\User user()
+ */
 class StoreEmailRequest extends FormRequest
 {
     /**
@@ -28,7 +34,7 @@ class StoreEmailRequest extends FormRequest
                 'email',
                 Rule::unique('emails', 'email')->where(function ($query) {
                     return $query->whereNull('deleted_at');
-                })->ignore($this->email, 'uuid'),
+                }),
             ],
         ];
     }

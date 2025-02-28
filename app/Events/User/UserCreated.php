@@ -2,6 +2,7 @@
 
 namespace App\Events\User;
 
+use App\Data\Create\UserData;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -15,8 +16,6 @@ class UserCreated extends ShouldBeStored
      * Create a new event instance.
      */
     public function __construct(
-        public array $data,
-    ) {
-        //
-    }
+        public UserData $data,
+    ) {}
 }

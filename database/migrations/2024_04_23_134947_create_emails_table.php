@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('email');
             $table->uuid('user_uuid');
             $table->boolean('is_primary')->default(false);
-            $table->json('data')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -28,11 +27,11 @@ return new class extends Migration
             $table->index(['email', 'user_uuid'], 'email_user_uuid_index');
 
             // Generated columns for conditional unique constraints
-            $table->string('email_for_unique')->virtualAs('IF(deleted_at IS NULL, email, NULL)');
+            $table->string('value_for_unique')->virtualAs('IF(deleted_at IS NULL, email, NULL)');
             $table->string('user_uuid_for_primary')->virtualAs('IF(deleted_at IS NULL AND is_primary = 1, user_uuid, NULL)');
 
             // Adjusting the unique index to ensure global uniqueness of emails when not deleted
-            $table->unique('email_for_unique', 'emails_email_deleted_idx');
+            $table->unique('value_for_unique', 'emails_email_deleted_idx');
 
             // Unique index to ensure only one primary email per user when not deleted
             $table->unique('user_uuid_for_primary', 'emails_primary_user_uuid_deleted_idx');
