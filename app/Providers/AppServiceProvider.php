@@ -70,14 +70,6 @@ class AppServiceProvider extends ServiceProvider
             $userReadModel
         );
 
-        $this->app->singleton(TwilioServiceContract::class, function () {
-            $client = new Client(
-                config('twilio.sid'),
-                config('twilio.auth_token')
-            );
-            return app()->make(TwilioService::class, ['client' => $client]);
-        });
-
 
         //  $this->app->bind(MicroServiceAggregateContract::class, MicroServiceAggregate::class);
         // $this->app->bind(CreateMicroServiceContract::class, CreateMicroService::class);

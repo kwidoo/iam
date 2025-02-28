@@ -1,16 +1,14 @@
 <?php
 
-use App\Http\Controllers\Auth\AccessTokenController;
 use App\Http\Controllers\Auth\HeartbeatController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\OrganizationController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserReadController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Passport\Http\Controllers\AccessTokenController;
 
-/** login */
 Route::group(
     [
         'as' => 'passport.',
