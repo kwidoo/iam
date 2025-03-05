@@ -1,0 +1,11 @@
+[submodule "kwidoo/laravel-contacts"]
+    path = packages/laravel-contacts
+    url = git@github.com:kwidoo/laravel-contacts.git
+
+[submodule "kwidoo/sms-verification"]
+    path = packages/sms-verification
+    url = git@github.com:kwidoo/sms-verification.git
+
+[submodule "kwidoo/passport-multiauth"]
+    path = packages/passport-multiauth
+    url = git@github.com:kwidoo/passport-multiauth.git
