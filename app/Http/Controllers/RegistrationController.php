@@ -12,10 +12,11 @@ use Kwidoo\Contacts\Contracts\ContactService;
 use Kwidoo\Contacts\Contracts\VerificationService;
 use App\Models\User;
 use Kwidoo\Contacts\Models\Contact as ModelsContact;
+use RuntimeException;
 
 class RegistrationController extends Controller
 {
-    public function register(RegisterRequest $request): JsonResponse
+    public function __invoke(RegisterRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -26,10 +27,9 @@ class RegistrationController extends Controller
             }
             $contact = $this->{'registerFor' . ucfirst($method)}($request);
             DB::commit();
-
             event('core.user.registered', [$contact]);
 
-            if (config('should_verify') || $request->input('otp')) {
+            if (config('iam.should_verify') || $request->input('otp')) {
                 $verificationService = app()->make(VerificationService::class, ['contact' => $contact]);
                 $verificationService->create($contact);
 
@@ -81,7 +81,7 @@ class RegistrationController extends Controller
 
         $contact =  $this->createContact($user, [
             'type'  => 'phone',
-            'value' => $request->input('phone')
+            'value' => ltrim($request->input('phone'), '+')
         ]);
 
         return $contact;
@@ -108,6 +108,11 @@ class RegistrationController extends Controller
         $contactService = app()->make(ContactService::class, ['model' => $user]);
         $uuid = $contactService->create($contactData['type'], $contactData['value']);
 
-        return ModelsContact::find($uuid);
+        $contactModel = config('contacts.model');
+        if (!$contactModel) {
+            throw new RuntimeException('Unable to determine contact model from configuration.');
+        }
+
+        return $contactModel::find($uuid);
     }
 }

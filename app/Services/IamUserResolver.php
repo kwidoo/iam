@@ -38,11 +38,17 @@ class IamUserResolver implements UserResolver
                 $uuid = $contactService->create($authMethod, ltrim($username, '+'));
 
                 $contact = $contactModel::find($uuid);
+                $contact->update(['is_verified' => true]);
             }
         }
 
         /** @var \App\Models\User */
-        $user = $contact->contactable;
+        $user = $contact?->contactable;
+
+        // Do not allow passwordless users to authenticate with password
+        if ($authMethod === 'password' && $user->password === null) {
+            throw new RuntimeException('Unable to proceed.', 422);
+        }
 
         return $user ? new User($user->getAuthIdentifier()) : null;
     }

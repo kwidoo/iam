@@ -1,15 +1,18 @@
 <?php
 
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\ResetController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Passport\Http\Controllers\AccessTokenController;
 
-Route::post('/v1/users', [RegistrationController::class, 'register']);
+Route::post('/signin', RegistrationController::class);
+Route::post('/password/reset/', [ResetController::class, 'resetPassword']);
+Route::post('/password/change', [ResetController::class, 'changePassword']);
 
 Route::group(
     [
         'as' => 'passport.',
-        'prefix' => config('passport.path', '/v1/oauth'),
+        'prefix' => config('passport.path', '/oauth'),
     ],
     function () {
         Route::post('/token', [
