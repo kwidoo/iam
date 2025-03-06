@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Aggregates\PasswordAggregateRoot;
-use Kwidoo\Contacts\Aggregates\ContactAggregateRoot;
 use Kwidoo\Contacts\Contracts\Contact;
 use Kwidoo\Contacts\Contracts\VerificationService as VerificationServiceContract;
 use Kwidoo\Contacts\Contracts\Verifier;
