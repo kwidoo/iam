@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Kwidoo\Contacts\Models\Contact;
+use Kwidoo\Contacts\Contracts\ContactService;
 use Kwidoo\MultiAuth\Contracts\UserResolver;
 use Laravel\Passport\Bridge\User;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
@@ -19,28 +19,29 @@ class IamUserResolver implements UserResolver
             throw new RuntimeException('Unable to determine authentication model from configuration.');
         }
 
-        $contactModel = config('contacts.models.contact');
+        $contactModel = config('contacts.model');
         if (!$contactModel) {
             throw new RuntimeException('Unable to determine contact model from configuration.');
         }
 
+        /** @var \App\Models\User */
         $user = null;
         $contact = $contactModel::where('value', ltrim($username, '+'))->where('is_primary', 1)->first();
 
         if ($authMethod !== 'password') {
             if (!$contact) {
+                /** @var \App\Models\User */
                 $user = $model::create([
                     'password' => null,
                 ]);
-                $contact = $user->contacts()->create([
-                    'value' => ltrim($username, '+'),
-                    'type' => $authMethod,
-                    'is_primary' => 1,
-                    'is_verified' => 1,
-                ]);
+                $contactService = app()->make(ContactService::class, ['model' => $user]);
+                $uuid = $contactService->create($authMethod, ltrim($username, '+'));
+
+                $contact = $contactModel::find($uuid);
             }
         }
 
+        /** @var \App\Models\User */
         $user = $contact->contactable;
 
         return $user ? new User($user->getAuthIdentifier()) : null;

@@ -21,13 +21,13 @@ class RegistrationController extends Controller
         try {
             $method = $request->input('method');
 
-
             if (!method_exists($this, 'registerFor' . ucfirst($method)) || !config('iam.allow_' . $method)) {
                 throw new UserCreationException('Invalid registration method.');
             }
             $contact = $this->{'registerFor' . ucfirst($method)}($request);
-
             DB::commit();
+
+            event('core.user.registered', [$contact]);
 
             if (config('should_verify') || $request->input('otp')) {
                 $verificationService = app()->make(VerificationService::class, ['contact' => $contact]);

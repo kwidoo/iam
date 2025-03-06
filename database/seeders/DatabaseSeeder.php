@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Kwidoo\Contacts\Contracts\ContactService;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,10 +16,15 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(OauthClientsTableSeeder::class);
 
+        $provider = config('auth.guards.api.provider');
+        $model = config('auth.providers.' . $provider . '.model');
+        if (!$model) {
+            throw new RuntimeException('Unable to determine contact model from configuration.');
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $user = $model::create();
+        $contactService = app()->make(ContactService::class, ['model' => $user]);
+
+        $uuid = $contactService->create('email', 'admin@example.com');
     }
 }

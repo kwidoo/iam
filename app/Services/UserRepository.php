@@ -24,12 +24,12 @@ class UserRepository extends PassportUserRepository
 
     public function getUserEntityByUserCredentials($username, $passwordOrCode, $grantType, ClientEntityInterface $clientEntity)
     {
-        dd($username, $passwordOrCode, $grantType, $clientEntity);
         $resolvedUser = app()->make(UserResolver::class)->resolve($username, $clientEntity);
 
         $user = User::find($resolvedUser->getIdentifier());
 
-        if (!$this->hasher->check($passwordOrCode, $user->password)) {
+        // IMPORTANT!!! Should not be able to login without password at this point
+        if (!$this->hasher->check($passwordOrCode, $user->password) || $user->password === null) {
             return;
         }
 
