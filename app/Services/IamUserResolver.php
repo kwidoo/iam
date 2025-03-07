@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Kwidoo\Contacts\Contracts\ContactService;
+use Kwidoo\Contacts\Contracts\VerificationService;
 use Kwidoo\MultiAuth\Contracts\UserResolver;
 use Laravel\Passport\Bridge\User;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
@@ -37,8 +38,16 @@ class IamUserResolver implements UserResolver
                 $contactService = app()->make(ContactService::class, ['model' => $user]);
                 $uuid = $contactService->create($authMethod, ltrim($username, '+'));
 
+                // OTP accounts are considered verified upon creation
                 $contact = $contactModel::find($uuid);
-                $contact->update(['is_verified' => true]);
+                $verificationService = app()->make(
+                    VerificationService::class,
+                    [
+                        'contact' => $contact,
+                        'verifier' => app()->make(config("passport-multiauth.strategies.$authMethod.class")),
+                    ]
+                );
+                $verificationService->markVerified();
             }
         }
 
@@ -46,7 +55,7 @@ class IamUserResolver implements UserResolver
         $user = $contact?->contactable;
 
         // Do not allow passwordless users to authenticate with password
-        if ($authMethod === 'password' && $user->password === null) {
+        if ($authMethod === 'password' && $user?->password === null) {
             throw new RuntimeException('Unable to proceed.', 422);
         }
 

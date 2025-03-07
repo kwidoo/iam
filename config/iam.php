@@ -6,7 +6,6 @@ return [
     'allow_otp' => true,
     'should_verify' => true,
     'otp' => [
-        'model'  => \Kwidoo\MultiAuth\Models\OTP::class,
         'length' => 6,
         'ttl'    => 5,
     ],

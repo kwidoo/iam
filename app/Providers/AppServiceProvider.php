@@ -2,16 +2,13 @@
 
 namespace App\Providers;
 
-use App\Contracts\Services\CreateUserService;
 use App\Exceptions\AuthGuardSetupException;
 use App\Guards\IamGuard;
 use App\Models\User;
-use App\Services\UserRepository;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
-use Laravel\Passport\Bridge\UserRepository as PassportUserRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,7 +37,5 @@ class AppServiceProvider extends ServiceProvider
             $provider = $config['provider'];
             return new IamGuard(Auth::createUserProvider($provider), $app->make('request'));
         });
-
-        Passport::enablePasswordGrant();
     }
 }

@@ -14,14 +14,17 @@ use App\Services\UserRepository;
 use InvalidArgumentException;
 use Kwidoo\Contacts\Contracts\Contact;
 use Kwidoo\Contacts\Contracts\TokenGenerator;
+use Laravel\Passport\Passport;
 
-class UserProvider extends ServiceProvider
+class IamProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
     public function register(): void
     {
+        Passport::enablePasswordGrant();
+
         // bind sms verification to Kwidoo\SmsVerification package. Make param accept SMS provider
         $this->app->bind(VerifierInterface::class, function ($app) {
             return (new VerifierFactory($app))->make();
@@ -49,6 +52,7 @@ class UserProvider extends ServiceProvider
                     'contact' => $contact
                 ]),
                 'contact' => $contact
+                // to add password reset template here
             ]);
 
             return new PasswordResetService($verifier, $contact);

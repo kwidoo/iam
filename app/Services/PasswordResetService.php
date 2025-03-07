@@ -7,6 +7,7 @@ use Kwidoo\Contacts\Contracts\Contact;
 use Kwidoo\Contacts\Contracts\VerificationService as VerificationServiceContract;
 use Kwidoo\Contacts\Contracts\Verifier;
 
+// created to change default events
 class PasswordResetService implements VerificationServiceContract
 {
     public function __construct(
@@ -25,6 +26,7 @@ class PasswordResetService implements VerificationServiceContract
             ->startPasswordChange($this->contact->getKey(), get_class($this->verifier))
             ->persist();
 
+        // to change template, see UserProvider.php
         $this->verifier->create();
     }
 
@@ -38,11 +40,19 @@ class PasswordResetService implements VerificationServiceContract
         $verified = $this->verifier->verify($token);
 
         if ($verified) {
-            PasswordAggregateRoot::retrieve($this->contact->getKey())
-                ->passwordChanged($this->contact->getKey(), get_class($this->verifier))
-                ->persist();
+            $this->markVerified();
         }
 
         return $verified;
+    }
+
+    /**
+     * @return void
+     */
+    public function markVerified(): void
+    {
+        PasswordAggregateRoot::retrieve($this->contact->getKey())
+            ->passwordChanged($this->contact->getKey(), get_class($this->verifier))
+            ->persist();
     }
 }
