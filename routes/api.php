@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ResetController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Passport\Http\Controllers\AccessTokenController;
@@ -27,6 +28,8 @@ Route::group(
 Route::group(
     ['middleware' => 'auth:api',],
     function () {
+        Route::get('/user', UserController::class);
+
         Route::post('/verify/{contact}', [VerifyController::class, 'send']);
         Route::put('/verify/{contact}', [VerifyController::class, 'verify']);
     }

@@ -11,6 +11,7 @@ use Kwidoo\SmsVerification\Contracts\VerifierInterface;
 use Kwidoo\SmsVerification\VerifierFactory;
 use Laravel\Passport\Bridge\UserRepository as PassportUserRepository;
 use App\Services\UserRepository;
+use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Kwidoo\Contacts\Contracts\Contact;
 use Kwidoo\Contacts\Contracts\TokenGenerator;
@@ -64,6 +65,8 @@ class IamProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('SuperAdmin') ? true : null;
+        });
     }
 }

@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Kwidoo\Contacts\Contracts\ContactService;
+use Kwidoo\Contacts\Contracts\VerificationService;
+use Spatie\Permission\Models\Role;
 use RuntimeException;
 
 class DatabaseSeeder extends Seeder
@@ -22,9 +23,25 @@ class DatabaseSeeder extends Seeder
             throw new RuntimeException('Unable to determine contact model from configuration.');
         }
 
-        $user = $model::create();
+        $user = $model::create([
+            'password' => bcrypt('admin123'),
+        ]);
         $contactService = app()->make(ContactService::class, ['model' => $user]);
-
         $uuid = $contactService->create('email', 'admin@example.com');
+
+        $contactModel = config('contacts.model');
+        if (!$contactModel) {
+            throw new RuntimeException('Unable to determine contact model from configuration.');
+        }
+
+        $contact = $contactModel::find($uuid);
+
+        $verificationService = app()->make(VerificationService::class, ['contact' => $contact]);
+        $verificationService->markVerified();
+
+        $role = Role::create(['name' => 'SuperAdmin', 'team_id' => 1]);
+        setPermissionsTeamId(1);
+
+        $user->assignRole($role);
     }
 }

@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Kwidoo\Contacts\Contracts\Contactable;
 use Kwidoo\Contacts\Traits\HasContacts;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements Contactable
 {
@@ -19,6 +20,7 @@ class User extends Authenticatable implements Contactable
     use HasUuids;
     use SoftDeletes;
     use HasContacts;
+    use HasRoles;
 
     /**
      * @var string
