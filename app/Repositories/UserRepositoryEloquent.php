@@ -2,18 +2,17 @@
 
 namespace App\Repositories;
 
-use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
 use App\Contracts\Repositories\UserRepository;
 use App\Models\User;
-use App\Validators\UserValidator;
+use Kwidoo\Mere\Repositories\RepositoryEloquent;
 
 /**
  * Class UserRepositoryEloquent.
  *
  * @package namespace App\Repositories;
  */
-class UserRepositoryEloquent extends BaseRepository implements UserRepository
+class UserRepositoryEloquent extends RepositoryEloquent implements UserRepository
 {
     /**
      * Specify Model class name

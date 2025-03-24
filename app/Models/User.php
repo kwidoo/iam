@@ -36,7 +36,7 @@ class User extends Authenticatable implements Contactable
     /**
      * @var string
      */
-    protected $primaryKey = 'uuid';
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.
@@ -44,7 +44,7 @@ class User extends Authenticatable implements Contactable
      * @var array<int, string>
      */
     protected $fillable = [
-        'uuid',
+        'id',
         'password',
     ];
 
@@ -74,7 +74,7 @@ class User extends Authenticatable implements Contactable
      */
     public function iam_token(): HasMany
     {
-        return $this->hasMany(ApiToken::class, 'user_uuid', 'uuid')->whereRevokedAt(null)->latest();
+        return $this->hasMany(ApiToken::class, 'user_id', 'id')->whereRevokedAt(null)->latest();
     }
 
     /**

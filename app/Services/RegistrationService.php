@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\UserRepository;
-use App\Contracts\Services\OrganizationService;
 use App\Contracts\Services\RegistrationService as RegistrationServiceContract;
 use App\Guards\OrganizationGuard;
 use Kwidoo\Contacts\Contracts\ContactServiceFactory;
@@ -31,14 +30,18 @@ class RegistrationService extends BaseService implements RegistrationServiceCont
 
     public function registerNewUser(array $data)
     {
+        $user = $this->create(['password' => $data['password']]);
+        $data['user_id'] = $user->id;
         $this->guard->checkCanRegister($data['organization'], $data);
-        $model = $this->create($data['password']);
-        $contactService = $this->csf->make($model);
+
+        $contactService = $this->csf->make($user);
         $contactService->create(
+            $data['method'],
             $data['value'],
-            $data['type'],
         );
 
-        return $model;
+        $user->organizations()->attach($data['organization']);
+
+        return $user;
     }
 }

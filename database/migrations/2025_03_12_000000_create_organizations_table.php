@@ -9,7 +9,7 @@ class CreateOrganizationsTable extends Migration
     public function up()
     {
         Schema::create('organizations', function (Blueprint $table) {
-            $table->uuid('uuid')->primary();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->string('slug')->unique();
             $table->uuid('owner_id')->nullable();
@@ -18,7 +18,7 @@ class CreateOrganizationsTable extends Migration
             $table->timestamps();
 
             $table->foreign('owner_id')
-                ->references('uuid')
+                ->references('id')
                 ->on('users')
                 ->onDelete('cascade');
         });

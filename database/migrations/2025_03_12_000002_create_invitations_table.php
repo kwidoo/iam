@@ -9,7 +9,7 @@ class CreateInvitationsTable extends Migration
     public function up()
     {
         Schema::create('invitations', function (Blueprint $table) {
-            $table->uuid('uuid')->primary();
+            $table->uuid('id')->primary();
             $table->uuid('organization_id');
             $table->uuid('invited_by'); // The user who sent the invite.
             // Selectable contact options: email, phone, or code.
@@ -21,10 +21,10 @@ class CreateInvitationsTable extends Migration
             $table->timestamps();
 
             $table->foreign('organization_id')
-                ->references('uuid')->on('organizations')
+                ->references('id')->on('organizations')
                 ->onDelete('cascade');
             $table->foreign('invited_by')
-                ->references('uuid')->on('users')
+                ->references('id')->on('users')
                 ->onDelete('cascade');
         });
     }

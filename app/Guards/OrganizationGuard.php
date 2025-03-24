@@ -9,6 +9,7 @@ class OrganizationGuard
 {
     public function checkCanRegister(?Organization $organization, array $data): void
     {
+        return;
         if ($organization && $organization->users()->where('user_id', $data['user_id'])->exists()) {
             return;
         }

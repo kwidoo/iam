@@ -27,10 +27,11 @@ class Organization extends Model
     /**
      * @var string
      */
-    protected $primaryKey = 'uuid';
+    protected $primaryKey = 'id';
 
 
     protected $fillable = [
+        'id',
         'name',
         'slug',
         'owner_id',

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * 
+ *
  *
  * @property string $uuid
  * @property string $user_uuid
@@ -44,13 +44,13 @@ class ApiToken extends Model
     /**
      * @var string
      */
-    protected $primaryKey = 'uuid';
+    protected $primaryKey = 'id';
 
     /**
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_uuid',
+        'user_id',
         'last_used_at',
         'revoked_at',
     ];

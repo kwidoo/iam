@@ -16,10 +16,10 @@ class CreateOrganizationUserTable extends Migration
 
             $table->primary(['organization_id', 'user_id']);
             $table->foreign('organization_id')
-                ->references('uuid')->on('organizations')
+                ->references('id')->on('organizations')
                 ->onDelete('cascade');
             $table->foreign('user_id')
-                ->references('uuid')->on('users')
+                ->references('id')->on('users')
                 ->onDelete('cascade');
         });
     }

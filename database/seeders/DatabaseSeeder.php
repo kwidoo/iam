@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Contracts\Services\RegistrationService;
+use App\Models\Organization;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Kwidoo\Contacts\Contracts\ContactService;
 use Kwidoo\Contacts\Contracts\VerificationService;
@@ -16,28 +19,26 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(OauthClientsTableSeeder::class);
+        $this->call(MenuItemsTableSeeder::class);
 
         $provider = config('auth.guards.api.provider');
         $model = config('auth.providers.' . $provider . '.model');
         if (!$model) {
             throw new RuntimeException('Unable to determine contact model from configuration.');
         }
+        Model::withoutEvents(function () use ($model) {
+            Organization::create(['name' => 'main', 'slug' => 'main']);
+        });
 
-        $user = $model::create([
+
+        $user = app()->make(RegistrationService::class)->registerNewUser([
+            'value' => 'admin@example.com',
+            'type' => 'email',
+            'method' => 'email',
             'password' => bcrypt('admin123'),
+            'organization' => Organization::first()
+
         ]);
-        $contactService = app()->make(ContactService::class, ['model' => $user]);
-        $uuid = $contactService->create('email', 'admin@example.com');
-
-        $contactModel = config('contacts.model');
-        if (!$contactModel) {
-            throw new RuntimeException('Unable to determine contact model from configuration.');
-        }
-
-        $contact = $contactModel::find($uuid);
-
-        $verificationService = app()->make(VerificationService::class, ['contact' => $contact]);
-        $verificationService->markVerified();
 
         $role = Role::create(['name' => 'SuperAdmin', 'team_id' => 1]);
         setPermissionsTeamId(1);

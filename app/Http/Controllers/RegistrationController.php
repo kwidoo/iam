@@ -49,7 +49,7 @@ class RegistrationController extends Controller
         $password = $request->input('otp') ? null : Hash::make($request->input('password'));
         $user = $this->service->create([
             'password' => $password,
-            'type'  => 'email',
+            'method'  => 'email',
             'value' => $request->input('email'),
             'organization' => $organization,
         ]);
@@ -66,7 +66,7 @@ class RegistrationController extends Controller
     {
         $user = $this->service->registerNewUser([
             'password' => Hash::make($request->input('password')),
-            'type'  => 'phone',
+            'method'  => 'phone',
             'value' => ltrim($request->input('phone'), '+'),
             'organization' => $organization,
         ]);
