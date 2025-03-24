@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -74,6 +75,16 @@ class User extends Authenticatable implements Contactable
     public function iam_token(): HasMany
     {
         return $this->hasMany(ApiToken::class, 'user_uuid', 'uuid')->whereRevokedAt(null)->latest();
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function organizations(): BelongsToMany
+    {
+        return $this->belongsToMany(Organization::class, 'organization_user')
+            ->withPivot('role')
+            ->withTimestamps();
     }
 
     /**
