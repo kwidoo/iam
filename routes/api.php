@@ -10,7 +10,7 @@ use Laravel\Passport\Http\Controllers\AccessTokenController;
 Route::post('/signin', RegistrationController::class);
 Route::post('/password/reset/', [ResetController::class, 'resetPassword']);
 Route::post('/password/change', [ResetController::class, 'changePassword']);
-Route::post('/register/{organization:slug?}', [RegistrationController::class, 'register']);
+Route::post('/register/{organization:slug?}', RegistrationController::class);
 
 Route::group(
     [

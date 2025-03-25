@@ -34,7 +34,7 @@ class RegistrationController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-
+            throw $e;
             return response()->json(['error' => 'Registration failed.'], 500);
         }
     }
