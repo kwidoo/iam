@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fb1682ff0dcacd97541327734897b259",
+    "content-hash": "f52f93fe6ce1011e91b9aaf957649e66",
     "packages": [
         {
             "name": "brick/math",
@@ -904,6 +904,84 @@
             "time": "2023-10-12T05:21:21+00:00"
         },
         {
+            "name": "giggsey/libphonenumber-for-php-lite",
+            "version": "9.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/giggsey/libphonenumber-for-php-lite.git",
+                "reference": "eeb7f1eb5ef2a4030c4e694eed8cebc79c7f283a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php-lite/zipball/eeb7f1eb5ef2a4030c4e694eed8cebc79c7f283a",
+                "reference": "eeb7f1eb5ef2a4030c4e694eed8cebc79c7f283a",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/polyfill-mbstring": "^1.17"
+            },
+            "conflict": {
+                "giggsey/libphonenumber-for-php": "*"
+            },
+            "require-dev": {
+                "ext-dom": "*",
+                "friendsofphp/php-cs-fixer": "^3.71",
+                "infection/infection": "^0.28.0",
+                "nette/php-generator": "^4.1",
+                "php-coveralls/php-coveralls": "^2.7",
+                "phpstan/extension-installer": "^1.4.3",
+                "phpstan/phpstan": "^2.1.7",
+                "phpstan/phpstan-deprecation-rules": "^2.0.1",
+                "phpstan/phpstan-phpunit": "^2.0.4",
+                "phpstan/phpstan-strict-rules": "^2.0.3",
+                "phpunit/phpunit": "^10.5.45",
+                "symfony/console": "^6.4",
+                "symfony/filesystem": "^6.4",
+                "symfony/process": "^6.4"
+            },
+            "suggest": {
+                "giggsey/libphonenumber-for-php": "Use libphonenumber-for-php for geocoding, carriers, timezones and matching"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "9.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "libphonenumber\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Joshua Gigg",
+                    "email": "giggsey@gmail.com",
+                    "homepage": "https://giggsey.com/"
+                }
+            ],
+            "description": "A lite version of giggsey/libphonenumber-for-php, which is a PHP Port of Google's libphonenumber",
+            "homepage": "https://github.com/giggsey/libphonenumber-for-php-lite",
+            "keywords": [
+                "geocoding",
+                "geolocation",
+                "libphonenumber",
+                "mobile",
+                "phonenumber",
+                "validation"
+            ],
+            "support": {
+                "issues": "https://github.com/giggsey/libphonenumber-for-php-lite/issues",
+                "source": "https://github.com/giggsey/libphonenumber-for-php-lite"
+            },
+            "time": "2025-03-21T12:19:12+00:00"
+        },
+        {
             "name": "graham-campbell/result-type",
             "version": "v1.1.3",
             "source": {
@@ -1445,15 +1523,17 @@
             "dist": {
                 "type": "path",
                 "url": "./packages/laravel-contacts",
-                "reference": "f0205fa366185c327c092e3747070372973dba4c"
+                "reference": "b7dba212b47d887ba2ab74f20cebfa05648390b1"
             },
             "require": {
                 "illuminate/database": "^12.0",
                 "illuminate/support": "^12.0",
-                "kwidoo/sms-verification": "*",
+                "kwidoo/sms-verification": "^1.1.1",
                 "php": "^8.2",
                 "prettus/l5-repository": "^2.10.1",
-                "spatie/laravel-event-sourcing": "^7.5"
+                "propaganistas/laravel-phone": "^5.3",
+                "spatie/laravel-event-sourcing": "^7.5",
+                "twilio/sdk": "^8.0"
             },
             "require-dev": {
                 "orchestra/testbench": "^10.0",
@@ -1517,17 +1597,11 @@
         },
         {
             "name": "kwidoo/mere",
-            "version": "1.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kwidoo/mere.git",
-                "reference": "61144e78e7a6ab217fe1369ff178cd7cf33476e4"
-            },
+            "version": "dev-main",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kwidoo/mere/zipball/61144e78e7a6ab217fe1369ff178cd7cf33476e4",
-                "reference": "61144e78e7a6ab217fe1369ff178cd7cf33476e4",
-                "shasum": ""
+                "type": "path",
+                "url": "./packages/mere",
+                "reference": "61144e78e7a6ab217fe1369ff178cd7cf33476e4"
             },
             "require": {
                 "kalnoy/nestedset": "^6.0",
@@ -1544,12 +1618,12 @@
             "type": "library",
             "extra": {
                 "laravel": {
-                    "aliases": {
-                        "Mere": "Kwidoo\\Mere\\MereFacade"
-                    },
                     "providers": [
                         "Kwidoo\\Mere\\MereServiceProvider"
-                    ]
+                    ],
+                    "aliases": {
+                        "Mere": "Kwidoo\\Mere\\MereFacade"
+                    }
                 }
             },
             "autoload": {
@@ -1557,7 +1631,20 @@
                     "Kwidoo\\Mere\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Kwidoo\\Mere\\Tests\\": "tests",
+                    "Kwidoo\\Mere\\Database\\": "database"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "vendor/bin/phpunit"
+                ],
+                "test-coverage": [
+                    "vendor/bin/phpunit --coverage-html coverage"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -1574,22 +1661,26 @@
                 "kwidoo",
                 "mere"
             ],
-            "support": {
-                "issues": "https://github.com/kwidoo/mere/issues",
-                "source": "https://github.com/kwidoo/mere/tree/1.1.2"
-            },
-            "time": "2025-03-22T10:23:29+00:00"
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "kwidoo/passport-multiauth",
-            "version": "dev-main",
+            "version": "1.0.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kwidoo/passport-multiauth.git",
+                "reference": "e96d2193d89e5d670acd9ceacc71f015bbd77151"
+            },
             "dist": {
-                "type": "path",
-                "url": "./packages/passport-multiauth",
-                "reference": "7813246c5869267358e14bf4b15c8e6abb3e9711"
+                "type": "zip",
+                "url": "https://api.github.com/repos/kwidoo/passport-multiauth/zipball/e96d2193d89e5d670acd9ceacc71f015bbd77151",
+                "reference": "e96d2193d89e5d670acd9ceacc71f015bbd77151",
+                "shasum": ""
             },
             "require": {
-                "kwidoo/sms-verification": "*",
+                "kwidoo/sms-verification": "1.1.1",
                 "laravel/passport": "^12.0",
                 "php": "^8.2"
             },
@@ -1613,19 +1704,7 @@
                     "Kwidoo\\MultiAuth\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Kwidoo\\MultiAuth\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "vendor/bin/phpunit"
-                ],
-                "test-coverage": [
-                    "vendor/bin/phpunit --coverage-html coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1642,17 +1721,25 @@
                 "kwidoo",
                 "passport-multiauth"
             ],
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/kwidoo/passport-multiauth/issues",
+                "source": "https://github.com/kwidoo/passport-multiauth/tree/1.0.9"
+            },
+            "time": "2025-03-25T12:59:47+00:00"
         },
         {
             "name": "kwidoo/sms-verification",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "./packages/sms-verification",
+            "version": "1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kwidoo/sms-verification.git",
                 "reference": "3a4cd2333c72afdcdb3331cc91c5a66e20e5c695"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kwidoo/sms-verification/zipball/3a4cd2333c72afdcdb3331cc91c5a66e20e5c695",
+                "reference": "3a4cd2333c72afdcdb3331cc91c5a66e20e5c695",
+                "shasum": ""
             },
             "require": {
                 "php": "^8.2",
@@ -1683,19 +1770,7 @@
                     "Kwidoo\\SmsVerification\\": "src"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Kwidoo\\SmsVerification\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "vendor/bin/phpunit"
-                ],
-                "test-coverage": [
-                    "vendor/bin/phpunit --coverage-html coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1712,9 +1787,11 @@
                 "kwidoo",
                 "sms-verification"
             ],
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/kwidoo/sms-verification/issues",
+                "source": "https://github.com/kwidoo/sms-verification/tree/1.1.1"
+            },
+            "time": "2025-03-07T08:30:56+00:00"
         },
         {
             "name": "laminas/laminas-diactoros",
@@ -4612,6 +4689,77 @@
                 "wiki": "https://github.com/andersao/laravel-validation"
             },
             "time": "2025-03-07T18:33:05+00:00"
+        },
+        {
+            "name": "propaganistas/laravel-phone",
+            "version": "5.3.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Propaganistas/Laravel-Phone.git",
+                "reference": "89f26e8336cf8f8041609148b4fef752f0bd720e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Propaganistas/Laravel-Phone/zipball/89f26e8336cf8f8041609148b4fef752f0bd720e",
+                "reference": "89f26e8336cf8f8041609148b4fef752f0bd720e",
+                "shasum": ""
+            },
+            "require": {
+                "giggsey/libphonenumber-for-php-lite": "^8.13.35|^9.0.0",
+                "illuminate/contracts": "^10.0|^11.0|^12.0",
+                "illuminate/support": "^10.0|^11.0|^12.0",
+                "illuminate/validation": "^10.0|^11.0|^12.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.14",
+                "orchestra/testbench": "*",
+                "phpunit/phpunit": "^10.5|^11.5.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Propaganistas\\LaravelPhone\\PhoneServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Propaganistas\\LaravelPhone\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Propaganistas",
+                    "email": "Propaganistas@users.noreply.github.com"
+                }
+            ],
+            "description": "Adds phone number functionality to Laravel based on Google's libphonenumber API.",
+            "keywords": [
+                "laravel",
+                "libphonenumber",
+                "phone",
+                "validation"
+            ],
+            "support": {
+                "issues": "https://github.com/Propaganistas/Laravel-Phone/issues",
+                "source": "https://github.com/Propaganistas/Laravel-Phone/tree/5.3.6"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Propaganistas",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-03-21T09:07:26+00:00"
         },
         {
             "name": "psr/clock",
@@ -11424,9 +11572,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "kwidoo/laravel-contacts": 20,
-        "kwidoo/passport-multiauth": 20,
-        "kwidoo/sms-verification": 20
+        "kwidoo/laravel-contacts": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

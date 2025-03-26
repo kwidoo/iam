@@ -2,19 +2,17 @@
 
 namespace App\Repositories;
 
-use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
-use App\Contracts\Repositories\OrganizationRepository;
-use App\Models\Organization;
-use App\Validators\OrganizationValidator;
+use App\Contracts\Repositories\ProfileRepository;
+use App\Models\Profile;
 use Kwidoo\Mere\Repositories\RepositoryEloquent;
 
 /**
- * Class OrganizationRepositoryEloquent.
+ * Class ProfileRepositoryEloquent.
  *
  * @package namespace App\Repositories;
  */
-class OrganizationRepositoryEloquent extends RepositoryEloquent implements OrganizationRepository
+class ProfileRepositoryEloquent extends RepositoryEloquent implements ProfileRepository
 {
     /**
      * Specify Model class name
@@ -23,10 +21,8 @@ class OrganizationRepositoryEloquent extends RepositoryEloquent implements Organ
      */
     public function model()
     {
-        return Organization::class;
+        return Profile::class;
     }
-
-
 
     /**
      * Boot up the repository, pushing criteria

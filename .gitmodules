@@ -9,3 +9,7 @@
 [submodule "kwidoo/passport-multiauth"]
     path = packages/passport-multiauth
     url = git@github.com:kwidoo/passport-multiauth.git
+
+[submodule "kwidoo/mere"]
+    path = packages/mere
+    url = git@github.com:kwidoo/mere.git

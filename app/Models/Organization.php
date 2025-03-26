@@ -7,6 +7,9 @@ use Exception;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Organization extends Model
 {
@@ -51,26 +54,47 @@ class Organization extends Model
     }
 
 
-    // The user who created/owns the organization.
-    public function owner()
+    /** The user who created/owns the organization.
+     *
+     * @return BelongsTo
+     */
+    public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    // Many-to-many relationship with users.
-    public function users()
+    /**
+     * Many-to-many relationship with users.
+     *
+     * @return BelongsToMany
+     */
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'organization_user')
             ->withPivot('role')
             ->withTimestamps();
     }
 
-    // One-to-many relationship with invitations.
-    public function invitations()
+    /** One-to-many relationship with invitations.
+     *
+     * @return HasMany
+     */
+    public function invitations(): HasMany
     {
         return $this->hasMany(Invitation::class);
     }
 
+    /**
+     * @return BelongsToMany
+     */
+    public function profiles(): BelongsToMany
+    {
+        return $this->belongsToMany(Profile::class, 'organization_profile');
+    }
+
+    /**
+     * @return array
+     */
     public function sluggable(): array
     {
         return [
@@ -80,6 +104,9 @@ class Organization extends Model
         ];
     }
 
+    /**
+     * @return [type]
+     */
     public function getRouteKeyName()
     {
         return 'slug';

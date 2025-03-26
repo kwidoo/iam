@@ -6,8 +6,6 @@ use App\Contracts\Services\RegistrationService;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
-use Kwidoo\Contacts\Contracts\ContactService;
-use Kwidoo\Contacts\Contracts\VerificationService;
 use Spatie\Permission\Models\Role;
 use RuntimeException;
 
@@ -36,8 +34,11 @@ class DatabaseSeeder extends Seeder
             'type' => 'email',
             'method' => 'email',
             'password' => bcrypt('admin123'),
-            'organization' => Organization::first()
-
+            'organization' => Organization::first(),
+            'fname' => 'Admin',
+            'lname' => 'Admin',
+            'dob' => '1978-04-06',
+            'gender' => 'm',
         ]);
 
         $role = Role::create(['name' => 'SuperAdmin', 'team_id' => 1]);

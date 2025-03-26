@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\Repositories\UserRepository;
 use App\Contracts\Services\RegistrationService as RegistrationServiceContract;
+use App\Factories\ProfileServiceFactory;
 use App\Guards\OrganizationGuard;
 use Kwidoo\Contacts\Contracts\ContactServiceFactory;
 use Kwidoo\Mere\Contracts\MenuService;
@@ -11,16 +12,14 @@ use Kwidoo\Mere\Services\BaseService;
 
 class RegistrationService extends BaseService implements RegistrationServiceContract
 {
-    protected ContactServiceFactory $csf;
-
     public function __construct(
         MenuService $menuService,
         UserRepository $repository,
-        ContactServiceFactory $csf,
+        protected ContactServiceFactory $csf,
+        protected ProfileServiceFactory $psf,
         protected OrganizationGuard $guard,
     ) {
         parent::__construct($menuService, $repository);
-        $this->csf = $csf;
     }
 
     protected function eventKey(): string
@@ -40,7 +39,18 @@ class RegistrationService extends BaseService implements RegistrationServiceCont
             $data['value'],
         );
 
+        $profileService = $this->psf->make($user);
+        $profile = $profileService->create([
+            'fname' => $data['fname'],
+            'lname' => $data['lname'],
+            'dob' => $data['dob'],
+            'gender' => $data['gender'],
+            'user_id' => $user->id,
+        ]);
+
         $user->organizations()->attach($data['organization']);
+        $profile->organizations()->attach($data['organization']);
+
 
         return $user;
     }

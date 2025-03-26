@@ -18,6 +18,7 @@ use App\Contracts\Services\{
     EventSourcingService as EventSourcingServiceContract,
     MicroserviceService as MicroserviceServiceContract,
     RegistrationService as RegistrationServiceContract,
+    ProfileService as ProfileServiceContract,
 };
 
 use App\Contracts\Repositories\{
@@ -27,11 +28,10 @@ use App\Contracts\Repositories\{
     InvitationRepository,
     MicroserviceRepository,
     OrganizationRepository,
+    ProfileRepository,
     UserRepository,
 };
-use App\Factories\ContactServiceFactory;
-use App\Contracts\Factories\ContactServiceFactory as ContactServiceFactoryContract;
-use App\Models\Rep\Invitation;
+use App\Models\Profile;
 // Implementations
 use App\Services\{
     OrganizationService,
@@ -39,6 +39,7 @@ use App\Services\{
     PermissionService,
     EventSourcingService,
     MicroserviceService,
+    ProfileService,
     RegistrationService,
 };
 
@@ -49,9 +50,10 @@ use App\Repositories\{
     InvitationRepositoryEloquent,
     MicroserviceRepositoryEloquent,
     OrganizationRepositoryEloquent,
+    ProfileRepositoryEloquent,
     UserRepositoryEloquent,
 };
-
+use Kwidoo\Mere\Http\Middleware\BindResource;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -73,12 +75,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PermissionServiceContract::class, PermissionService::class);
         $this->app->bind(EventSourcingServiceContract::class, EventSourcingService::class);
         $this->app->bind(MicroserviceServiceContract::class, MicroserviceService::class);
-        $this->app->bind(
-            ContactServiceFactoryContract::class,
-            ContactServiceFactory::class
-        );
-
         $this->app->bind(RegistrationServiceContract::class, RegistrationService::class);
+        $this->app->bind(ProfileServiceContract::class, ProfileService::class);
     }
 
     protected function registerRepositories(): void
@@ -90,6 +88,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(OrganizationRepository::class, OrganizationRepositoryEloquent::class);
         $this->app->bind(UserRepository::class, UserRepositoryEloquent::class);
         $this->app->bind(InvitationRepository::class, InvitationRepositoryEloquent::class);
+        $this->app->bind(ProfileRepository::class, ProfileRepositoryEloquent::class);
     }
 
     /**
@@ -99,7 +98,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Relation::enforceMorphMap([
             'user' => User::class,
+            'profile' => Profile::class,
         ]);
+
+        $router = $this->app['router'];
+        $router->aliasMiddleware('bind.resource', BindResource::class);
 
         Auth::extend('iam', function ($app, $name, array $config) {
             if (!isset($config['provider'])) {

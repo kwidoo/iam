@@ -82,7 +82,7 @@ class IamGuard implements Guard
      */
     protected function validateTokenAndGetUserId($token)
     {
-        return ApiToken::find($token)?->user_uuid;
+        return ApiToken::find($token)?->user_id;
     }
 
     /**
