@@ -2,18 +2,17 @@
 
 namespace App\Repositories;
 
-use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
 use App\Contracts\Repositories\RoleRepository;
 use Spatie\Permission\Models\Role;
-use App\Validators\RoleValidator;
+use Kwidoo\Mere\Repositories\RepositoryEloquent;
 
 /**
  * Class RoleRepositoryEloquent.
  *
  * @package namespace App\Repositories;
  */
-class RoleRepositoryEloquent extends BaseRepository implements RoleRepository
+class RoleRepositoryEloquent extends RepositoryEloquent implements RoleRepository
 {
     /**
      * Specify Model class name

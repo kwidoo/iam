@@ -5,7 +5,7 @@ namespace App\Factories;
 use App\Contracts\Services\PasswordStrategy;
 use App\Exceptions\UserCreationException;
 
-class PasswordStrategyResolver
+class PasswordStrategyFactory
 {
     /**
      * @param PasswordStrategy[] $strategies

@@ -4,6 +4,7 @@ namespace App\Data;
 
 use App\Models\Organization;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\Attributes\Validation\BooleanType;
 use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Data;
@@ -12,12 +13,14 @@ class RegistrationData extends Data
 {
     public function __construct(
         #[In(['email', 'phone'])]
-        #[Required(message: 'The method must be either email or phone')]
+        #[Required()]
         public string $method,
-        public bool $otp,
-        #[Required(message: 'The value is required')]
 
-        public string $value,
+        #[Required()]
+        #[BooleanType]
+        public bool $otp,
+
+        public ?string $value,
         public ?string $password = null,
         public ?string $fname = null,
         public ?string $lname = null,
@@ -49,5 +52,16 @@ class RegistrationData extends Data
             gender: $payload['gender'] ?? null,
             organization: $organization,
         );
+    }
+
+    public static function rules(): array
+    {
+        return [
+            'password' => ['required_if:otp,false', 'string', 'min:8'],
+            'password_confirmation' => ['required_if:otp,false', 'string', 'same:password'],
+
+            'email' => ['required_if:method,email', 'email'],
+            'phone' => ['required_if:method,phone', 'string'],
+        ];
     }
 }

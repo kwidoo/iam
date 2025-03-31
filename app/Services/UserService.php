@@ -27,6 +27,11 @@ class UserService extends BaseService implements UserServiceContract
     {
         return 'user';
     }
+    /**
+     * @param ShowQueryData $query
+     *
+     * @return Model
+     */
     public function getById(ShowQueryData $query): Model
     {
         $query->presenter = UserPresenter::class;

@@ -3,12 +3,21 @@
 namespace App\Factories;
 
 use App\Contracts\Repositories\OrganizationRepository;
+use App\Models\Organization;
 
 class ProfileOrganizationFactory
 {
-    // @todo: update logic
-    public function make(string $name)
+    public function __construct(
+        protected OrganizationRepository $organizationRepository,
+    ) {}
+
+    /**
+     * @param string $name
+     *
+     * @return Organization
+     */
+    public function make(string $name): Organization
     {
-        return app()->make(OrganizationRepository::class)->findByField('name', $name)->first();
+        return $this->organizationRepository->findByField('name', $name)->first();
     }
 }

@@ -12,6 +12,12 @@ class ProfileServiceFactory
         protected Lifecycle $defaultLifecycle,
     ) {}
 
+    /**
+     * @param User $user
+     * @param Lifecycle|null $lifecycle
+     *
+     * @return ProfileService
+     */
     public function make(User $user, ?Lifecycle $lifecycle = null): ProfileService
     {
         return app()->make(ProfileService::class, [

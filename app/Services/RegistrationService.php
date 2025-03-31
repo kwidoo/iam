@@ -7,10 +7,15 @@ use App\Contracts\Services\RegistrationService as RegistrationServiceContract;
 use App\Data\RegistrationData;
 use App\Factories\OrganizationServiceFactory;
 use App\Factories\ProfileServiceFactory;
-use App\Factories\PasswordStrategyResolver;
+use App\Factories\PasswordStrategyFactory;
+use App\Models\User;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Kwidoo\Contacts\Contracts\ContactServiceFactory;
 use Kwidoo\Mere\Contracts\Lifecycle;
 use Kwidoo\Mere\Contracts\MenuService;
+use Kwidoo\Mere\Data\ListQueryData;
+use Kwidoo\Mere\Data\ShowQueryData;
 
 class RegistrationService extends UserService implements RegistrationServiceContract
 {
@@ -21,11 +26,10 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         protected ContactServiceFactory $csf,
         protected ProfileServiceFactory $psf,
         protected OrganizationServiceFactory $osf,
-        protected PasswordStrategyResolver $strategy,
+        protected PasswordStrategyFactory $strategy,
     ) {
         $this->lifecycle = $lifecycle->withoutAuth();
         parent::__construct($menuService, $repository, $this->lifecycle);
-        $this->lifecycle = $this->lifecycle->withoutTrx();
     }
 
     protected function eventKey(): string
@@ -37,18 +41,26 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     {
         return $this->lifecycle
             ->run(
-                'registerNewUser',
-                $this->eventKey(),
-                $data,
-                fn() => $this->handleRegisterNewUser($data)
+                action: 'registerNewUser',
+                resource: $this->eventKey(),
+                context: $data,
+                callback: fn() => $this->handleRegisterNewUser($data)
             );
     }
 
-    protected function handleRegisterNewUser(RegistrationData $data)
+    /**
+     * @param RegistrationData $data
+     *
+     * @return User
+     */
+    protected function handleRegisterNewUser(RegistrationData $data): User
     {
+        $this->lifecycle = $this->lifecycle->withoutTrx();
+
         $passwordStrategy = $this->strategy->resolve($data->otp ? 'otp' : 'password');
         $data->password = $passwordStrategy->password($data->otp);
 
+        /** @var User */
         $user = $this->create(['password' => $data->password]);
 
         $data->userId = $user->id;
@@ -70,5 +82,26 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         $profile->organizations()->attach($data->organization);
 
         return $user;
+    }
+
+    /** DISABLED */
+    public function list(ListQueryData $query)
+    {
+        throw new Exception('Not implemented');
+    }
+
+    public function getById(ShowQueryData $query): Model
+    {
+        throw new Exception('Not implemented');
+    }
+
+    public function update(string $id, array $data): mixed
+    {
+        throw new Exception('Not implemented');
+    }
+
+    public function delete(string $id): bool
+    {
+        throw new Exception('Not implemented');
     }
 }

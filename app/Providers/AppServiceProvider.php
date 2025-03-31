@@ -34,8 +34,8 @@ use App\Contracts\Repositories\{
 };
 use App\Models\Profile;
 use App\Factories\{
-    PasswordStrategyResolver,
-    RegisterStrategyResolver,
+    PasswordStrategyFactory,
+    RegisterStrategyFactory,
 };
 
 use App\Strategies\{
@@ -92,15 +92,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProfileServiceContract::class, ProfileService::class);
         $this->app->bind(UserServiceContract::class, UserService::class);
 
-        $this->app->singleton(RegisterStrategyResolver::class, function ($app) {
-            return new RegisterStrategyResolver([
+        $this->app->singleton(RegisterStrategyFactory::class, function ($app) {
+            return new RegisterStrategyFactory([
                 $app->make(WithEmail::class),
                 $app->make(WithPhone::class),
             ]);
         });
 
-        $this->app->singleton(PasswordStrategyResolver::class, function ($app) {
-            return new PasswordStrategyResolver([
+        $this->app->singleton(PasswordStrategyFactory::class, function ($app) {
+            return new PasswordStrategyFactory([
                 $app->make(WithPassword::class),
                 $app->make(WithOTP::class),
             ]);

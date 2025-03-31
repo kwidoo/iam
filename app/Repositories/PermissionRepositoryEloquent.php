@@ -2,18 +2,17 @@
 
 namespace App\Repositories;
 
-use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
 use App\Contracts\Repositories\PermissionRepository;
 use Spatie\Permission\Models\Permission;
-use App\Validators\PermissionValidator;
+use Kwidoo\Mere\Repositories\RepositoryEloquent;
 
 /**
  * Class PermissionRepositoryEloquent.
  *
  * @package namespace App\Repositories;
  */
-class PermissionRepositoryEloquent extends BaseRepository implements PermissionRepository
+class PermissionRepositoryEloquent extends RepositoryEloquent implements PermissionRepository
 {
     /**
      * Specify Model class name

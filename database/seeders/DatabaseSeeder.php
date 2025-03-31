@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Contracts\Services\RegistrationService;
+use App\Data\RegistrationData;
 use App\Models\Organization;
 use Database\Seeders\Menus\ContactsMenuSeeder;
 use Illuminate\Database\Eloquent\Model;
@@ -37,8 +38,9 @@ class DatabaseSeeder extends Seeder
         });
 
 
-        $user = app()->make(RegistrationService::class)->registerNewUser([
+        $user = app()->make(RegistrationService::class)->registerNewUser(RegistrationData::from([
             'value' => 'admin@example.com',
+            'otp' => false,
             'type' => 'email',
             'method' => 'email',
             'password' => bcrypt('admin123'),
@@ -47,7 +49,7 @@ class DatabaseSeeder extends Seeder
             'lname' => 'Admin',
             'dob' => '1978-04-06',
             'gender' => 'm',
-        ]);
+        ]));
 
 
 
