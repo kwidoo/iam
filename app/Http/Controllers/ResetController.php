@@ -25,7 +25,7 @@ class ResetController extends Controller
     public function resetPassword(Request $request): JsonResponse
     {
         $request->validate([
-            'username' => 'required|string',
+            'username' => ['required', 'string'],
         ]);
 
         $contact = $this->repository

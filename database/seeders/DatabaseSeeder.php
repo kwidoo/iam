@@ -4,10 +4,19 @@ namespace Database\Seeders;
 
 use App\Contracts\Services\RegistrationService;
 use App\Models\Organization;
+use Database\Seeders\Menus\ContactsMenuSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use RuntimeException;
+use Database\Seeders\Menus\UsersMenuSeeder;
+use Database\Seeders\Menus\OrganizationsMenuSeeder;
+use Database\Seeders\Menus\OrganizationUserMenuSeeder;
+use Database\Seeders\Menus\InvitationsMenuSeeder;
+use Database\Seeders\Menus\MicroservicesMenuSeeder;
+use Database\Seeders\Menus\ProfilesMenuSeeder;
+use Database\Seeders\Menus\OrganizationProfileMenuSeeder;
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,7 +26,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(OauthClientsTableSeeder::class);
-        $this->call(MenuItemsTableSeeder::class);
 
         $provider = config('auth.guards.api.provider');
         $model = config('auth.providers.' . $provider . '.model');
@@ -41,9 +49,24 @@ class DatabaseSeeder extends Seeder
             'gender' => 'm',
         ]);
 
-        $role = Role::create(['name' => 'SuperAdmin', 'team_id' => 1]);
-        setPermissionsTeamId(1);
+
+
+        $this->call([
+            RolesAndPermissionsSeeder::class,
+            UsersMenuSeeder::class,
+            OrganizationsMenuSeeder::class,
+            OrganizationUserMenuSeeder::class,
+            InvitationsMenuSeeder::class,
+            MicroservicesMenuSeeder::class,
+            ProfilesMenuSeeder::class,
+            OrganizationProfileMenuSeeder::class,
+            ContactsMenuSeeder::class,
+        ]);
+
+        $role = Role::where('name', 'super admin')->first();
 
         $user->assignRole($role);
+
+        dump($user->createToken('SuperAdmin')->accessToken);
     }
 }

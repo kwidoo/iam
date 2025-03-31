@@ -11,6 +11,7 @@ return [
         'roles' => \App\Services\RoleService::class,
         'permissions' => \App\Services\PermissionService::class,
         'organizations' => \App\Services\OrganizationService::class,
+        'profiles' => \App\Services\ProfileService::class,
         'users' => \App\Services\UserService::class,
 
     ],

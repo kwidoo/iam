@@ -19,6 +19,7 @@ use App\Contracts\Services\{
     MicroserviceService as MicroserviceServiceContract,
     RegistrationService as RegistrationServiceContract,
     ProfileService as ProfileServiceContract,
+    UserService as UserServiceContract,
 };
 
 use App\Contracts\Repositories\{
@@ -32,6 +33,18 @@ use App\Contracts\Repositories\{
     UserRepository,
 };
 use App\Models\Profile;
+use App\Factories\{
+    PasswordStrategyResolver,
+    RegisterStrategyResolver,
+};
+
+use App\Strategies\{
+    WithEmail,
+    WithPhone,
+    WithOTP,
+    WithPassword,
+};
+
 // Implementations
 use App\Services\{
     OrganizationService,
@@ -41,6 +54,7 @@ use App\Services\{
     MicroserviceService,
     ProfileService,
     RegistrationService,
+    UserService,
 };
 
 use App\Repositories\{
@@ -53,7 +67,6 @@ use App\Repositories\{
     ProfileRepositoryEloquent,
     UserRepositoryEloquent,
 };
-use Kwidoo\Mere\Http\Middleware\BindResource;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -77,6 +90,21 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MicroserviceServiceContract::class, MicroserviceService::class);
         $this->app->bind(RegistrationServiceContract::class, RegistrationService::class);
         $this->app->bind(ProfileServiceContract::class, ProfileService::class);
+        $this->app->bind(UserServiceContract::class, UserService::class);
+
+        $this->app->singleton(RegisterStrategyResolver::class, function ($app) {
+            return new RegisterStrategyResolver([
+                $app->make(WithEmail::class),
+                $app->make(WithPhone::class),
+            ]);
+        });
+
+        $this->app->singleton(PasswordStrategyResolver::class, function ($app) {
+            return new PasswordStrategyResolver([
+                $app->make(WithPassword::class),
+                $app->make(WithOTP::class),
+            ]);
+        });
     }
 
     protected function registerRepositories(): void
@@ -100,9 +128,6 @@ class AppServiceProvider extends ServiceProvider
             'user' => User::class,
             'profile' => Profile::class,
         ]);
-
-        $router = $this->app['router'];
-        $router->aliasMiddleware('bind.resource', BindResource::class);
 
         Auth::extend('iam', function ($app, $name, array $config) {
             if (!isset($config['provider'])) {

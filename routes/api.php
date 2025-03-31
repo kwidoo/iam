@@ -3,6 +3,7 @@
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ResetController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -14,7 +15,6 @@ Route::post('/password/reset/', [ResetController::class, 'resetPassword']);
 Route::post('/password/change', [ResetController::class, 'changePassword']);
 Route::post('/register/{organization:slug?}', RegistrationController::class);
 Route::get('translations', TranslationController::class);
-Mere::registerRoutes();
 
 Route::group(
     [
@@ -33,7 +33,13 @@ Route::group(
 Route::group(
     ['middleware' => 'auth:api',],
     function () {
-        Route::get('/user', UserController::class);
+        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/admin/users/{id}', [UserController::class, 'show']);
+        Route::put('/admin/users/{id}', [UserController::class, 'update']);
+        Route::post('/admin/users/', [UserController::class, 'store']);
+        Route::get('/admin/organizations', [OrganizationController::class, 'index']);
+        Route::get('/admin/roles', [RoleController::class, 'index']);
+        Mere::registerRoutes();
     }
 
 );

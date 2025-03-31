@@ -5,6 +5,7 @@ namespace App\Transformers;
 use App\Factories\ProfileOrganizationFactory;
 use League\Fractal\TransformerAbstract;
 use App\Models\Profile;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ProfileTransformer.
@@ -21,8 +22,9 @@ class ProfileTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(Profile $model)
+    public function transform(Model $user)
     {
+        $model = $user->profile;
         $organization = $this->factory->make('main');
         $organizations = [];
         if ($organization) {

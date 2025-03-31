@@ -2,21 +2,22 @@
 
 namespace App\Factories;
 
-use App\Contracts\Services\ProfileService;
+use App\Contracts\Services\OrganizationService;
 use App\Models\User;
 use Kwidoo\Mere\Contracts\Lifecycle;
 
-class ProfileServiceFactory
+class OrganizationServiceFactory
 {
     public function __construct(
         protected Lifecycle $defaultLifecycle,
     ) {}
 
-    public function make(User $user, ?Lifecycle $lifecycle = null): ProfileService
+    public function make(User $user, ?Lifecycle $lifecycle = null): OrganizationService
     {
-        return app()->make(ProfileService::class, [
+        return app()->make(OrganizationService::class, [
             'user' => $user,
             'lifecycle' => $lifecycle ?? $this->defaultLifecycle,
+            'slug' => 'main',
         ]);
     }
 }
