@@ -28,6 +28,11 @@ class RoleService extends BaseService implements RoleServiceContract
         return 'role';
     }
 
+    public function getByName(string $name): Role
+    {
+        return $this->repository->findByField('name', $name)->first();
+    }
+
     /**
      * @param Role $role
      * @param string $userId

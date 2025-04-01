@@ -3,6 +3,8 @@
 namespace App\Data;
 
 use App\Models\Organization;
+use App\Models\Profile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\Attributes\Validation\BooleanType;
 use Spatie\LaravelData\Attributes\Validation\In;
@@ -27,7 +29,8 @@ class RegistrationData extends Data
         public ?string $dob = null,
         public ?string $gender = null,
         public ?Organization $organization = null,
-        public ?string $userId = null
+        public ?User $user = null,
+        public ?Profile $profile = null,
     ) {}
 
     public static function fromRequest(Request $request): self

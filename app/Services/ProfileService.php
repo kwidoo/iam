@@ -47,7 +47,7 @@ class ProfileService extends BaseService implements ProfileServiceContract
         return $this->create([
             'fname' => $data->fname,
             'lname' => $data->lname,
-            'user_id' => $data->userId,
+            'user_id' => $data->user->id,
         ]);
     }
 }

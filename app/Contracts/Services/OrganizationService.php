@@ -9,4 +9,5 @@ use Kwidoo\Mere\Contracts\BaseService;
 interface OrganizationService extends BaseService
 {
     public function createDefaultForUser(RegistrationData $data): Organization;
+    public function loadDefault(RegistrationData $data): Organization;
 }

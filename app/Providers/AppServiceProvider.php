@@ -34,15 +34,18 @@ use App\Contracts\Repositories\{
 };
 use App\Models\Profile;
 use App\Factories\{
-    PasswordStrategyFactory,
-    RegisterStrategyFactory,
+
+    StrategySelectorFactory,
 };
 
 use App\Strategies\{
-    WithEmail,
-    WithPhone,
-    WithOTP,
-    WithPassword,
+    Identity\EmailIdentityStrategy,
+    Identity\PhoneIdentityStrategy,
+    Password\WithOTP,
+    Password\WithPassword,
+    Organization\MainOnlyStrategy,
+    Organization\UserCreatesOrgStrategy,
+    Profile\ProfileStrategy,
 };
 
 // Implementations
@@ -68,6 +71,7 @@ use App\Repositories\{
     UserRepositoryEloquent,
 };
 
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -92,17 +96,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProfileServiceContract::class, ProfileService::class);
         $this->app->bind(UserServiceContract::class, UserService::class);
 
-        $this->app->singleton(RegisterStrategyFactory::class, function ($app) {
-            return new RegisterStrategyFactory([
-                $app->make(WithEmail::class),
-                $app->make(WithPhone::class),
-            ]);
-        });
-
-        $this->app->singleton(PasswordStrategyFactory::class, function ($app) {
-            return new PasswordStrategyFactory([
-                $app->make(WithPassword::class),
-                $app->make(WithOTP::class),
+        $this->app->singleton(StrategySelectorFactory::class, function () {
+            return new StrategySelectorFactory([
+                'email' => EmailIdentityStrategy::class,
+                'phone' => PhoneIdentityStrategy::class,
+                'user_creates_org' => UserCreatesOrgStrategy::class,
+                'main_only' => MainOnlyStrategy::class,
+                'default_profile' => ProfileStrategy::class,
+                'otp' => WithOTP::class,
+                'password' => WithPassword::class,
             ]);
         });
     }
