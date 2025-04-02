@@ -11,7 +11,7 @@ class WrappedContactService implements ContactService
 {
     public function __construct(
         protected ContactService $delegate,
-        protected Lifecycle $lifecycle
+        protected Lifecycle $lifecycle,
     ) {}
 
     public function create(string $type, string $value): string|int

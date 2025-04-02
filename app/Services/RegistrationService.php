@@ -4,11 +4,9 @@ namespace App\Services;
 
 use App\Contracts\Repositories\UserRepository;
 use App\Contracts\Services\RegistrationService as RegistrationServiceContract;
-use App\Data\RegistrationConfigData;
 use App\Data\RegistrationData;
-use App\Enums\RegistrationSecret;
-use App\Enums\RegistrationFlow;
 use App\Factories\ConfigurationContext;
+use App\Factories\OrganizationResolver;
 use App\Factories\OrganizationServiceFactory;
 use App\Factories\ProfileServiceFactory;
 use App\Factories\StrategySelectorFactory;
@@ -26,14 +24,14 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     public function __construct(
         MenuService $menuService,
         UserRepository $repository,
-        Lifecycle $lifecycle,
+        protected Lifecycle $lifecycle,
         protected WrappedContactServiceFactory $csf,
         protected ProfileServiceFactory $psf,
         protected OrganizationServiceFactory $osf,
         protected StrategySelectorFactory $selector,
         protected ConfigurationContext $config,
+        protected OrganizationResolver $orgResolver,
     ) {
-        $this->lifecycle = $lifecycle->withoutAuth();
         parent::__construct($menuService, $repository, $this->lifecycle);
     }
 
@@ -52,13 +50,51 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     public function registerNewUser(RegistrationData $data): User
     {
+        $this->prepareRegistrationContext($data);
+
         return $this->lifecycle
             ->run(
                 action: 'registerNewUser',
                 resource: $this->eventKey(),
                 context: $data,
-                callback: fn() => $this->handleRegisterNewUser($data)
+                callback: $this->resolveCallback($data)
             );
+    }
+
+    protected function prepareRegistrationContext(RegistrationData $data): void
+    {
+        $data->organization = $this->orgResolver->resolve($data->orgName ?? null);
+
+        $config = $this->config
+            ->forOrg($data->organization)
+            ->registrationConfig();
+
+        $this->selector->setConfig($config);
+
+        $existingUser = $this->repository->whereHas('contacts', function ($query) use ($data) {
+            $query->where('type', $data->method)
+                ->where('value', $data->value);
+        })->first();
+
+        $data->user = $existingUser;
+        $data->profile = $existingUser?->profile;
+    }
+
+    protected function resolveCallback(RegistrationData $data): callable
+    {
+        return $data->user
+            ? fn() => $this->handleReuse($data)
+            : fn() => $this->handleRegisterNewUser($data);
+    }
+
+    protected function handleReuse(RegistrationData $data): User
+    {
+        $this->handleOrganization($data);
+
+        $this->attachToOrganization($data);
+        $this->attachToProfile($data);
+
+        return $data->user;
     }
 
     /**
@@ -68,8 +104,6 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleRegisterNewUser(RegistrationData $data): User
     {
-        $this->selector->setConfig(RegistrationConfigData::from($data));
-
         $this->handleCreateUser($data);
 
         $this->handleIdentity($data);
@@ -78,8 +112,8 @@ class RegistrationService extends UserService implements RegistrationServiceCont
 
         $this->handleOrganization($data);
 
-        $data->user->organizations()->attach($data->organization);
-        $data->profile->organizations()->attach($data->organization);
+        $this->attachToOrganization($data);
+        $this->attachToProfile($data);
 
         return $data->user;
     }
@@ -87,15 +121,15 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     /**
      * @param RegistrationData $data
      *
-     * @return null
+     * @return void
      */
-    protected function handleCreateUser(RegistrationData $data)
+    protected function handleCreateUser(RegistrationData $data): void
     {
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\WithOTP|\App\Strategies\WithPassword> */
         $strategy = $this->selector->resolve('secret', NullService::class);
         $strategy->create($data);
 
-        $data->user = $this->lifecycle->withoutTrx()->run(
+        $data->user = $this->lifecycle->withoutTrx()->withoutAuth()->run(
             'create',
             $this->eventKey(),
             $data,
@@ -106,9 +140,9 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     /**
      * @param RegistrationData $data
      *
-     * @return null
+     * @return void
      */
-    protected function handleIdentity(RegistrationData $data)
+    protected function handleIdentity(RegistrationData $data): void
     {
         $contactService = $this->csf->make($data->user, $this->lifecycle->withoutTrx());
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\IdentityStrategy> $identity */
@@ -119,9 +153,9 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     /**
      * @param RegistrationData $data
      *
-     * @return null
+     * @return void
      */
-    protected function handleProfile(RegistrationData $data)
+    protected function handleProfile(RegistrationData $data): void
     {
         $profileService = $this->psf->make($data->user, $this->lifecycle->withoutTrx());
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\ProfileStrategy> $strategy */
@@ -132,20 +166,33 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     /**
      * @param RegistrationData $data
      *
-     * @return null
+     * @return void
      */
-    protected function handleOrganization(RegistrationData $data)
+    protected function handleOrganization(RegistrationData $data): void
     {
         if ($data->organization) {
             return;
         }
 
         $organizationService = $this->osf->make($data->user, $this->lifecycle->withoutTrx());
-        $strategyKey = $this->config->forOrg(null)->strategy();
 
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\OrganizationStrategy> $strategy */
         $strategy = $this->selector->resolve('flow', $organizationService);
         $strategy->create($data);
+    }
+
+    protected function attachToOrganization(RegistrationData $data): void
+    {
+        if (!$data->user->organizations->contains($data->organization)) {
+            $data->user->organizations()->attach($data->organization);
+        }
+    }
+
+    protected function attachToProfile(RegistrationData $data): void
+    {
+        if (!$data->profile->organizations->contains($data->organization)) {
+            $data->profile->organizations()->attach($data->organization);
+        }
     }
 
     /** DISABLED */

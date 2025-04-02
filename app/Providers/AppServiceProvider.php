@@ -30,6 +30,7 @@ use App\Contracts\Repositories\{
     MicroserviceRepository,
     OrganizationRepository,
     ProfileRepository,
+    SystemSettingRepository,
     UserRepository,
 };
 use App\Enums\RegistrationIdentity;
@@ -72,6 +73,7 @@ use App\Repositories\{
     MicroserviceRepositoryEloquent,
     OrganizationRepositoryEloquent,
     ProfileRepositoryEloquent,
+    SystemSettingRepositoryEloquent,
     UserRepositoryEloquent,
 };
 use App\Strategies\Organization\InitialBootstrapStrategy;
@@ -137,6 +139,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepository::class, UserRepositoryEloquent::class);
         $this->app->bind(InvitationRepository::class, InvitationRepositoryEloquent::class);
         $this->app->bind(ProfileRepository::class, ProfileRepositoryEloquent::class);
+        $this->app->bind(SystemSettingRepository::class, SystemSettingRepositoryEloquent::class);
     }
 
     /**

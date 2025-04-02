@@ -79,6 +79,15 @@ class User extends Authenticatable implements Contactable
     }
 
     /**
+     * @return HasMany<Organization>
+     */
+    public function ownedOrganizations(): HasMany
+    {
+        return $this->hasMany(Organization::class, 'owner_id', 'id');
+    }
+
+
+    /**
      * @return BelongsToMany
      */
     public function organizations(): BelongsToMany

@@ -120,8 +120,8 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         }
 
         return $this->create([
-            'name' => "{$data->orgName} organization",
-            'slug' => $this->slug,
+            'name' => 'main',
+            'slug' => 'main',
             'owner_id' => $data->user->id,
         ]);
     }
