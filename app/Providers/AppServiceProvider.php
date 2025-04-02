@@ -32,6 +32,10 @@ use App\Contracts\Repositories\{
     ProfileRepository,
     UserRepository,
 };
+use App\Enums\RegistrationIdentity;
+use App\Enums\RegistrationProfile;
+use App\Enums\RegistrationSecret;
+use App\Enums\RegistrationFlow;
 use App\Models\Profile;
 use App\Factories\{
 
@@ -70,7 +74,7 @@ use App\Repositories\{
     ProfileRepositoryEloquent,
     UserRepositoryEloquent,
 };
-
+use App\Strategies\Organization\InitialBootstrapStrategy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -96,16 +100,30 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProfileServiceContract::class, ProfileService::class);
         $this->app->bind(UserServiceContract::class, UserService::class);
 
+
         $this->app->singleton(StrategySelectorFactory::class, function () {
-            return new StrategySelectorFactory([
-                'email' => EmailIdentityStrategy::class,
-                'phone' => PhoneIdentityStrategy::class,
-                'user_creates_org' => UserCreatesOrgStrategy::class,
-                'main_only' => MainOnlyStrategy::class,
-                'default_profile' => ProfileStrategy::class,
-                'otp' => WithOTP::class,
-                'password' => WithPassword::class,
-            ]);
+            return new StrategySelectorFactory(
+                identityStrategies: [
+                    RegistrationIdentity::EMAIL->value => EmailIdentityStrategy::class,
+                    RegistrationIdentity::PHONE->value => PhoneIdentityStrategy::class,
+                ],
+                flowStrategies: [
+                    RegistrationFlow::MAIN_ONLY->value => MainOnlyStrategy::class,
+                    RegistrationFlow::USER_CREATES_ORG->value => UserCreatesOrgStrategy::class,
+                    RegistrationFlow::INITIAL_BOOTSTRAP->value => InitialBootstrapStrategy::class,
+                    RegistrationFlow::USER_JOINS_USER_ORG->value => UserCreatesOrgStrategy::class,
+                ],
+                profileStrategies: [
+                    RegistrationProfile::DEFAULT_PROFILE->value => ProfileStrategy::class,
+                ],
+                secretStrategies: [
+                    RegistrationSecret::PASSWORD->value => WithPassword::class,
+                    RegistrationSecret::OTP->value => WithOTP::class,
+                ],
+                modeStrategies: [
+                    // RegistrationProfile::OPEN->value => ModeStrategy::class,
+                ]
+            );
         });
     }
 

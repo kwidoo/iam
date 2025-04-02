@@ -9,6 +9,7 @@ use App\Models\User;
 class OrganizationServiceFactory
 {
     protected string $slug = 'main';
+
     public function __construct(
         protected Lifecycle $defaultLifecycle,
     ) {}

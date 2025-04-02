@@ -9,4 +9,10 @@ return [
         'length' => 6,
         'ttl'    => 5,
     ],
+    'defaults' => [
+        'name' => env('APP_NAME', 'MyApp'),
+        'registration_strategy' => 'main_only',
+        'registration_mode'     => 'invite_only',
+
+    ],
 ];

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Contracts\Services\RegistrationService;
 use App\Data\RegistrationData;
+use App\Enums\RegistrationFlow;
 use App\Models\Organization;
 use Database\Seeders\Menus\ContactsMenuSeeder;
 use Illuminate\Database\Eloquent\Model;
@@ -33,10 +34,6 @@ class DatabaseSeeder extends Seeder
         if (!$model) {
             throw new RuntimeException('Unable to determine contact model from configuration.');
         }
-        Model::withoutEvents(function () use ($model) {
-            Organization::create(['name' => 'main', 'slug' => 'main']);
-        });
-
 
         $user = app()->make(RegistrationService::class)->registerNewUser(RegistrationData::from([
             'value' => 'admin@example.com',
@@ -44,11 +41,12 @@ class DatabaseSeeder extends Seeder
             'type' => 'email',
             'method' => 'email',
             'password' => bcrypt('admin123'),
-            'organization' => Organization::first(),
             'fname' => 'Admin',
             'lname' => 'Admin',
             'dob' => '1978-04-06',
             'gender' => 'm',
+            'flow' => RegistrationFlow::INITIAL_BOOTSTRAP->value,
+
         ]));
 
 

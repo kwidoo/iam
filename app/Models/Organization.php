@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RegistrationMode;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Exception;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -40,6 +41,11 @@ class Organization extends Model
         'owner_id',
         'description',
         'logo',
+        'registration_mode'
+    ];
+
+    protected $casts = [
+        'registration_mode' => RegistrationMode::class,
     ];
 
     public static function boot()
@@ -48,7 +54,10 @@ class Organization extends Model
 
         static::creating(function ($org) {
             if (in_array($org->slug, ['main', 'admin', 'login'])) {
-                throw new Exception("This slug is reserved.");
+                if (self::all()->count() > 0) {
+
+                    throw new Exception("This slug is reserved.");
+                }
             }
         });
     }

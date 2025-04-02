@@ -4,13 +4,16 @@ namespace App\Services;
 
 use App\Contracts\Repositories\UserRepository;
 use App\Contracts\Services\RegistrationService as RegistrationServiceContract;
+use App\Data\RegistrationConfigData;
 use App\Data\RegistrationData;
+use App\Enums\RegistrationSecret;
+use App\Enums\RegistrationFlow;
 use App\Factories\ConfigurationContext;
 use App\Factories\OrganizationServiceFactory;
 use App\Factories\ProfileServiceFactory;
 use App\Factories\StrategySelectorFactory;
+use App\Factories\WrappedContactServiceFactory;
 use Illuminate\Database\Eloquent\Model;
-use Kwidoo\Contacts\Contracts\ContactServiceFactory;
 use Kwidoo\Mere\Contracts\Lifecycle;
 use Kwidoo\Mere\Contracts\MenuService;
 use Kwidoo\Mere\Data\ListQueryData;
@@ -24,12 +27,11 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         MenuService $menuService,
         UserRepository $repository,
         Lifecycle $lifecycle,
-        protected ContactServiceFactory $csf,
+        protected WrappedContactServiceFactory $csf,
         protected ProfileServiceFactory $psf,
         protected OrganizationServiceFactory $osf,
         protected StrategySelectorFactory $selector,
         protected ConfigurationContext $config,
-
     ) {
         $this->lifecycle = $lifecycle->withoutAuth();
         parent::__construct($menuService, $repository, $this->lifecycle);
@@ -66,7 +68,7 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleRegisterNewUser(RegistrationData $data): User
     {
-        $this->lifecycle = $this->lifecycle->withoutTrx();
+        $this->selector->setConfig(RegistrationConfigData::from($data));
 
         $this->handleCreateUser($data);
 
@@ -90,10 +92,15 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     protected function handleCreateUser(RegistrationData $data)
     {
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\WithOTP|\App\Strategies\WithPassword> */
-        $strategy = $this->selector->resolve($data->otp ? 'otp' : 'password', NullService::class);
+        $strategy = $this->selector->resolve('secret', NullService::class);
         $strategy->create($data);
 
-        $data->user = $this->create(['password' => $data->password]);
+        $data->user = $this->lifecycle->withoutTrx()->run(
+            'create',
+            $this->eventKey(),
+            $data,
+            fn() => $this->handleCreate(['password' => $data->password])
+        );
     }
 
     /**
@@ -103,9 +110,9 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleIdentity(RegistrationData $data)
     {
-        $contactService = $this->csf->make($data->user, $this->lifecycle);
+        $contactService = $this->csf->make($data->user, $this->lifecycle->withoutTrx());
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\IdentityStrategy> $identity */
-        $identity = $this->selector->resolve($data->method, $contactService);
+        $identity = $this->selector->resolve('identity', $contactService);
         $identity->create($data);
     }
 
@@ -116,10 +123,10 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleProfile(RegistrationData $data)
     {
-        $profileService = $this->psf->make($data->user, $this->lifecycle);
+        $profileService = $this->psf->make($data->user, $this->lifecycle->withoutTrx());
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\ProfileStrategy> $strategy */
-        $strategy = $this->selector->resolve('default_profile', $profileService);
-        $data = $strategy->create($data);
+        $strategy = $this->selector->resolve('profile', $profileService);
+        $strategy->create($data);
     }
 
     /**
@@ -133,12 +140,12 @@ class RegistrationService extends UserService implements RegistrationServiceCont
             return;
         }
 
-        $organizationService = $this->osf->make($data->user, $this->lifecycle);
+        $organizationService = $this->osf->make($data->user, $this->lifecycle->withoutTrx());
         $strategyKey = $this->config->forOrg(null)->strategy();
 
         /** @var \App\Contracts\Services\Strategy<\App\Strategies\OrganizationStrategy> $strategy */
-        $strategy = $this->selector->resolve($strategyKey, $organizationService);
-        $data = $strategy->create($data);
+        $strategy = $this->selector->resolve('flow', $organizationService);
+        $strategy->create($data);
     }
 
     /** DISABLED */

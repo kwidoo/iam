@@ -15,6 +15,7 @@ class CreateOrganizationsTable extends Migration
             $table->uuid('owner_id')->nullable();
             $table->text('description')->nullable();
             $table->string('logo')->nullable();
+            $table->string('registration_mode')->default('invite_only');
             $table->timestamps();
 
             $table->foreign('owner_id')

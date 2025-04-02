@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Enums\RegistrationFlow;
 use App\Models\Organization;
 use App\Models\Profile;
 use App\Models\User;
@@ -29,8 +30,11 @@ class RegistrationData extends Data
         public ?string $dob = null,
         public ?string $gender = null,
         public ?Organization $organization = null,
+        public ?string $inviteCode,
+        public ?string $orgName,
         public ?User $user = null,
         public ?Profile $profile = null,
+        public ?string $flow,
     ) {}
 
     public static function fromRequest(Request $request): self
@@ -54,6 +58,9 @@ class RegistrationData extends Data
             dob: $payload['dob'] ?? null,
             gender: $payload['gender'] ?? null,
             organization: $organization,
+            inviteCode: $payload['invite_code'] ?? null,
+            orgName: $payload['org_name'] ?? null,
+            flow: $payload['flow'] ?? RegistrationFlow::MAIN_ONLY->value,
         );
     }
 
@@ -63,8 +70,8 @@ class RegistrationData extends Data
             'password' => ['required_if:otp,false', 'string', 'min:8'],
             'password_confirmation' => ['required_if:otp,false', 'string', 'same:password'],
 
-            'email' => ['required_if:method,email', 'email'],
-            'phone' => ['required_if:method,phone', 'string'],
+            'email' => ['required_if:method,email', 'email', 'unique:contacts,value'],
+            'phone' => ['required_if:method,phone', 'string', 'unique:contacts,value'],
         ];
     }
 }

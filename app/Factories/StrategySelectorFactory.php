@@ -2,27 +2,56 @@
 
 namespace App\Factories;
 
+use App\Data\RegistrationConfigData;
 use RuntimeException;
 
 class StrategySelectorFactory
 {
-    /**
-     * @param array<string, class-string> $strategies
-     */
-    public function __construct(protected array $strategies) {}
 
-    /**
-     * @template TStrategy
-     * @param string $key
-     * @param mixed $service
-     * @return TStrategy
-     */
-    public function resolve(string $key, mixed $service): object
+
+    protected ?RegistrationConfigData $config;
+
+    public function __construct(
+        protected array $identityStrategies,
+        protected array $flowStrategies,
+        protected array $profileStrategies,
+        protected array $secretStrategies,
+        protected array $modeStrategies,
+        ?RegistrationConfigData $config = null,
+    ) {
+        $this->config = $config;
+    }
+
+    public function setConfig(RegistrationConfigData $config): void
     {
-        if (!isset($this->strategies[$key])) {
-            throw new RuntimeException("Strategy not found for key: {$key}");
+        $this->config = $config;
+    }
+
+    public function resolve(string $type, mixed $service): object
+    {
+        if (!$this->config) {
+            throw new RuntimeException("Registration configuration is not set.");
         }
 
-        return app()->make($this->strategies[$key], ['service' => $service]);
+        // Validate that the property exists
+        $property = $type . 'Strategies';
+
+        if (!property_exists($this, $property)) {
+            throw new RuntimeException("Unknown strategy type: {$type}");
+        }
+
+        $enum = $this->config->$type ?? null;
+        if (!$enum) {
+            throw new RuntimeException("Missing enum value for [{$type}] in RegistrationConfigData.");
+        }
+
+        $enumValue = $enum->value;
+        $strategyMap = $this->$property;
+
+        if (!isset($strategyMap[$enumValue])) {
+            throw new RuntimeException("Strategy not found for type [{$type}] and value [{$enumValue}].");
+        }
+
+        return app()->make($strategyMap[$enumValue], ['service' => $service]);
     }
 }

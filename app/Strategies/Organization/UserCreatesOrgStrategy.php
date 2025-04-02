@@ -5,16 +5,23 @@ namespace App\Strategies\Organization;
 use App\Contracts\Services\OrganizationService;
 use App\Contracts\Services\Strategy;
 use App\Data\RegistrationData;
+use App\Enums\RegistrationFlow;
 
 class UserCreatesOrgStrategy implements Strategy
 {
     public function __construct(protected OrganizationService $service) {}
 
-    public function key(): string
+    public function key(): RegistrationFlow
     {
-        return 'user_creates_org';
+        return RegistrationFlow::USER_CREATES_ORG;
     }
 
+
+    /**
+     * @param RegistrationData $data
+     *
+     * @return void
+     */
     public function create(RegistrationData $data)
     {
         $data->organization = $this->service->createDefaultForUser($data);
