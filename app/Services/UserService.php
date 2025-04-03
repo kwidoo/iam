@@ -17,8 +17,6 @@ class UserService extends BaseService implements UserServiceContract
         MenuService $menuService,
         UserRepository $repository,
         Lifecycle $lifecycle,
-
-
     ) {
         parent::__construct($menuService, $repository, $lifecycle);
     }

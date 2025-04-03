@@ -17,7 +17,7 @@ class MainOnlyStrategy implements Strategy
     }
 
 
-    public function create(RegistrationData $data)
+    public function create(RegistrationData $data): void
     {
         $data->organization = $this->service->loadDefault($data);
     }

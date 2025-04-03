@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Authorization;
+namespace App\Authorizers;
 
 use App\Contracts\Repositories\SystemSettingRepository;
 use App\Data\RegistrationData;
 use App\Enums\RegistrationFlow;
+use App\Models\Organization;
 use App\Models\User;
 use Kwidoo\Contacts\Contracts\ContactRepository;
 use Kwidoo\Mere\Contracts\Authorizer;
@@ -48,24 +49,24 @@ class RegistrationAuthorizer implements Authorizer
         }
     }
 
-    protected function denyIfInviteRequiredButMissing(?object $org, ?string $inviteCode): void
+    protected function denyIfInviteRequiredButMissing(?Organization $organization, ?string $inviteCode): void
     {
         if (
             $this->settingBool('registration.enforce_invite', 'iam.defaults.enforce_invite_code') &&
-            $org?->registration_mode->isInviteOnly() &&
+            $organization?->registration_mode->isInviteOnly() &&
             empty($inviteCode)
         ) {
             throw ValidationException::withMessages([
-                'invite_code' => __('Invite code is required for this :organization.', ['organization' => $org->name]),
+                'invite_code' => __('Invite code is required for this :organization.', ['organization' => $organization->name]),
             ]);
         }
     }
 
-    protected function denyIfIdentityUsedInOrg(?User $user, ?object $org, string $identity, string $value): void
+    protected function denyIfIdentityUsedInOrg(?User $user, ?Organization $organization, string $identity, string $value): void
     {
         if (
             $user &&
-            ($user->organizations->contains($org) || $user->ownedOrganizations->contains($org))
+            ($user->organizations->contains($organization) || $user->ownedOrganizations->contains($organization))
         ) {
             throw ValidationException::withMessages([
                 $identity => __("This :$identity is already used in this organization. Please log in.", [$identity => $value]),

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Wrapped;
+namespace App\Services;
 
 use Kwidoo\Contacts\Contracts\ContactService;
 use Exception;

@@ -41,6 +41,7 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
     public function createDefaultForUser(RegistrationData $data): Organization
     {
         $this->lifecycle = $this->lifecycle->withoutAuth();
+
         $roleService = $this->rsf->make($this->lifecycle);
         $permissionService = $this->psf->make($this->lifecycle);
 

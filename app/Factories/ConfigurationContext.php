@@ -87,14 +87,6 @@ class ConfigurationContext
         return $this->organization?->registration_mode ?? RegistrationMode::INVITE_ONLY;
     }
 
-    /**
-     * Global feature flag check from system settings.
-     */
-    public function featureEnabled(string $feature): bool
-    {
-        return (bool) $this->systemSettingRepository->get("feature.{$feature}", false);
-    }
-
     protected function settingBool(string $key, string $configKey): bool
     {
         $setting = $this->settingRepository->findByField('key', $key)->first();

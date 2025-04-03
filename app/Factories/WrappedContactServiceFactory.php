@@ -2,7 +2,7 @@
 
 namespace App\Factories;
 
-use App\Services\Wrapped\WrappedContactService;
+use App\Services\WrappedContactService;
 use Kwidoo\Contacts\Contracts\Contactable;
 use Kwidoo\Contacts\Contracts\ContactServiceFactory;
 use Kwidoo\Mere\Contracts\Lifecycle;

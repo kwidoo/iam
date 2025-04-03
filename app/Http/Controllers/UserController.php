@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\Services\ProfileService;
+use App\Contracts\Services\RegistrationService;
 use App\Contracts\Services\UserService;
+use App\Data\RegistrationData;
 use App\Http\Requests\StoreProfileRequest;
 use App\Models\Organization;
 use Illuminate\Http\Request;
@@ -17,6 +19,7 @@ class UserController extends Controller
         protected UserService $userService,
         protected ProfileService $profileService,
         protected ContactServiceFactory $factory,
+        protected RegistrationService $registrationService
     ) {}
     /**
      * Handle the incoming request.
@@ -31,35 +34,11 @@ class UserController extends Controller
         return $this->userService->getById($query);
     }
 
-    public function store(StoreProfileRequest $request)
+    public function store(RegistrationData $data)
     {
-        $user = $this->userService->create(['password' => bcrypt('password')]);
-        $profile = $this->profileService->create([
-            ...$request->validated(),
-            'user_id' => $user->id
-        ]);
-        $contactService = $this->factory->make($user);
-        $contact = $contactService->create(
-            $request->input('method'),
-            $request->get('login')
-        );
-
-        $organization = Organization::find($request->input('organization_id')) ?? Organization::where('name', 'main')->first();
-        if ($organization) {
-            $user->organizations()->attach($organization);
-            $profile->organizations()->attach($organization);
-        }
-
-
-
-
-
-        if (!$profile) {
-            return response()->json(['message' => 'Profile not found'], 404);
-        }
+        $this->registrationService->registerNewUser($data);
 
         return response()->json(['message' => 'User updated successfully']);
-        return $this->userService->update($id, $request->all());
     }
 
     public function update(Request $request, $id)
