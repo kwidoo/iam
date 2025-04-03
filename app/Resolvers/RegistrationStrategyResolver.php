@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Factories;
+namespace App\Resolvers;
 
+use App\Contracts\Resolvers\StrategyResolver;
 use App\Data\RegistrationConfigData;
 use RuntimeException;
 
-class StrategySelectorFactory
+class RegistrationStrategyResolver implements StrategyResolver
 {
-
-
     protected ?RegistrationConfigData $config;
 
     public function __construct(

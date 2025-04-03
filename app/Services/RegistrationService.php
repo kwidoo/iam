@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\UserRepository;
+use App\Contracts\Resolvers\OrganizationResolver;
 use App\Contracts\Services\RegistrationService as RegistrationServiceContract;
 use App\Data\RegistrationData;
 use App\Factories\ConfigurationContext;
-use App\Factories\OrganizationResolver;
 use App\Factories\OrganizationServiceFactory;
 use App\Factories\ProfileServiceFactory;
-use App\Factories\StrategySelectorFactory;
+use App\Resolvers\RegistrationStrategyResolver;
 use App\Factories\WrappedContactServiceFactory;
 use Illuminate\Database\Eloquent\Model;
 use Kwidoo\Mere\Contracts\Lifecycle;
@@ -28,9 +28,9 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         protected WrappedContactServiceFactory $csf,
         protected ProfileServiceFactory $psf,
         protected OrganizationServiceFactory $osf,
-        protected StrategySelectorFactory $selector,
-        protected ConfigurationContext $config,
-        protected OrganizationResolver $orgResolver,
+        protected RegistrationStrategyResolver $selector,
+        protected ConfigurationContext $context,
+        protected OrganizationResolver $resolver,
     ) {
         parent::__construct($menuService, $repository, $this->lifecycle);
     }
@@ -57,44 +57,19 @@ class RegistrationService extends UserService implements RegistrationServiceCont
                 action: 'registerNewUser',
                 resource: $this->eventKey(),
                 context: $data,
-                callback: $this->resolveCallback($data)
+                callback: fn() => $this->handleRegisterNewUser($data),
             );
     }
 
     protected function prepareRegistrationContext(RegistrationData $data): void
     {
-        $data->organization = $this->orgResolver->resolve($data->orgName ?? null);
+        $data->organization = $this->resolver->resolve($data->orgName ?? null);
 
-        $config = $this->config
+        $context = $this->context
             ->forOrg($data->organization)
             ->registrationConfig();
 
-        $this->selector->setConfig($config);
-
-        $existingUser = $this->repository->whereHas('contacts', function ($query) use ($data) {
-            $query->where('type', $data->method)
-                ->where('value', $data->value);
-        })->first();
-
-        $data->user = $existingUser;
-        $data->profile = $existingUser?->profile;
-    }
-
-    protected function resolveCallback(RegistrationData $data): callable
-    {
-        return $data->user
-            ? fn() => $this->handleReuse($data)
-            : fn() => $this->handleRegisterNewUser($data);
-    }
-
-    protected function handleReuse(RegistrationData $data): User
-    {
-        $this->handleOrganization($data);
-
-        $this->attachToOrganization($data);
-        $this->attachToProfile($data);
-
-        return $data->user;
+        $this->selector->setConfig($context);
     }
 
     /**
@@ -112,9 +87,6 @@ class RegistrationService extends UserService implements RegistrationServiceCont
 
         $this->handleOrganization($data);
 
-        $this->attachToOrganization($data);
-        $this->attachToProfile($data);
-
         return $data->user;
     }
 
@@ -125,7 +97,6 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleCreateUser(RegistrationData $data): void
     {
-        /** @var \App\Contracts\Services\Strategy<\App\Strategies\WithOTP|\App\Strategies\WithPassword> */
         $strategy = $this->selector->resolve('secret', NullService::class);
         $strategy->create($data);
 
@@ -145,7 +116,6 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     protected function handleIdentity(RegistrationData $data): void
     {
         $contactService = $this->csf->make($data->user, $this->lifecycle->withoutTrx());
-        /** @var \App\Contracts\Services\Strategy<\App\Strategies\IdentityStrategy> $identity */
         $identity = $this->selector->resolve('identity', $contactService);
         $identity->create($data);
     }
@@ -158,7 +128,6 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     protected function handleProfile(RegistrationData $data): void
     {
         $profileService = $this->psf->make($data->user, $this->lifecycle->withoutTrx());
-        /** @var \App\Contracts\Services\Strategy<\App\Strategies\ProfileStrategy> $strategy */
         $strategy = $this->selector->resolve('profile', $profileService);
         $strategy->create($data);
     }
@@ -170,30 +139,19 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleOrganization(RegistrationData $data): void
     {
-        if ($data->organization) {
-            return;
-        }
+        $context = $this->context
+            ->forOrg($data->organization)
+            ->forUser($data->user)
+            ->registrationConfig();
 
-        $organizationService = $this->osf->make($data->user, $this->lifecycle->withoutTrx());
+        $this->selector->setConfig($context);
 
-        /** @var \App\Contracts\Services\Strategy<\App\Strategies\OrganizationStrategy> $strategy */
+        $organizationService = $this->osf->make($this->lifecycle->withoutTrx());
         $strategy = $this->selector->resolve('flow', $organizationService);
         $strategy->create($data);
     }
 
-    protected function attachToOrganization(RegistrationData $data): void
-    {
-        if (!$data->user->organizations->contains($data->organization)) {
-            $data->user->organizations()->attach($data->organization);
-        }
-    }
 
-    protected function attachToProfile(RegistrationData $data): void
-    {
-        if (!$data->profile->organizations->contains($data->organization)) {
-            $data->profile->organizations()->attach($data->organization);
-        }
-    }
 
     /** DISABLED */
     public function list(ListQueryData $query)

@@ -17,6 +17,7 @@
         "kwidoo/sms-verification": "1.1.1",
         "laravel/framework": "^12.0",
         "laravel/passport": "^12.0",
+        "laravel/telescope": "^5.7",
         "laravel/tinker": "^2.10.1",
         "predis/predis": "^2.3",
         "prettus/l5-repository": "2.10.1",

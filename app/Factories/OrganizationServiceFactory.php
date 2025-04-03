@@ -20,10 +20,9 @@ class OrganizationServiceFactory
      *
      * @return OrganizationService
      */
-    public function make(User $user, ?Lifecycle $lifecycle = null): OrganizationService
+    public function make(?Lifecycle $lifecycle = null): OrganizationService
     {
         return app()->make(OrganizationService::class, [
-            'user' => $user,
             'lifecycle' => $lifecycle ?? $this->defaultLifecycle,
             'slug' => $this->slug,
         ]);

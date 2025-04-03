@@ -2,6 +2,7 @@
 
 namespace App\Contracts\Repositories;
 
+use App\Models\Organization;
 use Prettus\Repository\Contracts\RepositoryInterface;
 
 /**
@@ -11,5 +12,5 @@ use Prettus\Repository\Contracts\RepositoryInterface;
  */
 interface OrganizationRepository extends RepositoryInterface
 {
-    //
+    public function getMainOrganization(): ?Organization;
 }

@@ -33,14 +33,16 @@ use App\Contracts\Repositories\{
     SystemSettingRepository,
     UserRepository,
 };
+use App\Contracts\Resolvers\OrganizationResolver;
 use App\Enums\RegistrationIdentity;
 use App\Enums\RegistrationProfile;
 use App\Enums\RegistrationSecret;
 use App\Enums\RegistrationFlow;
 use App\Models\Profile;
-use App\Factories\{
-
-    StrategySelectorFactory,
+use App\Resolvers\{
+    ConsoleOrganizationResolver,
+    HttpOrganizationResolver,
+    RegistrationStrategyResolver,
 };
 
 use App\Strategies\{
@@ -77,6 +79,7 @@ use App\Repositories\{
     UserRepositoryEloquent,
 };
 use App\Strategies\Organization\InitialBootstrapStrategy;
+use App\Strategies\Organization\UserJoinsUserOrgStrategy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -89,6 +92,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registerServices();
         $this->registerRepositories();
+        $this->registerResolvers();
     }
 
     protected function registerServices(): void
@@ -101,32 +105,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RegistrationServiceContract::class, RegistrationService::class);
         $this->app->bind(ProfileServiceContract::class, ProfileService::class);
         $this->app->bind(UserServiceContract::class, UserService::class);
-
-
-        $this->app->singleton(StrategySelectorFactory::class, function () {
-            return new StrategySelectorFactory(
-                identityStrategies: [
-                    RegistrationIdentity::EMAIL->value => EmailIdentityStrategy::class,
-                    RegistrationIdentity::PHONE->value => PhoneIdentityStrategy::class,
-                ],
-                flowStrategies: [
-                    RegistrationFlow::MAIN_ONLY->value => MainOnlyStrategy::class,
-                    RegistrationFlow::USER_CREATES_ORG->value => UserCreatesOrgStrategy::class,
-                    RegistrationFlow::INITIAL_BOOTSTRAP->value => InitialBootstrapStrategy::class,
-                    RegistrationFlow::USER_JOINS_USER_ORG->value => UserCreatesOrgStrategy::class,
-                ],
-                profileStrategies: [
-                    RegistrationProfile::DEFAULT_PROFILE->value => ProfileStrategy::class,
-                ],
-                secretStrategies: [
-                    RegistrationSecret::PASSWORD->value => WithPassword::class,
-                    RegistrationSecret::OTP->value => WithOTP::class,
-                ],
-                modeStrategies: [
-                    // RegistrationProfile::OPEN->value => ModeStrategy::class,
-                ]
-            );
-        });
     }
 
     protected function registerRepositories(): void
@@ -140,6 +118,38 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InvitationRepository::class, InvitationRepositoryEloquent::class);
         $this->app->bind(ProfileRepository::class, ProfileRepositoryEloquent::class);
         $this->app->bind(SystemSettingRepository::class, SystemSettingRepositoryEloquent::class);
+    }
+
+    protected function registerResolvers(): void
+    {
+        $this->app->singleton(RegistrationStrategyResolver::class, function () {
+            return new RegistrationStrategyResolver(
+                identityStrategies: [
+                    RegistrationIdentity::EMAIL->value => EmailIdentityStrategy::class,
+                    RegistrationIdentity::PHONE->value => PhoneIdentityStrategy::class,
+                ],
+                flowStrategies: [
+                    RegistrationFlow::MAIN_ONLY->value => MainOnlyStrategy::class,
+                    RegistrationFlow::USER_CREATES_ORG->value => UserCreatesOrgStrategy::class,
+                    RegistrationFlow::INITIAL_BOOTSTRAP->value => InitialBootstrapStrategy::class,
+                    RegistrationFlow::USER_JOINS_USER_ORG->value => UserJoinsUserOrgStrategy::class,
+                ],
+                profileStrategies: [
+                    RegistrationProfile::DEFAULT_PROFILE->value => ProfileStrategy::class,
+                ],
+                secretStrategies: [
+                    RegistrationSecret::PASSWORD->value => WithPassword::class,
+                    RegistrationSecret::OTP->value => WithOTP::class,
+                ],
+                modeStrategies: [
+                    // RegistrationProfile::OPEN->value => ModeStrategy::class,
+                ]
+            );
+        });
+
+        $this->app->runningInConsole()
+            ? $this->app->bind(OrganizationResolver::class, ConsoleOrganizationResolver::class)
+            : $this->app->bind(OrganizationResolver::class, HttpOrganizationResolver::class);
     }
 
     /**

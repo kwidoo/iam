@@ -14,7 +14,7 @@ return [
     'defaults' => [
         'name' => env('APP_NAME', 'MyApp'),
         'registration_strategy' => RegistrationFlow::USER_CREATES_ORG,
-        'enforce_invite_code' => true,
+        'enforce_invite_code' => false,
         'allow_duplicate_identity_across_orgs' => env('IAM_ALLOW_DUPLICATE_IDENTITY', false),
 
 

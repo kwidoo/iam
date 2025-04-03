@@ -20,7 +20,7 @@ class ConfigurationContext
 
     public function __construct(
         protected OrganizationRepository $repository,
-        protected SystemSettingRepository $systemSettingRepository
+        protected SystemSettingRepository $settingRepository
     ) {}
 
     /**
@@ -32,7 +32,7 @@ class ConfigurationContext
     public function forOrg(string|Organization|null $org): self
     {
         if (is_string($org)) {
-            $this->organization = $this->repository->find($org);
+            $this->organization = $this->repository->findByField('slug', $org)->first();
         } elseif ($org instanceof Organization) {
             $this->organization = $org;
         }
@@ -46,6 +46,7 @@ class ConfigurationContext
     public function forUser(?User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -57,9 +58,9 @@ class ConfigurationContext
         return new RegistrationConfigData(
             flow: $this->determineFlow(),
             mode: $this->determineMode(),
-            identity: $this->user?->identity ?? RegistrationIdentity::EMAIL,
-            profile: $this->user?->profile ?? RegistrationProfile::DEFAULT_PROFILE,
-            secret: $this->user?->secret ?? RegistrationSecret::PASSWORD,
+            identity: RegistrationIdentity::EMAIL,
+            profile: RegistrationProfile::DEFAULT_PROFILE,
+            secret: RegistrationSecret::PASSWORD,
         );
     }
 
@@ -71,11 +72,10 @@ class ConfigurationContext
         if ($this->repository->all()->isEmpty()) {
             return RegistrationFlow::INITIAL_BOOTSTRAP;
         }
-
-        if ($this->organization) {
-            return $this->organization->registration_strategy
-                ?? config('iam.defaults.registration_strategy', RegistrationFlow::MAIN_ONLY);
+        if ($this->organization && !$this->organization->owner->is($this->user)) {
+            return RegistrationFlow::USER_JOINS_USER_ORG;
         }
+
         return config('iam.defaults.registration_strategy', RegistrationFlow::MAIN_ONLY);
     }
 
@@ -93,5 +93,14 @@ class ConfigurationContext
     public function featureEnabled(string $feature): bool
     {
         return (bool) $this->systemSettingRepository->get("feature.{$feature}", false);
+    }
+
+    protected function settingBool(string $key, string $configKey): bool
+    {
+        $setting = $this->settingRepository->findByField('key', $key)->first();
+
+        return $setting !== null
+            ? filter_var($setting->value, FILTER_VALIDATE_BOOLEAN)
+            : config($configKey, false);
     }
 }

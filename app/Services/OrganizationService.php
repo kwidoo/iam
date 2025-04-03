@@ -29,7 +29,8 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         protected UserRepository $userRepository,
     ) {
         parent::__construct($menuService, $repository, $lifecycle);
-        $this->organization = $repository->findByField('slug', $slug)->first();
+
+        $this->organization = $this->repository->findByField('slug', $slug)->first();
     }
 
     protected function eventKey(): string
@@ -45,7 +46,7 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
         $slug = $this->generateSlug();
 
-        $organization = $this->create([
+        $this->organization = $this->create([
             'name' => "{$data->fname} {$data->lname} organization",
             'slug' => $slug,
             'owner_id' => $data->user->id,
@@ -54,21 +55,21 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
         $role = $roleService->create([
             'name' => $slug . '-admin',
-            'organization_id' => $organization->id,
+            'organization_id' => $this->organization->id,
             'description' => "{$data->fname} {$data->lname}\'s organization role with full permissions.",
             'guard_name' => 'web',
         ]);
 
         $role = $roleService->create([
             'name' => $slug . '-user',
-            'organization_id' => $organization->id,
+            'organization_id' => $this->organization->id,
             'description' => "{$data->fname} {$data->lname}\'s organization role with full permissions.",
             'guard_name' => 'web',
         ]);
 
         $permission = $permissionService->create([
             'name' => $slug . '-admin',
-            'organization_id' => $organization->id,
+            'organization_id' => $this->organization->id,
             'description' => 'Allows the user to manage the {$data->fname} {$data->lname}\'s organization.',
             'guard_name' => 'web',
         ]);
@@ -76,7 +77,10 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         $roleService->assignRole($role, $data->user->id);
         $permissionService->givePermission($permission, $data->user->id);
 
-        return $organization;
+        $this->attachToOrganization($data);
+        $this->attachToProfile($data);
+
+        return $this->organization;
     }
 
     /**
@@ -94,10 +98,36 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
             $role = $roleService->getByName('user');
             $roleService->assignRole($role, $data->user->id);
 
+            $this->attachToOrganization($data);
+            $this->attachToProfile($data);
+
             return $this->organization;
         }
 
         return $this->createDefaultForUser($data);
+    }
+
+    public function connectToExistingOrg(RegistrationData $data): Organization
+    {
+        $this->lifecycle = $this->lifecycle->withoutAuth();
+
+        $this->organization = $data->organization;
+
+        if (!$this->organization || !$this->organization->exists) {
+            throw ValidationException::withMessages([
+                'organization' => 'Invalid organization provided.',
+            ]);
+        }
+
+        // Assign default role
+        $roleService = $this->rsf->make($this->lifecycle);
+        $role = $roleService->getByName('user', $this->organization->id); // assuming scoped per-org
+        $roleService->assignRole($role, $data->user->id);
+
+        $this->attachToOrganization($data);
+        $this->attachToProfile($data);
+
+        return $this->organization;
     }
 
     /**
@@ -119,11 +149,30 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
             return $data->organization;
         }
 
-        return $this->create([
+        $this->organization = $this->create([
             'name' => 'main',
             'slug' => 'main',
             'owner_id' => $data->user->id,
         ]);
+
+        $this->attachToOrganization($data);
+        $this->attachToProfile($data);
+
+        return $this->organization;
+    }
+
+    protected function attachToOrganization(RegistrationData $data): void
+    {
+        if (!$data->user->organizations->contains($this->organization)) {
+            $data->user->organizations()->attach($this->organization);
+        }
+    }
+
+    protected function attachToProfile(RegistrationData $data): void
+    {
+        if (!$data->profile->organizations->contains($this->organization)) {
+            $data->profile->organizations()->attach($this->organization);
+        }
     }
 
     /**

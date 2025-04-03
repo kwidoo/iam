@@ -35,4 +35,9 @@ class OrganizationRepositoryEloquent extends RepositoryEloquent implements Organ
     {
         $this->pushCriteria(app(RequestCriteria::class));
     }
+
+    public function getMainOrganization(): ?Organization
+    {
+        return $this->where('slug', 'main')->first();
+    }
 }
