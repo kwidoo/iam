@@ -49,10 +49,14 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     {
         $this->prepareRegistrationContext($data);
 
+        $resource = $data->organization?->registration_mode->isInviteOnly()
+            ? $this->eventKey($data) . '-invite'
+            : $this->eventKey();
+
         return $this->lifecycle
             ->run(
                 action: 'registerNewUser',
-                resource: $this->eventKey(),
+                resource: $resource,
                 context: $data,
                 callback: fn() => $this->handleRegisterNewUser($data),
             );

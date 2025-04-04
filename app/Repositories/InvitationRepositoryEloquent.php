@@ -33,4 +33,14 @@ class InvitationRepositoryEloquent extends BaseRepository implements InvitationR
     {
         $this->pushCriteria(app(RequestCriteria::class));
     }
+
+    /**
+     * @param string $token
+     *
+     * @return Invitation
+     */
+    public function findByToken(string $token): Invitation|null
+    {
+        return $this->where('expires_at', '>', now())->whereNull('accepted_at')->where('token', $token)->first();
+    }
 }

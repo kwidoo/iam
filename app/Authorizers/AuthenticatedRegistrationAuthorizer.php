@@ -2,7 +2,7 @@
 
 namespace App\Authorizers;
 
-use App\Authorizers\RegistrationAuthorizer;
+use App\Authorization\InvitationAuthorizer;
 use Illuminate\Support\Facades\Gate;
 use Kwidoo\Mere\Contracts\Authorizer;
 use Spatie\LaravelData\Data;
@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 class AuthenticatedRegistrationAuthorizer implements Authorizer
 {
     public function __construct(
-        protected RegistrationAuthorizer $baseAuthorizer,
+        protected InvitationAuthorizer $baseAuthorizer,
         protected AuthFactory $auth,
         protected ?string $guard = null
     ) {}

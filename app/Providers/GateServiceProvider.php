@@ -19,5 +19,8 @@ class GateServiceProvider extends ServiceProvider
         Gate::define('register-users', function ($user, $organization) {
             return $user->hasRole("{$organization->slug}-admin") || $user->hasRole('super-admin');
         });
+        Gate::define('invite-users', function ($user, $organization) {
+            return $user->hasRole("{$organization->slug}-admin") || $user->hasRole('super-admin');
+        });
     }
 }

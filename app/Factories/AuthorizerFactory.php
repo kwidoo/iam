@@ -2,6 +2,7 @@
 
 namespace App\Factories;
 
+use App\Authorization\InvitationAuthorizer;
 use App\Authorizers\AuthenticatedRegistrationAuthorizer;
 use App\Authorizers\RegistrationAuthorizer;
 use Kwidoo\Mere\Contracts\Authorizer;
@@ -16,6 +17,12 @@ class AuthorizerFactory implements AuthorizerFactoryContract
         return match ($context) {
             'registration' => app()->make(AuthAwareResolver::class)->resolve(
                 RegistrationAuthorizer::class,
+                AuthenticatedRegistrationAuthorizer::class,
+                'api'
+            ),
+            'sendInvite' => app()->make(InvitationAuthorizer::class, ['guard' => 'api']),
+            'registration-invite' => app()->make(AuthAwareResolver::class)->resolve(
+                InvitationAuthorizer::class,
                 AuthenticatedRegistrationAuthorizer::class,
                 'api'
             ),

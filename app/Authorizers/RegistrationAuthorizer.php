@@ -9,6 +9,7 @@ use App\Data\RegistrationData;
 use App\Enums\RegistrationFlow;
 use App\Models\Organization;
 use App\Models\User;
+use App\Resolvers\UserResolver;
 use Kwidoo\Contacts\Contracts\ContactRepository;
 use Kwidoo\Mere\Contracts\Authorizer;
 use Spatie\LaravelData\Data;
@@ -22,11 +23,12 @@ class RegistrationAuthorizer implements Authorizer
         protected SystemSettingRepository $settingRepository,
         protected OrganizationRepository $repository,
         protected UserRepository $userRepository,
+        protected UserResolver $userResolver,
     ) {}
 
     public function authorize(string $ability, mixed $resource, Data $extra): void
     {
-        if ($ability !== 'registerNewUser' || $resource !== 'registration' || !($extra instanceof RegistrationData)) {
+        if ($ability !== 'registerNewUser' || !in_array($resource,  ['registration', 'registration-invite']) || !($extra instanceof RegistrationData)) {
             throw new InvalidArgumentException('Invalid ability or resource type.');
         }
 
@@ -41,7 +43,6 @@ class RegistrationAuthorizer implements Authorizer
         $user = $this->retrieveUser($identity, $extra->value);
 
         $this->denyIfCreatingOrgWhenForcedToUseMain($extra->flow);
-        $this->denyIfInviteRequiredButMissing($organization, $extra->inviteCode);
         $this->denyIfIdentityUsedInOrg($user, $organization, $identity, $extra->value);
         $this->denyIfIdentityReuseForbidden($user, $identity, $extra->value);
         $this->denyIfIdentityAlreadyRegistered($user, $identity, $extra->value);
@@ -55,19 +56,6 @@ class RegistrationAuthorizer implements Authorizer
         ) {
             throw ValidationException::withMessages([
                 'organization' => __('Cannot create organization. Only main organization is allowed.'),
-            ]);
-        }
-    }
-
-    protected function denyIfInviteRequiredButMissing(?Organization $organization, ?string $inviteCode): void
-    {
-        if (
-            $this->settingBool('registration.enforce_invite', 'iam.defaults.enforce_invite_code') &&
-            $organization?->registration_mode->isInviteOnly() &&
-            empty($inviteCode)
-        ) {
-            throw ValidationException::withMessages([
-                'invite_code' => __('Invite code is required for this :organization.', ['organization' => $organization->name]),
             ]);
         }
     }
@@ -108,11 +96,7 @@ class RegistrationAuthorizer implements Authorizer
 
     protected function retrieveUser(string $identity, string $value): ?User
     {
-        return $this->contactRepository
-            ->where('value', $value)
-            ->where('type', $identity)
-            ->first()
-            ?->contactable;
+        return $this->userResolver->resolve($identity, $value);
     }
 
     protected function settingBool(string $key, string $configKey): bool
