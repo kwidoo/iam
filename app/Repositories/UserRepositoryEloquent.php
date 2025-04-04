@@ -24,13 +24,26 @@ class UserRepositoryEloquent extends RepositoryEloquent implements UserRepositor
         return User::class;
     }
 
-
-
     /**
      * Boot up the repository, pushing criteria
      */
     public function boot()
     {
         $this->pushCriteria(app(RequestCriteria::class));
+    }
+
+    /**
+     * @param array $attributes
+     *
+     * @return User
+     * @todo find out why it is so
+     */
+    public function create(array $attributes)
+    {
+        $fillable = $this->model->getFillable();
+        $attributes = array_intersect_key($attributes, array_flip($fillable));
+
+        // This will respect the $fillable rules
+        return User::create($attributes);
     }
 }

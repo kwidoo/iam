@@ -2,7 +2,9 @@
 
 namespace App\Authorizers;
 
+use App\Contracts\Repositories\OrganizationRepository;
 use App\Contracts\Repositories\SystemSettingRepository;
+use App\Contracts\Repositories\UserRepository;
 use App\Data\RegistrationData;
 use App\Enums\RegistrationFlow;
 use App\Models\Organization;
@@ -17,13 +19,21 @@ class RegistrationAuthorizer implements Authorizer
 {
     public function __construct(
         protected ContactRepository $contactRepository,
-        protected SystemSettingRepository $settingRepository
+        protected SystemSettingRepository $settingRepository,
+        protected OrganizationRepository $repository,
+        protected UserRepository $userRepository,
     ) {}
 
     public function authorize(string $ability, mixed $resource, Data $extra): void
     {
         if ($ability !== 'registerNewUser' || $resource !== 'registration' || !($extra instanceof RegistrationData)) {
             throw new InvalidArgumentException('Invalid ability or resource type.');
+        }
+
+        if ($extra->flow === RegistrationFlow::INITIAL_BOOTSTRAP && ($this->repository->count() > 0 || $this->userRepository->count() > 1)) {
+            throw ValidationException::withMessages([
+                'organization' => __('Initial organization creation is not allowed anymore.'),
+            ]);
         }
 
         $organization = $extra->organization;

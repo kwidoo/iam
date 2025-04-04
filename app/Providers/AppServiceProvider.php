@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Access\Permissions\GrantAdminPermissionStrategy;
+use App\Access\Permissions\GrantDefaultUserPermissionStrategy;
+use App\Access\Roles\AssignAdminRoleStrategy;
+use App\Access\Roles\AssignDefaultUserRoleStrategy;
 use App\Exceptions\AuthGuardSetupException;
 use App\Guards\IamGuard;
 use App\Models\User;
@@ -38,7 +42,10 @@ use App\Enums\RegistrationIdentity;
 use App\Enums\RegistrationProfile;
 use App\Enums\RegistrationSecret;
 use App\Enums\RegistrationFlow;
+use App\Factories\AccessAssignmentFactory;
 use App\Factories\AuthorizerFactory;
+use App\Factories\PermissionAssignmentStrategyFactory;
+use App\Factories\RoleAssignmentStrategyFactory;
 use App\Models\Profile;
 use App\Resolvers\{
     ConsoleOrganizationResolver,
@@ -81,6 +88,7 @@ use App\Repositories\{
 };
 use App\Strategies\Organization\InitialBootstrapStrategy;
 use App\Strategies\Organization\UserJoinsUserOrgStrategy;
+use Kwidoo\Mere\Contracts\AccessAssignmentFactory as AccessAssignmentFactoryContract;
 use Kwidoo\Mere\Contracts\AuthorizerFactory as AuthorizerFactoryContract;
 
 class AppServiceProvider extends ServiceProvider
@@ -154,6 +162,21 @@ class AppServiceProvider extends ServiceProvider
             : $this->app->bind(OrganizationResolver::class, HttpOrganizationResolver::class);
 
         $this->app->bind(AuthorizerFactoryContract::class, AuthorizerFactory::class);
+        $this->app->bind(AccessAssignmentFactoryContract::class, AccessAssignmentFactory::class);
+
+        $this->app->singleton(RoleAssignmentStrategyFactory::class, function ($app) {
+            return new RoleAssignmentStrategyFactory([
+                'assign.admin.role' => $app->make(AssignAdminRoleStrategy::class),
+                'assign.default.role' => $app->make(AssignDefaultUserRoleStrategy::class),
+            ]);
+        });
+
+        $this->app->singleton(PermissionAssignmentStrategyFactory::class, function ($app) {
+            return new PermissionAssignmentStrategyFactory([
+                'grant.admin.permissions' => $app->make(GrantAdminPermissionStrategy::class),
+                'grant.default.permissions' => $app->make(GrantDefaultUserPermissionStrategy::class),
+            ]);
+        });
     }
 
     /**

@@ -29,7 +29,7 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         protected RegistrationStrategyResolver $selector,
         protected ConfigurationContextResolver $context,
     ) {
-        parent::__construct($menuService, $repository, $this->lifecycle);
+        parent::__construct($menuService, $repository, $lifecycle);
     }
 
     /**

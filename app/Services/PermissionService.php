@@ -28,6 +28,11 @@ class PermissionService extends BaseService implements PermissionServiceContract
         return 'permission';
     }
 
+    public function getByName(string $name): ?Permission
+    {
+        return $this->repository->findByField('name', $name)->first();
+    }
+
     public function givePermission(Permission $permission, string $userId): void
     {
         $this->lifecycle->run(
