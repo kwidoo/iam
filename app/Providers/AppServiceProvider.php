@@ -38,6 +38,7 @@ use App\Enums\RegistrationIdentity;
 use App\Enums\RegistrationProfile;
 use App\Enums\RegistrationSecret;
 use App\Enums\RegistrationFlow;
+use App\Factories\AuthorizerFactory;
 use App\Models\Profile;
 use App\Resolvers\{
     ConsoleOrganizationResolver,
@@ -80,6 +81,7 @@ use App\Repositories\{
 };
 use App\Strategies\Organization\InitialBootstrapStrategy;
 use App\Strategies\Organization\UserJoinsUserOrgStrategy;
+use Kwidoo\Mere\Contracts\AuthorizerFactory as AuthorizerFactoryContract;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -150,6 +152,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->runningInConsole()
             ? $this->app->bind(OrganizationResolver::class, ConsoleOrganizationResolver::class)
             : $this->app->bind(OrganizationResolver::class, HttpOrganizationResolver::class);
+
+        $this->app->bind(AuthorizerFactoryContract::class, AuthorizerFactory::class);
     }
 
     /**

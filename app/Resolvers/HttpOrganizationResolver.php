@@ -9,14 +9,18 @@ use App\Enums\RegistrationFlow;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
+use RuntimeException;
 
 class HttpOrganizationResolver implements OrganizationResolver
 {
-    protected ?RegistrationFlow $flow = null;
     public function __construct(
         protected OrganizationRepository $repository,
         protected SystemSettingRepository $settingRepository
-    ) {}
+    ) {
+        if (app()->runningInConsole()) {
+            throw new RuntimeException('This resolver is only for HTTP requests.');
+        }
+    }
 
     /**
      *
@@ -63,6 +67,12 @@ class HttpOrganizationResolver implements OrganizationResolver
         return $parts[0]; // org
     }
 
+    /**
+     * @param string $key
+     * @param string $configKey
+     *
+     * @return bool
+     */
     protected function settingBool(string $key, string $configKey): bool
     {
         $setting = $this->settingRepository->findByField('key', $key)->first();

@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
-use Kwidoo\Contacts\Contracts\ContactService;
-use Exception;
-use Kwidoo\Contacts\Contracts\Contact;
+use App\Services\Traits\OnlyCreate;
+use Kwidoo\Contacts\Contracts\ContactService as ContactServiceContract;
 use Kwidoo\Mere\Contracts\Lifecycle;
 
-class WrappedContactService implements ContactService
+class ContactService implements ContactServiceContract
 {
+    use OnlyCreate;
+
     public function __construct(
-        protected ContactService $delegate,
+        protected ContactServiceContract $delegate,
         protected Lifecycle $lifecycle,
     ) {}
 
@@ -28,15 +29,5 @@ class WrappedContactService implements ContactService
             );
 
         return '';
-    }
-
-    public function destroy(Contact $contact): bool
-    {
-        throw new Exception('Not implemented');
-    }
-
-    public function restore(string $uuid): bool
-    {
-        throw new Exception('Not implemented');
     }
 }

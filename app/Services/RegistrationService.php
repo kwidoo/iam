@@ -3,34 +3,31 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\UserRepository;
-use App\Contracts\Resolvers\OrganizationResolver;
 use App\Contracts\Services\RegistrationService as RegistrationServiceContract;
 use App\Data\RegistrationData;
-use App\Factories\ConfigurationContext;
+use App\Resolvers\ConfigurationContextResolver;
 use App\Factories\OrganizationServiceFactory;
 use App\Factories\ProfileServiceFactory;
 use App\Resolvers\RegistrationStrategyResolver;
-use App\Factories\WrappedContactServiceFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Factories\ContactServiceFactory;
 use Kwidoo\Mere\Contracts\Lifecycle;
 use Kwidoo\Mere\Contracts\MenuService;
-use Kwidoo\Mere\Data\ListQueryData;
-use Kwidoo\Mere\Data\ShowQueryData;
 use App\Models\User;
-use Exception;
+use App\Services\Traits\OnlyCreate;
 
 class RegistrationService extends UserService implements RegistrationServiceContract
 {
+    use OnlyCreate;
+
     public function __construct(
         MenuService $menuService,
         UserRepository $repository,
         protected Lifecycle $lifecycle,
-        protected WrappedContactServiceFactory $csf,
+        protected ContactServiceFactory $csf,
         protected ProfileServiceFactory $psf,
         protected OrganizationServiceFactory $osf,
         protected RegistrationStrategyResolver $selector,
-        protected ConfigurationContext $context,
-        protected OrganizationResolver $resolver,
+        protected ConfigurationContextResolver $context,
     ) {
         parent::__construct($menuService, $repository, $this->lifecycle);
     }
@@ -61,12 +58,15 @@ class RegistrationService extends UserService implements RegistrationServiceCont
             );
     }
 
+    /**
+     * @param RegistrationData $data
+     *
+     * @return void
+     */
     protected function prepareRegistrationContext(RegistrationData $data): void
     {
-        $data->organization = $this->resolver->resolve($data->orgName ?? null);
-
         $context = $this->context
-            ->forOrg($data->organization)
+            ->forOrg($data->orgName ?? null)
             ->registrationConfig();
 
         $this->selector->setConfig($context);
@@ -104,7 +104,7 @@ class RegistrationService extends UserService implements RegistrationServiceCont
             'create',
             $this->eventKey(),
             $data,
-            fn() => $this->handleCreate(['password' => $data->password])
+            fn() => $this->handleCreate($data->toArray()),
         );
     }
 
@@ -149,28 +149,5 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         $organizationService = $this->osf->make($this->lifecycle->withoutTrx());
         $strategy = $this->selector->resolve('flow', $organizationService);
         $strategy->create($data);
-    }
-
-
-
-    /** DISABLED */
-    public function list(ListQueryData $query)
-    {
-        throw new Exception('Not implemented');
-    }
-
-    public function getById(ShowQueryData $query): Model
-    {
-        throw new Exception('Not implemented');
-    }
-
-    public function update(string $id, array $data): mixed
-    {
-        throw new Exception('Not implemented');
-    }
-
-    public function delete(string $id): bool
-    {
-        throw new Exception('Not implemented');
     }
 }
