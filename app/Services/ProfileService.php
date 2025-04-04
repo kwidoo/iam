@@ -48,6 +48,8 @@ class ProfileService extends BaseService implements ProfileServiceContract
             'fname' => $data->fname,
             'lname' => $data->lname,
             'user_id' => $data->user->id,
+            'dob' => $data->dob,
+            'gender' => $data->gender
         ]);
     }
 }

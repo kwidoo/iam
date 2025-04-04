@@ -35,6 +35,10 @@ class DatabaseSeeder extends Seeder
             throw new RuntimeException('Unable to determine contact model from configuration.');
         }
 
+        $this->call([
+            RolesAndPermissionsSeeder::class,
+        ]);
+
         $user = app()->make(RegistrationService::class)->registerNewUser(RegistrationData::from([
             'value' => 'admin@example.com',
             'otp' => false,
@@ -46,11 +50,13 @@ class DatabaseSeeder extends Seeder
             'dob' => '1978-04-06',
             'gender' => 'm',
             'flow' => RegistrationFlow::INITIAL_BOOTSTRAP->value,
-
         ]));
 
+        $role = Role::where('name', 'super admin')->first();
+
+        $user->assignRole($role);
+
         $this->call([
-            RolesAndPermissionsSeeder::class,
             UsersMenuSeeder::class,
             OrganizationsMenuSeeder::class,
             OrganizationUserMenuSeeder::class,
@@ -61,9 +67,7 @@ class DatabaseSeeder extends Seeder
             ContactsMenuSeeder::class,
         ]);
 
-        $role = Role::where('name', 'super admin')->first();
 
-        $user->assignRole($role);
 
         dump($user->createToken('SuperAdmin')->accessToken);
     }

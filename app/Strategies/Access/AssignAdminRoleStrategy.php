@@ -17,8 +17,10 @@ class AssignAdminRoleStrategy implements RoleAssignmentStrategy
 
     public function assign(User $user, Organization $organization): void
     {
+        $slug = $organization->slug;
+
         $roleService = $this->factory->make($this->lifecycle->withoutAuth());
-        $role = $roleService->getByName('admin', $organization->id);
-        $roleService->assignRole($role, $user->id);
+        $role = $roleService->getByName("{$slug}-admin", $organization->id);
+        $roleService->assignRole($role, $user->id, $organization->id);
     }
 }

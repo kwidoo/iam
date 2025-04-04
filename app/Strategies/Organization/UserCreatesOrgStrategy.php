@@ -24,6 +24,7 @@ class UserCreatesOrgStrategy implements Strategy
      */
     public function create(RegistrationData $data)
     {
+        $data->flow = $this->key()->value;
         $data->organization = $this->service->createDefaultForUser($data);
     }
 }

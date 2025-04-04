@@ -28,6 +28,8 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         protected UserRepository $userRepository,
         protected AccessAssignmentFactory $factory,
         protected AccessAssignmentStrategyResolver $aasr,
+        protected OrgRoleInitializerService $orgRoleInitializer,
+
     ) {
         parent::__construct($menuService, $repository, $lifecycle);
 
@@ -44,7 +46,7 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         $this->lifecycle = $this->lifecycle->withoutAuth();
 
         $slug = $this->generateSlug();
-
+        dump($data->flow);
         $this->organization = $this->create([
             'name' => "{$data->fname} {$data->lname} organization",
             'slug' => $slug,
@@ -55,6 +57,8 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
         $this->attachToOrganization($data);
         $this->attachToProfile($data);
+
+        $this->orgRoleInitializer->createDefaults($this->organization, $data);
 
         $this->provideAccess($this->factory->resolve()->resolve($data));
 
@@ -124,8 +128,6 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
         $this->attachToOrganization($data);
         $this->attachToProfile($data);
-
-        $this->provideAccess($this->factory->resolve()->resolve($data));
 
         return $this->organization;
     }

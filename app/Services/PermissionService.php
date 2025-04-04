@@ -7,6 +7,7 @@ use App\Contracts\Repositories\PermissionRepository;
 use App\Contracts\Repositories\UserRepository;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Kwidoo\Mere\Contracts\Lifecycle;
 use Kwidoo\Mere\Services\BaseService;
 use Kwidoo\Mere\Contracts\MenuService;
@@ -28,29 +29,43 @@ class PermissionService extends BaseService implements PermissionServiceContract
         return 'permission';
     }
 
-    public function getByName(string $name): ?Permission
+    public function getByName(string $name, ?string $organizationId = null): Permission
     {
-        return $this->repository->findByField('name', $name)->first();
+        $query = $this->repository->findByField('name', $name);
+
+        if ($organizationId) {
+            $query = $query->where('organization_id', $organizationId);
+        }
+
+        return $query->first();
     }
 
-    public function givePermission(Permission $permission, string $userId): void
+    public function givePermission(Permission $permission, string $userId, string $organizationId): mixed
     {
-        $this->lifecycle->run(
-            action: 'create',
+        return $this->lifecycle->run(
+            action: 'assign',
             resource: $this->eventKey(),
-            context: ['permissionId' => $permission->id, 'userId' => $userId],
-            callback: fn() => $this->handleGivePermission($permission, $userId)
+            context: ['permissionId' => $permission->id, 'userId' => $userId, 'organizationId' => $organizationId],
+            callback: fn() => $this->handleGivePermission($permission, $userId, $organizationId)
         );
     }
 
-    protected function handleGivePermission(Permission $permission, string $userId): User
+    protected function handleGivePermission(Permission $permission, string $userId, string $organizationId): User
     {
+        /** @var User $user */
         $user = $this->userRepository->find($userId);
-        if ($user) {
-            $user->givePermissionTo($permission);
-            return $user;
+
+        if (!$user) {
+            throw new Exception("User with ID [$userId] not found.");
         }
 
-        throw new Exception('User not found');
+        DB::table('model_has_permissions')->updateOrInsert([
+            'permission_id' => $permission->id,
+            config('permission.column_names.model_morph_key') => $user->getKey(),
+            'model_type' => $user->getMorphClass(),
+            //'organization_id' => $organizationId,
+        ]);
+
+        return $user;
     }
 }

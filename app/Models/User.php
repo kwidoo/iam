@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Kwidoo\Contacts\Contracts\Contactable;
 use Kwidoo\Contacts\Traits\HasContacts;
 use Laravel\Passport\HasApiTokens;
@@ -114,5 +115,16 @@ class User extends Authenticatable implements Contactable
     protected static function newFactory()
     {
         return UserFactory::new();
+    }
+
+    public function hasRoleInOrg(string $roleName, string $organizationId): bool
+    {
+        return DB::table('model_has_roles')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $this->id)
+            ->where('model_has_roles.model_type', self::class)
+            ->where('model_has_roles.organization_id', $organizationId)
+            ->where('roles.name', $roleName)
+            ->exists();
     }
 }

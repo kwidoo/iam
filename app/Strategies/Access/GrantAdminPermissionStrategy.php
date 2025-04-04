@@ -17,8 +17,9 @@ class GrantAdminPermissionStrategy implements PermissionAssignmentStrategy
 
     public function assign(User $user, Organization $organization): void
     {
+        $slug = $organization->slug;
         $permissionService = $this->factory->make($this->lifecycle->withoutAuth());
-        $permission = $permissionService->getByName('admin', $organization->id);
-        $permissionService->givePermission($permission, $user->id);
+        $permission = $permissionService->getByName("{$slug}-admin", $organization->id);
+        $permissionService->givePermission($permission, $user->id, $organization->id);
     }
 }
