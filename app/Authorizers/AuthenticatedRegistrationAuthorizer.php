@@ -33,7 +33,9 @@ class AuthenticatedRegistrationAuthorizer implements Authorizer
             : $this->auth->guard();
 
         if ($guardInstance->check()) {
-            Gate::authorize('register-users', [$extra->organization]);
+            Gate::authorize('register-users', [
+                'organization' => $extra->organization
+            ]);
         }
 
         $this->baseAuthorizer->authorize($ability, $resource, $extra);

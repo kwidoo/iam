@@ -17,7 +17,6 @@ class GuestRegistrationContextResolver implements AccessAssignmentContextResolve
      */
     public function resolve(BaseData $data): AccessAssignmentDataContract
     {
-        dump($data);
         return new AccessAssignmentData(
             actor: 'self',
             user: $data->user,

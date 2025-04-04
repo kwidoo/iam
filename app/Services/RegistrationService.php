@@ -69,6 +69,8 @@ class RegistrationService extends UserService implements RegistrationServiceCont
             ->forOrg($data->orgName ?? null)
             ->registrationConfig();
 
+        $data->organization = $this->context->getOrg(); //@todo in doubt
+
         $this->selector->setConfig($context);
     }
 

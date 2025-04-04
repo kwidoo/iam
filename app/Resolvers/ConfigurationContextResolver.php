@@ -120,4 +120,9 @@ class ConfigurationContextResolver
     {
         return RegistrationSecret::PASSWORD;
     }
+
+    public function getOrg(): ?Organization
+    {
+        return $this->organization;
+    }
 }

@@ -46,7 +46,7 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         $this->lifecycle = $this->lifecycle->withoutAuth();
 
         $slug = $this->generateSlug();
-        dump($data->flow);
+
         $this->organization = $this->create([
             'name' => "{$data->fname} {$data->lname} organization",
             'slug' => $slug,
