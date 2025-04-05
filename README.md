@@ -1,66 +1,126 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Kwidoo IAM — Laravel Microservice for Identity and Access Management
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Status**: MVP (70% complete)
+**Tech stack**: Laravel, Passport (OAuth2), Spatie Event Sourcing, SOLID, DRY, custom Lifecycle framework
+**Purpose**: Acts as a centralized IAM microservice for authenticating and authorizing users across multiple Laravel-based microservices.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   ✅ OAuth2 authentication via Laravel Passport
+-   ✅ Event Sourcing with Spatie package
+-   ✅ SOLID, DRY, modular architecture with custom `Lifecycle` and service resolution
+-   ✅ Multi-organization logic with flexible user-org relationships
+-   ✅ Role and Policy support (WIP)
+-   ✅ Dynamic menu builder per user/service (microservice-compliant)
+-   ✅ Reusable shared logic in separate `kwidoo/mere` package
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🧱 Architecture Overview
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🧠 Core Concepts
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+This IAM system is built as a **modular, event-sourced, lifecycle-driven microservice**, emphasizing clear separation of concerns and long-term maintainability.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-   **Factory/Resolver Pattern**: Used to dynamically select service implementations based on input or configuration (DI-friendly workaround for PHP).
+-   **Lifecycle Executor**: Encapsulates authorization, hooks (before/after), aggregate handling, and service orchestration.
+-   **Eventable Hooks**: Pre-/post-operation hooks allow extensibility (currently implemented but may be refactored).
+-   **Aggregate Roots**: Domain logic is captured via Spatie's Event Sourcing aggregate system.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🔁 Registration Flow (Example)
 
-### Premium Partners
+1. **Authorization Check** — Can the current user register?
+2. **Lifecycle Orchestration**:
+    - Create User
+    - Create Profile
+    - Create Contact (email/phone)
+    - Create or assign Organization
+3. **Dynamic Organization Rules**:
+    - Single default organization
+    - One organization per user (with or without ability to create more)
+    - Many-to-many user/organization support
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+---
 
-## Contributing
+## 🔒 Roles & Permissions (WIP)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+-   Role-based access with Spatie Laravel Permission
+-   Dynamic, organization-aware policy checks
+-   Planned support for scoped permission generation (`org-{id}-{action}`)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🧩 Related Components
 
-## Security Vulnerabilities
+### 📦 [`kwidoo/mere`](https://github.com/your-org/mere)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Reusable internal Laravel package that provides:
 
-## License
+-   Lifecycle service infrastructure
+-   Shared logic and traits across microservices
+-   Event projector bridge and hook handling
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 📦 [`kwidoo/sms-verification`](https://github.com/your-org/sms-verification)
+
+-   SMS verification system with support for 9 providers:
+    -   Twilio, Nexmo (Vonage), MessageBird, etc.
+-   Config-based driver switching
+-   OTP token generation and validation
+-   Can be reused in any Laravel app
+
+### 📦 [`kwidoo/passport-multiauth`](https://github.com/your-org/passport-multiauth)
+
+-   Passport extension that supports:
+    -   Login via password
+    -   Login via OTP (SMS or Email)
+-   Drop-in replacement for Laravel Passport’s password grant
+-   Can be used independently of the IAM service
+
+---
+
+## ⚙️ Tech Highlights
+
+| Component   | Stack                         |
+| ----------- | ----------------------------- |
+| Framework   | Laravel                       |
+| Auth        | Laravel Passport (OAuth2)     |
+| Events      | Spatie Laravel Event Sourcing |
+| DI Strategy | Factory + Resolver pattern    |
+| Principles  | SOLID, DRY                    |
+| Deployment  | Microservice-ready            |
+
+---
+
+## 🚧 Roadmap
+
+-   [ ] Complete UI interface (admin console)
+-   [ ] Finalize role/policy support
+-   [ ] Write full test suite (unit + feature)
+-   [ ] Dockerize for microservice deployment
+-   [ ] Add OpenAPI (Swagger) documentation
+
+---
+
+## 🧠 Philosophy
+
+This project is not just about authentication, but about creating a **modular identity service** with clear extensibility points and adherence to SOLID principles.
+
+It is designed to be **the backbone IAM module** for distributed systems.
+
+---
+
+## 🧑‍💻 Author
+
+Built by a Laravel/Vue architect with over a decade of experience, focused on scalable, long-living systems.
+
+---
+
+## 📬 Contact / Early Access
+
+Want to use this IAM module in your system? Interested in OAuth2/event-sourced identity architecture?
+
+📩 Reach out via LinkedIn or email to discuss implementation or consulting opportunities.
