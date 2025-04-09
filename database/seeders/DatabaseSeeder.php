@@ -2,21 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Contracts\Services\RegistrationService;
-use App\Data\RegistrationData;
-use App\Enums\RegistrationFlow;
-use Database\Seeders\Menus\ContactsMenuSeeder;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use RuntimeException;
-use Database\Seeders\Menus\UsersMenuSeeder;
-use Database\Seeders\Menus\OrganizationsMenuSeeder;
-use Database\Seeders\Menus\OrganizationUserMenuSeeder;
-use Database\Seeders\Menus\InvitationsMenuSeeder;
-use Database\Seeders\Menus\MicroservicesMenuSeeder;
-use Database\Seeders\Menus\ProfilesMenuSeeder;
-use Database\Seeders\Menus\OrganizationProfileMenuSeeder;
-
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,48 +11,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(OauthClientsTableSeeder::class);
+        // Organization and super admin are already created in your existing setup
 
-        $provider = config('auth.guards.api.provider');
-        $model = config('auth.providers.' . $provider . '.model');
-        if (!$model) {
-            throw new RuntimeException('Unable to determine contact model from configuration.');
-        }
-
+        // Run the seeders in order of dependency
         $this->call([
-            RolesAndPermissionsSeeder::class,
+            OauthClientsTableSeeder::class, // Create OAuth clients first
+            MenuItemSeeder::class,     // First create menu structure
+            ResourceConfigSeeder::class, // Then create resource configurations
+            RoleSeeder::class,         // Then create roles
+            PermissionSeeder::class,   // Then create and assign permissions
+            UserSeeder::class,         // Finally create sample users with roles
         ]);
-
-        $user = app()->make(RegistrationService::class)->registerNewUser(RegistrationData::from([
-            'value' => 'admin@example.com',
-            'otp' => false,
-            'type' => 'email',
-            'method' => 'email',
-            'password' => bcrypt('admin123'),
-            'fname' => 'Admin',
-            'lname' => 'Admin',
-            'dob' => '1978-04-06',
-            'gender' => 'm',
-            'flow' => RegistrationFlow::INITIAL_BOOTSTRAP->value,
-        ]));
-
-        $role = Role::where('name', 'super admin')->first();
-
-        $user->assignRole($role);
-
-        $this->call([
-            UsersMenuSeeder::class,
-            OrganizationsMenuSeeder::class,
-            OrganizationUserMenuSeeder::class,
-            InvitationsMenuSeeder::class,
-            MicroservicesMenuSeeder::class,
-            ProfilesMenuSeeder::class,
-            OrganizationProfileMenuSeeder::class,
-            ContactsMenuSeeder::class,
-        ]);
-
-
-
-        dump($user->createToken('SuperAdmin')->accessToken);
     }
 }

@@ -26,14 +26,14 @@ class OrgRoleInitializerService
         $roleService->create([
             'name' => "{$slug}-admin",
             'organization_id' => $organization->id,
-            'description' => "{$data->fname} {$data->lname}'s organization admin role.",
+            //  'description' => "{$data->fname} {$data->lname}'s organization admin role.",
             'guard_name' => 'web',
         ]);
 
         $roleService->create([
             'name' => "{$slug}-user",
             'organization_id' => $organization->id,
-            'description' => "Default user role for {$data->fname} {$data->lname}'s organization.",
+            //   'description' => "Default user role for {$data->fname} {$data->lname}'s organization.",
             'guard_name' => 'web',
         ]);
 
@@ -43,14 +43,14 @@ class OrgRoleInitializerService
         $permissionService->create([
             'name' => "{$slug}-admin",
             'organization_id' => $organization->id,
-            'description' => "Full access in {$data->fname} {$data->lname}'s organization.",
+            //     'description' => "Full access in {$data->fname} {$data->lname}'s organization.",
             'guard_name' => 'web',
         ]);
 
         $permissionService->create([
             'name' => "{$slug}-user",
             'organization_id' => $organization->id,
-            'description' => "Default user permissions for organization.",
+            //    'description' => "Default user permissions for organization.",
             'guard_name' => 'web',
         ]);
     }

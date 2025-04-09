@@ -2,6 +2,7 @@
 
 namespace App\Resolvers;
 
+use App\Contracts\Repositories\OrganizationRepository;
 use App\Contracts\Resolvers\OrganizationResolver;
 use App\Enums\RegistrationFlow;
 use App\Models\Organization;
@@ -12,7 +13,7 @@ class ConsoleOrganizationResolver implements OrganizationResolver
 {
     protected ?RegistrationFlow $flow = null;
 
-    public function __construct()
+    public function __construct(protected OrganizationRepository $repository,)
     {
         if (!app()->runningInConsole()) {
             throw new RuntimeException('This resolver is only for console commands.');
@@ -29,6 +30,17 @@ class ConsoleOrganizationResolver implements OrganizationResolver
      */
     public function resolve(?string $name = null): ?Organization
     {
+        dump($this->flow);
+        if ($this->flow === RegistrationFlow::MAIN_ONLY) {
+            return $this->repository->getMainOrganization();
+        }
+        if ($this->flow === RegistrationFlow::USER_JOINS_USER_ORG && $name === null) {
+            return $this->repository
+                ->where('slug', $name)
+                ->orWhere('id', $name)
+                ->first();
+        }
+
         return null;
     }
 

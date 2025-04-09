@@ -51,7 +51,7 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
             'name' => "{$data->fname} {$data->lname} organization",
             'slug' => $slug,
             'owner_id' => $data->user->id,
-            'role' => 'owner',
+            //   'role' => 'owner',
         ]);
 
 
