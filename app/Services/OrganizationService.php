@@ -58,7 +58,7 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         $this->attachToOrganization($data);
         $this->attachToProfile($data);
 
-        $this->orgRoleInitializer->createDefaults($this->organization, $data);
+        $this->orgRoleInitializer->createDefaults($this->organization, $data, $this->lifecycle);
 
         $this->provideAccess($this->factory->resolve()->resolve($data));
 
@@ -159,7 +159,7 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
     protected function provideAccess(AccessAssignmentData $context): void
     {
-        [$roleStrategy, $permissionStrategy] = $this->aasr->resolve($context);
+        [$roleStrategy, $permissionStrategy] = $this->aasr->resolve($context, $this->lifecycle);
         $roleStrategy->assign($context->user, $this->organization);
         $permissionStrategy->assign($context->user, $this->organization);
     }

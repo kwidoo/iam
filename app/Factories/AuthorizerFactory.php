@@ -2,7 +2,7 @@
 
 namespace App\Factories;
 
-use App\Authorization\InvitationAuthorizer;
+use App\Authorizers\InvitationAuthorizer;
 use App\Authorizers\AuthenticatedRegistrationAuthorizer;
 use App\Authorizers\RegistrationAuthorizer;
 use Kwidoo\Mere\Contracts\Authorizer;

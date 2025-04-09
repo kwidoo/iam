@@ -45,7 +45,7 @@ class PermissionService extends BaseService implements PermissionServiceContract
         return $this->lifecycle->run(
             action: 'assign',
             resource: $this->eventKey(),
-            context: ['permissionId' => $permission->id, 'userId' => $userId, 'organizationId' => $organizationId],
+            context: $this->lifecycle->context(),
             callback: fn() => $this->handleGivePermission($permission, $userId, $organizationId)
         );
     }

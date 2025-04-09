@@ -10,16 +10,41 @@ use App\Enums\RegistrationFlow;
 use InvalidArgumentException;
 use Spatie\LaravelData\Data;
 
+/**
+ * Data Transfer Object for registration configuration.
+ * Contains settings and strategies for the registration process.
+ *
+ * @category App\Data
+ * @package  App\Data
+ * @author   John Doe <john.doe@example.com>
+ * @license  MIT https://opensource.org/licenses/MIT
+ * @link     https://github.com/your-repo
+ */
 class RegistrationConfigData extends Data
 {
+    /**
+     * Initialize registration configuration with all required settings.
+     *
+     * @param RegistrationIdentity $identity Identity verification method
+     * @param RegistrationMode     $mode     Registration mode (open/invite-only)
+     * @param RegistrationProfile  $profile  Profile creation strategy
+     * @param RegistrationSecret   $secret   Secret type (password/OTP)
+     * @param RegistrationFlow     $flow     Registration flow type
+     */
     public function __construct(
         public RegistrationIdentity $identity,
         public RegistrationMode $mode,
         public RegistrationProfile $profile,
         public RegistrationSecret $secret,
         public RegistrationFlow $flow,
-    ) {}
+    ) {
+    }
 
+    /**
+     * Get all configuration keys and their values.
+     *
+     * @return array<string, mixed>
+     */
     public function allKeys(): array
     {
         return [
@@ -32,12 +57,16 @@ class RegistrationConfigData extends Data
     }
 
     /**
-     * Create a new instance from the provided data.
-     * @param RegistrationData $data
+     * Create a new instance from the provided registration data.
+     * Determines appropriate settings based on the registration method and flow.
+     *
+     * @param RegistrationData $data Registration data
+     *
      * @return RegistrationConfigData
-     * @throws InvalidArgumentException
+     *
+     * @throws InvalidArgumentException When invalid method or flow is provided
      */
-    public static function fromData(Data $data): self
+    public static function fromData(RegistrationData $data): self
     {
         return new self(
             identity: match ($data->method) {

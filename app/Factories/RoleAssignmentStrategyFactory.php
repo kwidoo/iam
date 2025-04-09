@@ -4,6 +4,7 @@ namespace App\Factories;
 
 use App\Contracts\Access\RoleAssignmentStrategy;
 use InvalidArgumentException;
+use Kwidoo\Mere\Contracts\Lifecycle;
 
 class RoleAssignmentStrategyFactory
 {
@@ -16,12 +17,12 @@ class RoleAssignmentStrategyFactory
         }
     }
 
-    public function make(string $key): RoleAssignmentStrategy
+    public function make(string $key, Lifecycle $lifecycle): RoleAssignmentStrategy
     {
         if (!isset($this->strategies[$key])) {
             throw new InvalidArgumentException("RoleAssignmentStrategy [$key] not found.");
         }
 
-        return $this->strategies[$key];
+        return app()->make($this->strategies[$key], ['lifecycle' => $lifecycle]);
     }
 }

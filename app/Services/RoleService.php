@@ -51,7 +51,7 @@ class RoleService extends BaseService implements RoleServiceContract
         return $this->lifecycle->run(
             action: 'create',
             resource: $this->eventKey(),
-            context: ['roleId' => $role->id, 'userId' => $userId],
+            context: $this->lifecycle->context(),
             callback: fn() => $this->handleAssignRole($role, $userId, $organizationId)
         );
     }

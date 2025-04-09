@@ -14,22 +14,41 @@ use App\Enums\RegistrationIdentity;
 use App\Enums\RegistrationProfile;
 use App\Enums\RegistrationSecret;
 
+/**
+ * Resolver for registration configuration context.
+ * Determines appropriate registration settings based on organization and user context.
+ *
+ * @category App\Resolvers
+ * @package  App\Resolvers
+ * @author   John Doe <john.doe@example.com>
+ * @license  MIT https://opensource.org/licenses/MIT
+ * @link     https://github.com/your-repo
+ */
 class ConfigurationContextResolver
 {
     protected ?Organization $organization = null;
     protected ?User $user = null;
 
+    /**
+     * Initialize the resolver with required repositories and resolvers.
+     *
+     * @param OrganizationRepository  $repository        Organization repository
+     * @param SystemSettingRepository $settingRepository System settings repository
+     * @param OrganizationResolver    $resolver          Organization resolver
+     */
     public function __construct(
         protected OrganizationRepository $repository,
         protected SystemSettingRepository $settingRepository,
         protected OrganizationResolver $resolver
-    ) {}
+    ) {
+    }
 
     /**
      * Set the context organization by ID or model.
      *
-     * @param string|Organization|null $org
-     * @return $this
+     * @param string|Organization|null $organization Organization to set
+     *
+     * @return self
      */
     public function forOrg(string|Organization|null $organization): self
     {
@@ -44,6 +63,10 @@ class ConfigurationContextResolver
 
     /**
      * Optionally set the user context.
+     *
+     * @param User|null $user User to set
+     *
+     * @return self
      */
     public function forUser(?User $user): self
     {
@@ -53,7 +76,10 @@ class ConfigurationContextResolver
     }
 
     /**
-     * Full registration config from current context.
+     * Get full registration config from current context.
+     * Determines all registration settings based on current organization and user.
+     *
+     * @return RegistrationConfigData
      */
     public function registrationConfig(): RegistrationConfigData
     {
@@ -68,6 +94,9 @@ class ConfigurationContextResolver
 
     /**
      * Determine the current registration flow.
+     * Based on organization existence and user-organization relationship.
+     *
+     * @return RegistrationFlow
      */
     public function determineFlow(): RegistrationFlow
     {
@@ -83,12 +112,23 @@ class ConfigurationContextResolver
 
     /**
      * Determine the registration mode for the current org.
+     * Checks if organization requires invite codes for registration.
+     *
+     * @return RegistrationMode
      */
     public function determineMode(): RegistrationMode
     {
         return $this->organization?->registration_mode ?? RegistrationMode::INVITE_ONLY;
     }
 
+    /**
+     * Get boolean setting value from repository or config.
+     *
+     * @param string $key       Setting key
+     * @param string $configKey Config key fallback
+     *
+     * @return bool
+     */
     protected function settingBool(string $key, string $configKey): bool
     {
         $setting = $this->settingRepository->findByField('key', $key)->first();
@@ -100,6 +140,9 @@ class ConfigurationContextResolver
 
     /**
      * Determine the registration identity for the current context.
+     * Currently defaults to email-based registration.
+     *
+     * @return RegistrationIdentity
      */
     public function determineIdentity(): RegistrationIdentity
     {
@@ -108,19 +151,31 @@ class ConfigurationContextResolver
 
     /**
      * Determine the registration profile for the current context.
+     * Currently defaults to standard profile creation.
+     *
+     * @return RegistrationProfile
      */
     public function determineProfile(): RegistrationProfile
     {
         return RegistrationProfile::DEFAULT_PROFILE;
     }
+
     /**
      * Determine the registration secret for the current context.
+     * Currently defaults to password-based authentication.
+     *
+     * @return RegistrationSecret
      */
     public function determineSecret(): RegistrationSecret
     {
         return RegistrationSecret::PASSWORD;
     }
 
+    /**
+     * Get the current organization from context.
+     *
+     * @return Organization|null
+     */
     public function getOrg(): ?Organization
     {
         return $this->organization;

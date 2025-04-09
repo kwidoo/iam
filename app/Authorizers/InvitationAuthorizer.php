@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Authorization;
+namespace App\Authorizers;
 
 use App\Authorizers\RegistrationAuthorizer;
 use Kwidoo\Mere\Contracts\Authorizer;

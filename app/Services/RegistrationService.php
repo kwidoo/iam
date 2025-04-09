@@ -15,10 +15,26 @@ use Kwidoo\Mere\Contracts\MenuService;
 use App\Models\User;
 use App\Services\Traits\OnlyCreate;
 
+/**
+ * Service responsible for handling user registration process.
+ * Implements a strategy-based approach for different registration flows.
+ */
 class RegistrationService extends UserService implements RegistrationServiceContract
 {
     use OnlyCreate;
 
+    /**
+     * Initialize the registration service with required dependencies.
+     *
+     * @param MenuService                  $menuService
+     * @param UserRepository               $repository
+     * @param Lifecycle                    $lifecycle
+     * @param ContactServiceFactory        $csf
+     * @param ProfileServiceFactory        $psf
+     * @param OrganizationServiceFactory   $osf
+     * @param RegistrationStrategyResolver $selector
+     * @param ConfigurationContextResolver $context
+     */
     public function __construct(
         MenuService $menuService,
         UserRepository $repository,
@@ -33,6 +49,8 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     }
 
     /**
+     * Get the event key for registration lifecycle events.
+     *
      * @return string
      */
     protected function eventKey(): string
@@ -41,8 +59,11 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     }
 
     /**
-     * @param RegistrationData $data
+     * Register a new user with the provided registration data.
+     * Handles the complete registration flow including user creation,
+     * identity verification, profile setup, and organization association.
      *
+     * @param  RegistrationData $data
      * @return User
      */
     public function registerNewUser(RegistrationData $data): User
@@ -63,8 +84,10 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     }
 
     /**
-     * @param RegistrationData $data
+     * Prepare the registration context by setting up organization
+     * and configuration for the registration process.
      *
+     * @param  RegistrationData $data
      * @return void
      */
     protected function prepareRegistrationContext(RegistrationData $data): void
@@ -73,32 +96,36 @@ class RegistrationService extends UserService implements RegistrationServiceCont
             ->forOrg($data->orgName ?? null)
             ->registrationConfig();
 
-        $data->organization = $this->context->getOrg(); //@todo in doubt
+        $data->organization = $this->context->getOrg();
 
         $this->selector->setConfig($context);
     }
 
     /**
-     * @param RegistrationData $data
+     * Handle the complete user registration process.
+     * Creates user, sets up identity, profile and organization associations.
      *
+     * @param  RegistrationData $data
      * @return User
      */
     protected function handleRegisterNewUser(RegistrationData $data): User
     {
         $this->handleCreateUser($data);
 
-        $this->handleIdentity($data);
-
         $this->handleProfile($data);
 
         $this->handleOrganization($data);
+
+        $this->handleIdentity($data);
 
         return $data->user;
     }
 
     /**
-     * @param RegistrationData $data
+     * Create a new user based on registration data.
+     * Uses the appropriate secret strategy (OTP or password).
      *
+     * @param  RegistrationData $data
      * @return void
      */
     protected function handleCreateUser(RegistrationData $data): void
@@ -115,8 +142,9 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     }
 
     /**
-     * @param RegistrationData $data
+     * Handle user identity setup (email or phone) based on registration data.
      *
+     * @param  RegistrationData $data
      * @return void
      */
     protected function handleIdentity(RegistrationData $data): void
@@ -127,8 +155,9 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     }
 
     /**
-     * @param RegistrationData $data
+     * Handle user profile creation based on registration data.
      *
+     * @param  RegistrationData $data
      * @return void
      */
     protected function handleProfile(RegistrationData $data): void
@@ -139,8 +168,10 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     }
 
     /**
-     * @param RegistrationData $data
+     * Handle organization association for the new user.
+     * Uses the appropriate flow strategy based on registration context.
      *
+     * @param  RegistrationData $data
      * @return void
      */
     protected function handleOrganization(RegistrationData $data): void

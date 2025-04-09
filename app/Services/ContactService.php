@@ -21,10 +21,7 @@ class ContactService implements ContactServiceContract
             ->run(
                 action: 'createIdentity',
                 resource: 'identity',
-                context: [
-                    'type' => $type,
-                    'value' => $value,
-                ],
+                context: $this->lifecycle->context(),
                 callback: fn() => $this->delegate->create($type, $value)
             );
 

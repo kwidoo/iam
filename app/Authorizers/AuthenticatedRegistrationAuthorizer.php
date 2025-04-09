@@ -2,7 +2,6 @@
 
 namespace App\Authorizers;
 
-use App\Authorization\InvitationAuthorizer;
 use Illuminate\Support\Facades\Gate;
 use Kwidoo\Mere\Contracts\Authorizer;
 use Spatie\LaravelData\Data;

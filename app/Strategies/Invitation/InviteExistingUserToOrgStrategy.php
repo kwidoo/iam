@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Invitation\Strategies;
+namespace App\Strategies\Invitation;
 
 use App\Contracts\Repositories\OrganizationRepository;
 use App\Contracts\Repositories\UserRepository;
@@ -18,7 +18,8 @@ class InviteExistingUserToOrgStrategy implements InvitationStrategy
     public function __construct(
         protected OrganizationRepository $repository,
         protected UserResolver $resolver,
-    ) {}
+    ) {
+    }
 
     public function send(InvitationData $data): void
     {

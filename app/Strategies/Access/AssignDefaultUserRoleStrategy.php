@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Access\Roles;
+namespace App\Strategies\Access;
 
 use App\Contracts\Access\RoleAssignmentStrategy;
 use App\Models\User;
@@ -13,7 +13,8 @@ class AssignDefaultUserRoleStrategy implements RoleAssignmentStrategy
     public function __construct(
         protected RoleServiceFactory $factory,
         protected Lifecycle $lifecycle,
-    ) {}
+    ) {
+    }
 
     public function assign(User $user, Organization $organization): void
     {

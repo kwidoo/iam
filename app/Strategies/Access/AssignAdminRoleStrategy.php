@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Access\Roles;
+namespace App\Strategies\Access;
 
 use App\Contracts\Access\RoleAssignmentStrategy;
 use App\Models\User;
@@ -18,7 +18,6 @@ class AssignAdminRoleStrategy implements RoleAssignmentStrategy
     public function assign(User $user, Organization $organization): void
     {
         $slug = $organization->slug;
-
         $roleService = $this->factory->make($this->lifecycle->withoutAuth());
         $role = $roleService->getByName("{$slug}-admin", $organization->id);
         $roleService->assignRole($role, $user->id, $organization->id);

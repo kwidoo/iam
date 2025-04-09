@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Aggregates\RegistrationAggregate;
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\Services\{
     OrganizationService as OrganizationServiceContract,
@@ -13,6 +14,7 @@ use App\Contracts\Services\{
     ProfileService as ProfileServiceContract,
     UserService as UserServiceContract,
 };
+use App\Factories\AccessAssignmentFactory;
 use App\Services\{
     OrganizationService,
     RoleService,
@@ -23,6 +25,7 @@ use App\Services\{
     ProfileService,
     UserService,
 };
+use Kwidoo\Mere\Contracts\Aggregate;
 
 class ServiceBindingServiceProvider extends ServiceProvider
 {
@@ -36,5 +39,7 @@ class ServiceBindingServiceProvider extends ServiceProvider
         $this->app->bind(RegistrationServiceContract::class, RegistrationService::class);
         $this->app->bind(ProfileServiceContract::class, ProfileService::class);
         $this->app->bind(UserServiceContract::class, UserService::class);
+
+        $this->app->bind(Aggregate::class, RegistrationAggregate::class);
     }
 }

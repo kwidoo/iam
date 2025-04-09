@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Access\Permissions;
+namespace App\Strategies\Access;
 
 use App\Contracts\Access\PermissionAssignmentStrategy;
 use App\Models\User;
@@ -13,7 +13,8 @@ class GrantDefaultUserPermissionStrategy implements PermissionAssignmentStrategy
     public function __construct(
         protected PermissionServiceFactory $factory,
         protected Lifecycle $lifecycle,
-    ) {}
+    ) {
+    }
 
     public function assign(User $user, Organization $organization): void
     {

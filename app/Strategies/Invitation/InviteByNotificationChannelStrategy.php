@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Invitation\Strategies;
+namespace App\Strategies\Invitation;
 
 use App\Contracts\Repositories\InvitationRepository;
 use App\Contracts\Services\InvitationStrategy;
@@ -15,19 +15,22 @@ class InviteByNotificationChannelStrategy implements InvitationStrategy
 {
     public function __construct(
         protected InvitationRepository $invitationRepository,
-    ) {}
+    ) {
+    }
 
     public function send(InvitationData $data): void
     {
         $token = Str::uuid()->toString();
 
-        $invitation = $this->invitationRepository->create([
+        $invitation = $this->invitationRepository->create(
+            [
             'method' => $data->method,
             'value' => $data->value,
             'token' => $token,
             'organization_id' => $data->organizationId,
             'role' => $data->role,
-        ]);
+            ]
+        );
 
         Notification::route($data->method, $data->value)
             ->notify(new GenericInvitationNotification($invitation));
