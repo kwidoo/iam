@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b01c2d32bbdd82e39919388a988c55b3",
+    "content-hash": "bb8912823f00ae4e5a2298ab06551425",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2433,7 +2433,7 @@
             "dist": {
                 "type": "path",
                 "url": "./packages/laravel-contacts",
-                "reference": "4ffbcd9f6fff027c7131d6870558cb995bb4acbd"
+                "reference": "d42de315dcd8938b9579cbd70b0b78065734f0fb"
             },
             "require": {
                 "illuminate/database": "^12.0",
@@ -2511,7 +2511,7 @@
             "dist": {
                 "type": "path",
                 "url": "./packages/mere",
-                "reference": "2fdc8e290f96345ed5241e57ab0fbb3d56e1d9af"
+                "reference": "a8759db206653f6257dc76341945b8c179577f07"
             },
             "require": {
                 "kalnoy/nestedset": "^6.0",
@@ -2577,20 +2577,20 @@
         },
         {
             "name": "kwidoo/passport-multiauth",
-            "version": "1.0.9",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kwidoo/passport-multiauth.git",
-                "reference": "e96d2193d89e5d670acd9ceacc71f015bbd77151"
+                "reference": "c930e859b992fc40361a032ebf0eb235d1339412"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kwidoo/passport-multiauth/zipball/e96d2193d89e5d670acd9ceacc71f015bbd77151",
-                "reference": "e96d2193d89e5d670acd9ceacc71f015bbd77151",
+                "url": "https://api.github.com/repos/kwidoo/passport-multiauth/zipball/c930e859b992fc40361a032ebf0eb235d1339412",
+                "reference": "c930e859b992fc40361a032ebf0eb235d1339412",
                 "shasum": ""
             },
             "require": {
-                "kwidoo/sms-verification": "1.1.1",
+                "kwidoo/sms-verification": "^1.1.1",
                 "laravel/passport": "^12.0",
                 "php": "^8.2"
             },
@@ -2633,9 +2633,9 @@
             ],
             "support": {
                 "issues": "https://github.com/kwidoo/passport-multiauth/issues",
-                "source": "https://github.com/kwidoo/passport-multiauth/tree/1.0.9"
+                "source": "https://github.com/kwidoo/passport-multiauth/tree/1.2.0"
             },
-            "time": "2025-03-25T12:59:47+00:00"
+            "time": "2025-04-10T13:01:47+00:00"
         },
         {
             "name": "kwidoo/sms-verification",

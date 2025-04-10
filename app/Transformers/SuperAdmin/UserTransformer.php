@@ -27,6 +27,9 @@ class UserTransformer extends TransformerAbstract
     {
         return [
             'id' => $user->id,
+            'name' => $user->profile()->first()->full_name,
+            'email' => $user->primaryContact->value,
+            'createdAt' => $user->created_at,
             'login' => [
                 'id' => $user->primaryContact->uuid,
                 'value' => $user->primaryContact->value,

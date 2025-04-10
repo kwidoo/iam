@@ -10,6 +10,7 @@ use Kwidoo\Mere\Contracts\MenuService;
 use Kwidoo\Mere\Data\ShowQueryData;
 use Illuminate\Database\Eloquent\Model;
 use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Mere\Data\ListQueryData;
 
 class UserService extends BaseService implements UserServiceContract
 {
@@ -26,11 +27,23 @@ class UserService extends BaseService implements UserServiceContract
         return 'user';
     }
     /**
+     * @param ListQueryData $query
+     *
+     * @return mixed
+     */
+    public function list(ListQueryData $query)
+    {
+        $query->presenter = UserPresenter::class;
+        $query->with = ['roles', 'organizations.profiles'];
+
+        return parent::list($query);
+    }
+    /**
      * @param ShowQueryData $query
      *
      * @return Model
      */
-    public function getById(ShowQueryData $query): Model
+    public function getById(ShowQueryData $query): Model|array
     {
         $query->presenter = UserPresenter::class;
         $query->with = ['roles', 'organizations.profiles'];
