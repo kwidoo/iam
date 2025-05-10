@@ -8,7 +8,7 @@ use App\Data\AccessAssignmentData;
 use App\Factories\RoleAssignmentStrategyFactory;
 use App\Factories\PermissionAssignmentStrategyFactory;
 use App\Enums\RegistrationFlow;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 
 class AccessAssignmentStrategyResolver
 {

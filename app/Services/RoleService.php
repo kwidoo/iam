@@ -6,10 +6,12 @@ use App\Contracts\Services\RoleService as RoleServiceContract;
 use App\Contracts\Repositories\RoleRepository;
 use App\Contracts\Repositories\UserRepository;
 use App\Models\User;
+use App\Services\Base\BaseService;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Kwidoo\Mere\Contracts\Lifecycle;
-use Kwidoo\Mere\Services\BaseService;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Kwidoo\Lifecycle\Data\LifecycleData;
+use Kwidoo\Lifecycle\Data\LifecycleOptionsData;
 use Kwidoo\Mere\Contracts\MenuService;
 use Spatie\Permission\Contracts\Role;
 
@@ -43,22 +45,35 @@ class RoleService extends BaseService implements RoleServiceContract
     /**
      * @param Role $role
      * @param string $userId
+     * @param string $organizationId
      *
      * @return mixed
      */
     public function assignRole(Role $role, string $userId, string $organizationId): mixed
     {
-        return $this->lifecycle->run(
+        $data = new LifecycleData(
             action: 'create',
             resource: $this->eventKey(),
-            context: $this->lifecycle->context(),
-            callback: fn() => $this->handleAssignRole($role, $userId, $organizationId)
+            context: [
+                'role' => $role,
+                'userId' => $userId,
+                'organizationId' => $organizationId
+            ]
+        );
+
+        return $this->lifecycle->run(
+            $data,
+            function () use ($role, $userId, $organizationId) {
+                return $this->handleAssignRole($role, $userId, $organizationId);
+            },
+            $this->options
         );
     }
 
     /**
      * @param Role $role
      * @param string $userId
+     * @param string $organizationId
      *
      * @return User
      */

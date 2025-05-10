@@ -4,7 +4,7 @@ namespace App\Factories;
 
 use App\Contracts\Access\RoleAssignmentStrategy;
 use InvalidArgumentException;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 
 class RoleAssignmentStrategyFactory
 {

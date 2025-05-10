@@ -10,7 +10,10 @@ use App\Factories\OrganizationServiceFactory;
 use App\Factories\ProfileServiceFactory;
 use App\Resolvers\RegistrationStrategyResolver;
 use App\Factories\ContactServiceFactory;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use App\Services\Base\BaseService;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Kwidoo\Lifecycle\Data\LifecycleData;
+use Kwidoo\Lifecycle\Data\LifecycleOptionsData;
 use Kwidoo\Mere\Contracts\MenuService;
 use App\Models\User;
 use App\Services\Traits\OnlyCreate;
@@ -19,7 +22,7 @@ use App\Services\Traits\OnlyCreate;
  * Service responsible for handling user registration process.
  * Implements a strategy-based approach for different registration flows.
  */
-class RegistrationService extends UserService implements RegistrationServiceContract
+class RegistrationService extends BaseService implements RegistrationServiceContract
 {
     use OnlyCreate;
 
@@ -38,7 +41,7 @@ class RegistrationService extends UserService implements RegistrationServiceCont
     public function __construct(
         MenuService $menuService,
         UserRepository $repository,
-        protected Lifecycle $lifecycle,
+        Lifecycle $lifecycle,
         protected ContactServiceFactory $csf,
         protected ProfileServiceFactory $psf,
         protected OrganizationServiceFactory $osf,
@@ -71,16 +74,22 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         $this->prepareRegistrationContext($data);
 
         $resource = $data->organization?->registration_mode->isInviteOnly()
-            ? $this->eventKey($data) . '-invite'
+            ? $this->eventKey() . '-invite'
             : $this->eventKey();
 
-        return $this->lifecycle
-            ->run(
-                action: 'registerNewUser',
-                resource: $resource,
-                context: $data,
-                callback: fn() => $this->handleRegisterNewUser($data),
-            );
+        $lifecycleData = new LifecycleData(
+            action: 'registerNewUser',
+            resource: $resource,
+            context: $data
+        );
+
+        return $this->lifecycle->run(
+            $lifecycleData,
+            function () use ($data) {
+                return $this->handleRegisterNewUser($data);
+            },
+            $this->options
+        );
     }
 
     /**
@@ -133,11 +142,20 @@ class RegistrationService extends UserService implements RegistrationServiceCont
         $strategy = $this->selector->resolve('secret', NullService::class);
         $strategy->create($data);
 
-        $data->user = $this->lifecycle->withoutTrx()->withoutAuth()->run(
-            'create',
-            $this->eventKey(),
-            $data,
+        $lifecycleData = new LifecycleData(
+            action: 'create',
+            resource: $this->eventKey(),
+            context: $data
+        );
+
+        $noTrxNoAuthOptions = $this->options
+            ->withoutTrx()
+            ->withoutAuth();
+
+        $data->user = $this->lifecycle->run(
+            $lifecycleData,
             fn() => $this->handleCreate($data->toArray()),
+            $noTrxNoAuthOptions
         );
     }
 
@@ -149,7 +167,7 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleIdentity(RegistrationData $data): void
     {
-        $contactService = $this->csf->make($data->user, $this->lifecycle->withoutTrx());
+        $contactService = $this->csf->make($data->user, $this->lifecycle);
         $identity = $this->selector->resolve('identity', $contactService);
         $identity->create($data);
     }
@@ -162,7 +180,7 @@ class RegistrationService extends UserService implements RegistrationServiceCont
      */
     protected function handleProfile(RegistrationData $data): void
     {
-        $profileService = $this->psf->make($data->user, $this->lifecycle->withoutTrx());
+        $profileService = $this->psf->make($data->user, $this->lifecycle);
         $strategy = $this->selector->resolve('profile', $profileService);
         $strategy->create($data);
     }
@@ -183,8 +201,19 @@ class RegistrationService extends UserService implements RegistrationServiceCont
 
         $this->selector->setConfig($context);
 
-        $organizationService = $this->osf->make($this->lifecycle->withoutTrx());
+        $organizationService = $this->osf->make($this->lifecycle);
         $strategy = $this->selector->resolve('flow', $organizationService);
         $strategy->create($data);
+    }
+
+    /**
+     * Handle the creation of a new resource.
+     *
+     * @param array $data The data for creating the new resource
+     * @return mixed The newly created resource
+     */
+    protected function handleCreate(array $data): mixed
+    {
+        return $this->repository->create($data);
     }
 }

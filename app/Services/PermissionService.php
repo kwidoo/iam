@@ -6,10 +6,11 @@ use App\Contracts\Services\PermissionService as PermissionServiceContract;
 use App\Contracts\Repositories\PermissionRepository;
 use App\Contracts\Repositories\UserRepository;
 use App\Models\User;
+use App\Services\Base\BaseService;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Kwidoo\Mere\Contracts\Lifecycle;
-use Kwidoo\Mere\Services\BaseService;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Kwidoo\Lifecycle\Data\LifecycleData;
 use Kwidoo\Mere\Contracts\MenuService;
 use Spatie\Permission\Contracts\Permission;
 
@@ -42,11 +43,22 @@ class PermissionService extends BaseService implements PermissionServiceContract
 
     public function givePermission(Permission $permission, string $userId, string $organizationId): mixed
     {
-        return $this->lifecycle->run(
+        $data = new LifecycleData(
             action: 'assign',
             resource: $this->eventKey(),
-            context: $this->lifecycle->context(),
-            callback: fn() => $this->handleGivePermission($permission, $userId, $organizationId)
+            context: [
+                'permission' => $permission,
+                'userId' => $userId,
+                'organizationId' => $organizationId
+            ]
+        );
+
+        return $this->lifecycle->run(
+            $data,
+            function () use ($permission, $userId, $organizationId) {
+                return $this->handleGivePermission($permission, $userId, $organizationId);
+            },
+            $this->options
         );
     }
 

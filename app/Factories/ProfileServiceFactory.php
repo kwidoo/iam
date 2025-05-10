@@ -4,7 +4,7 @@ namespace App\Factories;
 
 use App\Contracts\Services\ProfileService;
 use App\Models\User;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 
 class ProfileServiceFactory
 {

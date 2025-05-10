@@ -3,17 +3,19 @@
 namespace App\Factories;
 
 use App\Contracts\Services\PermissionService;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 
 class PermissionServiceFactory
 {
     public function __construct(
         protected Lifecycle $defaultLifecycle,
     ) {}
+
     /**
-     * Create an instance of RoleService.
+     * Create an instance of PermissionService.
      *
-     * @return RoleService
+     * @param Lifecycle|null $lifecycle
+     * @return PermissionService
      */
     public function make(?Lifecycle $lifecycle = null): PermissionService
     {

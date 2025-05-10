@@ -4,14 +4,15 @@ namespace App\Services;
 
 use App\Contracts\Repositories\InvitationRepository;
 use App\Contracts\Services\InvitationService as InvitationServiceContract;
-use Kwidoo\Mere\Contracts\Lifecycle;
-use Kwidoo\Mere\Contracts\MenuService;
-use Kwidoo\Mere\Services\BaseService;
-use App\Models\User;
 use App\Data\InvitationData;
 use App\Data\InvitationAcceptanceData;
 use App\Data\InvitationConfigData;
 use App\Factories\InvitationStrategyFactory;
+use App\Models\User;
+use App\Services\Base\BaseService;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Kwidoo\Lifecycle\Data\LifecycleData;
+use Kwidoo\Mere\Contracts\MenuService;
 
 class InvitationService extends BaseService implements InvitationServiceContract
 {
@@ -21,9 +22,9 @@ class InvitationService extends BaseService implements InvitationServiceContract
         Lifecycle $lifecycle,
         protected InvitationStrategyFactory $factory,
     ) {
-
         parent::__construct($menuService, $repository, $lifecycle);
     }
+
     protected function eventKey(): string
     {
         return 'invitation';
@@ -31,25 +32,36 @@ class InvitationService extends BaseService implements InvitationServiceContract
 
     public function send(InvitationData $data): void
     {
-        $this->lifecycle
-            ->run(
-                action: 'sendInvite',
-                resource: $this->eventKey(),
-                context: $data,
-                callback: fn() => $this->handleSend($data),
-            );
+        $lifecycleData = new LifecycleData(
+            action: 'sendInvite',
+            resource: $this->eventKey(),
+            context: $data
+        );
+
+        $this->lifecycle->run(
+            $lifecycleData,
+            function () use ($data) {
+                $this->handleSend($data);
+            },
+            $this->options
+        );
     }
 
     public function accept(InvitationAcceptanceData $data): User
     {
-        return $this->lifecycle
-            ->withoutAuth()
-            ->run(
-                action: 'acceptInvite',
-                resource: $this->eventKey(),
-                context: $data,
-                callback: fn() => $this->handleAccept($data),
-            );
+        $lifecycleData = new LifecycleData(
+            action: 'acceptInvite',
+            resource: $this->eventKey(),
+            context: $data
+        );
+
+        return $this->lifecycle->run(
+            $lifecycleData,
+            function () use ($data) {
+                return $this->handleAccept($data);
+            },
+            $this->options->withoutAuth()
+        );
     }
 
     protected function handleSend(InvitationData $data): void

@@ -6,20 +6,25 @@ use App\Contracts\Access\PermissionAssignmentStrategy;
 use App\Models\User;
 use App\Models\Organization;
 use App\Factories\PermissionServiceFactory;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Kwidoo\Lifecycle\Data\LifecycleOptionsData;
 
 class GrantAdminPermissionStrategy implements PermissionAssignmentStrategy
 {
+    protected LifecycleOptionsData $options;
+
     public function __construct(
         protected PermissionServiceFactory $factory,
         protected Lifecycle $lifecycle,
     ) {
+        $this->options = new LifecycleOptionsData();
     }
 
     public function assign(User $user, Organization $organization): void
     {
         $slug = $organization->slug;
-        $permissionService = $this->factory->make($this->lifecycle->withoutAuth());
+        $options = $this->options->withoutAuth();
+        $permissionService = $this->factory->make($this->lifecycle);
         $permission = $permissionService->getByName("{$slug}-admin", $organization->id);
         $permissionService->givePermission($permission, $user->id, $organization->id);
     }

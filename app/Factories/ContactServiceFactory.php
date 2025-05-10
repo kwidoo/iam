@@ -5,7 +5,7 @@ namespace App\Factories;
 use App\Services\ContactService;
 use Kwidoo\Contacts\Contracts\Contactable;
 use Kwidoo\Contacts\Contracts\ContactServiceFactory as BaseContractServiceFactory;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 
 class ContactServiceFactory
 {

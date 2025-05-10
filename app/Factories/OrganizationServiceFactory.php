@@ -3,7 +3,7 @@
 namespace App\Factories;
 
 use App\Contracts\Services\OrganizationService;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 use App\Models\User;
 
 class OrganizationServiceFactory

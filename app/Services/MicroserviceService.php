@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Contracts\Services\MicroserviceService as MicroserviceServiceContract;
 use App\Contracts\Repositories\MicroserviceRepository;
-use Kwidoo\Mere\Contracts\Lifecycle;
-use Kwidoo\Mere\Services\BaseService;
+use App\Services\Base\BaseService;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 use Kwidoo\Mere\Contracts\MenuService;
 
 class MicroserviceService extends BaseService implements MicroserviceServiceContract

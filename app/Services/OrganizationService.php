@@ -9,9 +9,10 @@ use App\Data\AccessAssignmentData;
 use App\Data\RegistrationData;
 use App\Models\Organization;
 use App\Resolvers\AccessAssignmentStrategyResolver;
-use Kwidoo\Mere\Contracts\Lifecycle;
+use App\Services\Base\BaseService;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Kwidoo\Lifecycle\Data\LifecycleData;
 use Kwidoo\Mere\Contracts\MenuService;
-use Kwidoo\Mere\Services\BaseService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Kwidoo\Mere\Contracts\AccessAssignmentFactory;
@@ -29,10 +30,8 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
         protected AccessAssignmentFactory $factory,
         protected AccessAssignmentStrategyResolver $aasr,
         protected OrgRoleInitializerService $orgRoleInitializer,
-
     ) {
         parent::__construct($menuService, $repository, $lifecycle);
-
         $this->organization = $this->repository->findByField('slug', $slug)->first();
     }
 
@@ -43,22 +42,60 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
     public function createDefaultForUser(RegistrationData $data): Organization
     {
-        $this->lifecycle = $this->lifecycle->withoutAuth();
+        // Set options for this operation
+        $authDisabledOptions = $this->options->withoutAuth();
 
         $slug = $this->generateSlug();
 
-        $this->organization = $this->create([
-            'name' => "{$data->fname} {$data->lname} organization",
-            'slug' => $slug,
-            'owner_id' => $data->user->id,
-            //   'role' => 'owner',
-        ]);
+        // Create lifecycle data for creating organization
+        $createLifecycleData = new LifecycleData(
+            action: 'create',
+            resource: $this->eventKey(),
+            context: [
+                'name' => "{$data->fname} {$data->lname} organization",
+                'slug' => $slug,
+                'owner_id' => $data->user->id,
+            ]
+        );
 
+        // Create the organization with the new lifecycle
+        $this->organization = $this->lifecycle->run(
+            $createLifecycleData,
+            function () use ($data, $slug) {
+                return $this->handleCreate([
+                    'name' => "{$data->fname} {$data->lname} organization",
+                    'slug' => $slug,
+                    'owner_id' => $data->user->id,
+                ]);
+            },
+            $authDisabledOptions
+        );
 
         $this->attachToOrganization($data);
         $this->attachToProfile($data);
 
-        $this->orgRoleInitializer->createDefaults($this->organization, $data, $this->lifecycle);
+        // Create lifecycle data for creating default roles
+        $rolesLifecycleData = new LifecycleData(
+            action: 'createDefaults',
+            resource: $this->eventKey(),
+            context: [
+                'organization' => $this->organization,
+                'data' => $data
+            ]
+        );
+
+        // Initialize roles with the new lifecycle
+        $this->lifecycle->run(
+            $rolesLifecycleData,
+            function () use ($data) {
+                $this->orgRoleInitializer->createDefaults(
+                    $this->organization,
+                    $data,
+                    $this->lifecycle
+                );
+            },
+            $authDisabledOptions
+        );
 
         $this->provideAccess($this->factory->resolve()->resolve($data));
 
@@ -72,7 +109,9 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
      */
     public function loadDefault(RegistrationData $data): Organization
     {
-        $this->lifecycle = $this->lifecycle->withoutAuth();
+        // Set options for this operation
+        $authDisabledOptions = $this->options->withoutAuth();
+
         $this->organization = $this->repository->findByField('slug', 'main')->first();
 
         if ($this->organization) {
@@ -89,7 +128,8 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
     public function connectToExistingOrg(RegistrationData $data): Organization
     {
-        $this->lifecycle = $this->lifecycle->withoutAuth();
+        // Set options for this operation
+        $authDisabledOptions = $this->options->withoutAuth();
 
         $this->organization = $data->organization;
 
@@ -114,17 +154,36 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
      */
     public function createInitialOrganization(RegistrationData $data): Organization
     {
-        $this->lifecycle = $this->lifecycle->withoutAuth();
+        // Set options for this operation
+        $authDisabledOptions = $this->options->withoutAuth();
 
         if ($data->organization) {
             return $data->organization;
         }
 
-        $this->organization = $this->create([
-            'name' => 'main',
-            'slug' => 'main',
-            'owner_id' => $data->user->id,
-        ]);
+        // Create lifecycle data for creating initial organization
+        $createLifecycleData = new LifecycleData(
+            action: 'create',
+            resource: $this->eventKey(),
+            context: [
+                'name' => 'main',
+                'slug' => 'main',
+                'owner_id' => $data->user->id,
+            ]
+        );
+
+        // Create the initial organization with the new lifecycle
+        $this->organization = $this->lifecycle->run(
+            $createLifecycleData,
+            function () use ($data) {
+                return $this->handleCreate([
+                    'name' => 'main',
+                    'slug' => 'main',
+                    'owner_id' => $data->user->id,
+                ]);
+            },
+            $authDisabledOptions
+        );
 
         $this->attachToOrganization($data);
         $this->attachToProfile($data);
@@ -159,8 +218,22 @@ class OrganizationService extends BaseService implements OrganizationServiceCont
 
     protected function provideAccess(AccessAssignmentData $context): void
     {
-        [$roleStrategy, $permissionStrategy] = $this->aasr->resolve($context, $this->lifecycle);
-        $roleStrategy->assign($context->user, $this->organization);
-        $permissionStrategy->assign($context->user, $this->organization);
+        // Create lifecycle data for providing access
+        $accessLifecycleData = new LifecycleData(
+            action: 'provideAccess',
+            resource: $this->eventKey(),
+            context: $context
+        );
+
+        // Assign roles and permissions through the new lifecycle
+        $this->lifecycle->run(
+            $accessLifecycleData,
+            function () use ($context) {
+                [$roleStrategy, $permissionStrategy] = $this->aasr->resolve($context, $this->lifecycle);
+                $roleStrategy->assign($context->user, $this->organization);
+                $permissionStrategy->assign($context->user, $this->organization);
+            },
+            $this->options
+        );
     }
 }
