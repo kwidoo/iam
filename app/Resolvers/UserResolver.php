@@ -2,6 +2,7 @@
 
 namespace App\Resolvers;
 
+use App\Criteria\ByContact;
 use App\Models\User;
 use Kwidoo\Contacts\Contracts\ContactRepository;
 
@@ -11,11 +12,16 @@ class UserResolver
         protected ContactRepository $repository,
     ) {}
 
-    public function resolve($identity, $value): ?User
+    /**
+     * @param mixed $identity
+     * @param mixed $value
+     *
+     * @return User|null
+     */
+    public function resolve(string $identity, string $value): ?User
     {
         return $this->repository
-            ->where('value', $value)
-            ->where('type', $identity)
+            ->pushCriteria(new ByContact($value, $identity))
             ->first()
             ?->contactable;
     }
