@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Resolvers;
+namespace App\Resolvers\Organizations;
 
-use App\Contracts\Repositories\OrganizationRepository;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
+use Kwidoo\Mere\Contracts\Repositories\OrganizationRepository;
 use App\Contracts\Resolvers\OrganizationResolver;
 use App\Enums\RegistrationFlow;
-use App\Models\Organization;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -13,28 +13,25 @@ class ConsoleOrganizationResolver implements OrganizationResolver
 {
     protected ?RegistrationFlow $flow = null;
 
-    public function __construct(protected OrganizationRepository $repository,)
-    {
+    public function __construct(
+        protected OrganizationRepository $repository,
+    ) {
         if (!app()->runningInConsole()) {
             throw new RuntimeException('This resolver is only for console commands.');
         }
     }
 
     /**
-     *
-     * Resolve the organization based on the provided context.
-     *
      * @param string|null $name
-     * @return Organization|null
+     * @return \App\Models\Organization|null
      * @throws InvalidArgumentException
      */
-    public function resolve(?string $name = null): ?Organization
+    public function resolve(?string $name = null): ?OrganizationInterface
     {
-        dump($this->flow);
         if ($this->flow === RegistrationFlow::MAIN_ONLY) {
             return $this->repository->getMainOrganization();
         }
-        if ($this->flow === RegistrationFlow::USER_JOINS_USER_ORG && $name === null) {
+        if ($this->flow === RegistrationFlow::USER_JOINS_USER_ORG && $name !== null) {
             return $this->repository
                 ->where('slug', $name)
                 ->orWhere('id', $name)

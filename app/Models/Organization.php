@@ -11,8 +11,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
 
-class Organization extends Model
+class Organization extends Model implements OrganizationInterface
 {
     use HasFactory;
     use HasUuids;
@@ -82,6 +83,17 @@ class Organization extends Model
         return $this->belongsToMany(User::class, 'organization_user')
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    /**
+     * Check if a user belongs to this organization
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function hasUser(User $user): bool
+    {
+        return $this->users()->where('users.id', $user->id)->exists();
     }
 
     /** One-to-many relationship with invitations.

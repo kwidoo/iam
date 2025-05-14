@@ -4,9 +4,9 @@ namespace App\Repositories;
 
 use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
-use App\Contracts\Repositories\OrganizationRepository;
-use App\Models\Organization;
+use Kwidoo\Mere\Contracts\Repositories\OrganizationRepository;
 use App\Validators\OrganizationValidator;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
 use Kwidoo\Mere\Repositories\RepositoryEloquent;
 
 /**
@@ -23,7 +23,7 @@ class OrganizationRepositoryEloquent extends RepositoryEloquent implements Organ
      */
     public function model()
     {
-        return Organization::class;
+        return OrganizationInterface::class;
     }
 
 
@@ -36,7 +36,7 @@ class OrganizationRepositoryEloquent extends RepositoryEloquent implements Organ
         $this->pushCriteria(app(RequestCriteria::class));
     }
 
-    public function getMainOrganization(): ?Organization
+    public function getMainOrganization(): ?OrganizationInterface
     {
         return $this->where('slug', 'main')->first();
     }

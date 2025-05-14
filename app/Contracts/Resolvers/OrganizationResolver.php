@@ -2,10 +2,9 @@
 
 namespace App\Contracts\Resolvers;
 
-use App\Enums\RegistrationFlow;
-use App\Models\Organization;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
 
 interface OrganizationResolver
 {
-    public function resolve(?string $input = null): ?Organization;
+    public function resolve(?string $input = null): ?OrganizationInterface;
 }

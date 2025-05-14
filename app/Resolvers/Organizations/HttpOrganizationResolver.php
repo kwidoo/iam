@@ -2,11 +2,11 @@
 
 namespace App\Resolvers;
 
-use App\Contracts\Repositories\OrganizationRepository;
-use App\Contracts\Repositories\SystemSettingRepository;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
+use Kwidoo\Mere\Contracts\Repositories\OrganizationRepository;
+use Kwidoo\Mere\Contracts\Repositories\SystemSettingRepository;
 use App\Contracts\Resolvers\OrganizationResolver;
 use App\Enums\RegistrationFlow;
-use App\Models\Organization;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use RuntimeException;
@@ -27,10 +27,10 @@ class HttpOrganizationResolver implements OrganizationResolver
      * Resolve the organization based on the provided name or request context.
      *
      * @param string|null $name
-     * @return Organization|null
+     * @return \App\Models\Organization|null
      * @throws InvalidArgumentException
      */
-    public function resolve(?string $name = null): ?Organization
+    public function resolve(?string $name = null): ?OrganizationInterface
     {
         if ($this->settingBool('registration.force_main_org', 'iam.defaults.force_main_org') === RegistrationFlow::MAIN_ONLY) {
             return $this->repository->getMainOrganization();
