@@ -12,24 +12,24 @@ namespace App\Enums;
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/your-repo
  */
-enum RegistrationFlow: string
+enum OrganizationFlow: string
 {
-    /**
+/**
      * User registers without organization association
      */
     case MAIN_ONLY = 'main_only';
 
-    /**
+/**
      * User creates a new organization during registration
      */
     case USER_CREATES_ORG = 'user_creates_org';
 
-    /**
+/**
      * User joins an existing organization during registration
      */
     case USER_JOINS_USER_ORG = 'user_joins_user_org';
 
-    /**
+/**
      * Initial system bootstrap registration
      */
     case INITIAL_BOOTSTRAP = 'initial_bootstrap';

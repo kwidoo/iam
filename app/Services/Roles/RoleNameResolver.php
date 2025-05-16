@@ -14,10 +14,10 @@ class RoleNameResolver
      */
     public function resolve(string $role, string $organizationSlug, ?string $action = null): string
     {
-        $name = "{$organizationSlug}.{$role}";
+        $name = "{$organizationSlug}:{$role}";
 
         if ($action) {
-            $name .= ".{$action}";
+            $name .= ":{$action}";
         }
 
         return $name;

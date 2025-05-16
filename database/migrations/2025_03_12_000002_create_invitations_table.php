@@ -13,8 +13,8 @@ class CreateInvitationsTable extends Migration
             $table->uuid('organization_id');
             $table->uuid('invited_by'); // The user who sent the invite.
             // Selectable contact options: email, phone, or code.
-            $table->enum('contact_type', ['email', 'phone', 'code']);
-            $table->string('contact_value');
+            $table->enum('type', ['email', 'phone', 'code']);
+            $table->string('value');
             $table->string('token')->unique();
             $table->timestamp('expires_at')->nullable();
             $table->timestamp('accepted_at')->nullable();

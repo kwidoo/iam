@@ -2,75 +2,77 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Contracts\Resolvers\OrganizationResolver;
-use App\Resolvers\{
-    ConsoleOrganizationResolver,
-    HttpOrganizationResolver,
-    RegistrationStrategyResolver,
-};
+use App\Contracts\Services\ProfileService;
+use Illuminate\Support\ServiceProvider;
+
 use App\Enums\{
     RegistrationIdentity,
-    RegistrationFlow,
+    OrganizationFlow,
+    OrganizationMode,
     RegistrationProfile,
     RegistrationSecret,
 };
-use App\Strategies\{
-    Identity\EmailIdentityStrategy,
-    Identity\PhoneIdentityStrategy,
-    Password\WithOTP,
-    Password\WithPassword,
-    Organization\MainOnlyStrategy,
-    Organization\UserCreatesOrgStrategy,
-    Organization\InitialBootstrapStrategy,
-    Organization\UserJoinsUserOrgStrategy,
-    Profile\ProfileStrategy,
-};
+use App\Resolvers\Organizations\CreateOrganizationStrategyResolver;
+use App\Resolvers\Organizations\HttpOrganizationResolver;
+use App\Resolvers\Organizations\ConsoleOrganizationResolver;
+use App\Resolvers\Registration\RegistrationStrategyResolver;
+use App\Services\Organizations\InitialBootstrap;
+use App\Services\Organizations\MainOnly;
+use App\Services\Organizations\UserCreatesOrg;
+use App\Services\Organizations\UserJoinsUserOrg;
+use App\Services\Registration\Identity\EmailIdentity;
+use App\Services\Registration\Identity\PhoneIdentity;
+use App\Services\Registration\Password\WithOTP;
+use App\Services\Registration\Password\WithPassword;
 
-/**
- * Service provider for registration strategy resolvers.
- * Registers and configures strategy resolvers for different registration aspects.
- *
- * @category App\Providers
- * @package  App\Providers
- * @author   John Doe <john.doe@example.com>
- * @license  MIT https://opensource.org/licenses/MIT
- * @link     https://github.com/your-repo
- */
 class ResolverServiceProvider extends ServiceProvider
 {
-    /**
-     * Register services in the container.
-     * Sets up strategy resolvers for identity, flow, profile, and secret handling.
-     *
-     * @return void
-     */
     public function register(): void
     {
+        // possible registration strategies:
         $this->app->singleton(
-            RegistrationStrategyResolver::class, function () {
+            RegistrationStrategyResolver::class,
+            function ($app) {
                 return new RegistrationStrategyResolver(
-                    identityStrategies: [
-                    RegistrationIdentity::EMAIL->value => EmailIdentityStrategy::class,
-                    RegistrationIdentity::PHONE->value => PhoneIdentityStrategy::class,
+                    container: $app,
+                    identityServices: [
+                        RegistrationIdentity::EMAIL->value => EmailIdentity::class,
+                        RegistrationIdentity::PHONE->value => PhoneIdentity::class,
                     ],
-                    flowStrategies: [
-                    RegistrationFlow::MAIN_ONLY->value => MainOnlyStrategy::class,
-                    RegistrationFlow::USER_CREATES_ORG->value => UserCreatesOrgStrategy::class,
-                    RegistrationFlow::INITIAL_BOOTSTRAP->value => InitialBootstrapStrategy::class,
-                    RegistrationFlow::USER_JOINS_USER_ORG->value => UserJoinsUserOrgStrategy::class,
+                    flowServices: [
+                        OrganizationFlow::MAIN_ONLY->value => MainOnly::class,
+                        OrganizationFlow::USER_CREATES_ORG->value => UserCreatesOrg::class,
+                        OrganizationFlow::INITIAL_BOOTSTRAP->value => InitialBootstrap::class,
+                        OrganizationFlow::USER_JOINS_USER_ORG->value => UserJoinsUserOrg::class,
                     ],
-                    profileStrategies: [
-                    RegistrationProfile::DEFAULT_PROFILE->value => ProfileStrategy::class,
+                    profileServices: [
+                        RegistrationProfile::DEFAULT_PROFILE->value => ProfileService::class,
                     ],
-                    secretStrategies: [
-                    RegistrationSecret::PASSWORD->value => WithPassword::class,
-                    RegistrationSecret::OTP->value => WithOTP::class,
+                    secretServices: [
+                        RegistrationSecret::PASSWORD->value => WithPassword::class,
+                        RegistrationSecret::OTP->value => WithOTP::class,
                     ],
-                    modeStrategies: []
+                    modeServices: []
                 );
             }
         );
+
+        $this->app->singleton(CreateOrganizationStrategyResolver::class, function ($app) {
+            return new CreateOrganizationStrategyResolver(
+                container: $app,
+                flowServices: [
+                    OrganizationFlow::MAIN_ONLY->value => MainOnly::class,
+                    OrganizationFlow::USER_CREATES_ORG->value => UserCreatesOrg::class,
+                    OrganizationFlow::INITIAL_BOOTSTRAP->value => InitialBootstrap::class,
+                    OrganizationFlow::USER_JOINS_USER_ORG->value => UserJoinsUserOrg::class,
+                ],
+                modeServices: [
+                    //   OrganizationMode::INVITE_ONLY->value => MainOnly::class,
+                    // OrganizationMode::OPEN->value => UserCreat::class,
+                ]
+            );
+        });
 
         $this->app->runningInConsole()
             ? $this->app->bind(OrganizationResolver::class, ConsoleOrganizationResolver::class)

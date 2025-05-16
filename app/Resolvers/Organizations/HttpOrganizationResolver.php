@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Resolvers;
+namespace App\Resolvers\Organizations;
 
 use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
 use Kwidoo\Mere\Contracts\Repositories\OrganizationRepository;
 use Kwidoo\Mere\Contracts\Repositories\SystemSettingRepository;
 use App\Contracts\Resolvers\OrganizationResolver;
-use App\Enums\RegistrationFlow;
+use App\Enums\OrganizationFlow;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use RuntimeException;
@@ -32,7 +32,7 @@ class HttpOrganizationResolver implements OrganizationResolver
      */
     public function resolve(?string $name = null): ?OrganizationInterface
     {
-        if ($this->settingBool('registration.force_main_org', 'iam.defaults.force_main_org') === RegistrationFlow::MAIN_ONLY) {
+        if ($this->settingBool('registration.force_main_org', 'iam.defaults.force_main_org') === OrganizationFlow::MAIN_ONLY) {
             return $this->repository->getMainOrganization();
         }
 
@@ -40,7 +40,7 @@ class HttpOrganizationResolver implements OrganizationResolver
             ?? request()->route('organization')
             ?? $this->fromSubdomain(request());
 
-        if ($this->settingBool('registration.force_main_org', 'iam.defaults.force_main_org') !== RegistrationFlow::MAIN_ONLY && $slug === null) {
+        if ($this->settingBool('registration.force_main_org', 'iam.defaults.force_main_org') !== OrganizationFlow::MAIN_ONLY && $slug === null) {
             return null;
         }
 

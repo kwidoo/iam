@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum RegistrationMode: string
+enum OrganizationMode: string
 {
     case INVITE_ONLY = 'invite_only';
     case OPEN = 'open';

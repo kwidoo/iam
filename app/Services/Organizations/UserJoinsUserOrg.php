@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Strategies\Organization;
+namespace App\Services\Organizations;
 
 use App\Contracts\Services\OrganizationCreateService;
-use Kwidoo\Mere\Contracts\Data\RegistrationData;
-use App\Enums\RegistrationFlow;
-use App\Services\OrganizationService;
+use App\Contracts\Services\Organizations\OrganizationService;
+use App\Enums\OrganizationFlow;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
+use Spatie\LaravelData\Contracts\BaseData;
 
 class UserJoinsUserOrg implements OrganizationCreateService
 {
@@ -21,23 +22,25 @@ class UserJoinsUserOrg implements OrganizationCreateService
     /**
      * Get the registration flow type this strategy handles.
      *
-     * @return RegistrationFlow
+     * @return OrganizationFlow
      */
-    public function key(): RegistrationFlow
+    public function key(): OrganizationFlow
     {
-        return RegistrationFlow::USER_JOINS_USER_ORG;
+        return OrganizationFlow::USER_JOINS_USER_ORG;
     }
 
     /**
      * Connect the user to an existing organization during registration.
      * Validates the organization and sets up the user-organization relationship.
      *
-     * @param RegistrationData $data Registration data containing user and org info
+     * @param \App\Data\Organizations\OrganizationCreateData $data Registration data containing user and org info
      *
-     * @return void
+     * @return \App\Models\Organization
      */
-    public function create(RegistrationData $data): void
+    public function create(BaseData $data): OrganizationInterface
     {
-        $data->organization = $this->service->connectToExistingOrg($data);
+        $data->flow =  $this->key();
+        $organization = $this->service->connect($data);
+        return $organization;
     }
 }

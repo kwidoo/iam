@@ -5,6 +5,7 @@ return [
     App\Providers\AuthGuardServiceProvider::class,
     App\Providers\GateServiceProvider::class,
     App\Providers\IamProvider::class,
+    App\Providers\LifecycleServiceProvider::class,
     App\Providers\MorphMapServiceProvider::class,
     App\Providers\RepositoryBindingServiceProvider::class,
     App\Providers\ResolverServiceProvider::class,

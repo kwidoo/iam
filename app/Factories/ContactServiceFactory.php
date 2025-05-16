@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Services\ContactService;
+use App\Services\DefaultContactService;
 use Kwidoo\Contacts\Contracts\Contactable;
 use Kwidoo\Contacts\Contracts\ContactServiceFactory as BaseContractServiceFactory;
 use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
@@ -20,10 +21,10 @@ class ContactServiceFactory
      *
      * @return ContactService
      */
-    public function make(Contactable $model, Lifecycle $lifecycle): ContactService
+    public function make(Contactable $model, Lifecycle $lifecycle): DefaultContactService
     {
         $delegate = $this->csf->make($model);
 
-        return new ContactService($delegate, $lifecycle ?? $this->defaultLifecycle);
+        return new DefaultContactService($delegate, $lifecycle ?? $this->defaultLifecycle);
     }
 }

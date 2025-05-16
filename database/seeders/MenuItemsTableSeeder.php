@@ -7,7 +7,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Kwidoo\Mere\Contracts\MenuRepository;
+use Kwidoo\Mere\Contracts\Repositories\MenuRepository;
 
 /**
  * Seeds the menu items table with default data.

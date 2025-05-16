@@ -2,6 +2,7 @@
 
 namespace App\Data\Organizations;
 
+use App\Enums\OrganizationFlow;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
@@ -24,7 +25,14 @@ class OrganizationCreateData extends Data
         #[Required, StringType]
         #[MapInputName('owner_id')]
         public string $ownerId,
+
+        public ?OrganizationFlow $flow = null,
     ) {
         //
+    }
+
+    public function user() //: string
+    {
+        //return app()->make(UserRepository::class)->find($this->ownerId);
     }
 }

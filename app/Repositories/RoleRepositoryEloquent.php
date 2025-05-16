@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use Prettus\Repository\Criteria\RequestCriteria;
-use App\Contracts\Repositories\RoleRepository;
+use Kwidoo\Mere\Contracts\Repositories\RoleRepository;
 use Spatie\Permission\Models\Role;
 use Kwidoo\Mere\Repositories\RepositoryEloquent;
 

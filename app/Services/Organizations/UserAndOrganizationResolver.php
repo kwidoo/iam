@@ -2,7 +2,7 @@
 
 namespace App\Services\Organizations;
 
-use App\Contracts\Services\OrganizationService;
+use App\Contracts\Services\Organizations\OrganizationService;
 use App\Contracts\Services\UserService;
 use Kwidoo\Mere\Data\ShowQueryData;
 

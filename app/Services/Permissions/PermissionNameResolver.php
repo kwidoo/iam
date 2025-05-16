@@ -14,10 +14,10 @@ class PermissionNameResolver
      */
     public function resolve(string $permission, string $organizationSlug, ?string $action = null): string
     {
-        $name = "{$organizationSlug}.{$permission}";
+        $name = "{$organizationSlug}:{$permission}";
 
         if ($action) {
-            $name .= ".{$action}";
+            $name .= ":{$action}";
         }
 
         return $name;

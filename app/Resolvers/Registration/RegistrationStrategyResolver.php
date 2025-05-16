@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Resolvers;
+namespace App\Resolvers\Registration;
 
 use App\Contracts\Resolvers\StrategyResolver;
-use App\Data\RegistrationConfigData;
+use App\Data\Registration\RegistrationConfigData;
+use Illuminate\Contracts\Container\Container;
 use RuntimeException;
 
 class RegistrationStrategyResolver implements StrategyResolver
@@ -11,19 +12,22 @@ class RegistrationStrategyResolver implements StrategyResolver
     protected ?RegistrationConfigData $config;
 
     public function __construct(
-        protected array $identityStrategies,
-        protected array $flowStrategies,
-        protected array $profileStrategies,
-        protected array $secretStrategies,
-        protected array $modeStrategies,
+        protected Container $container,
+        protected array $identityServices,
+        protected array $flowServices,
+        protected array $profileServices,
+        protected array $secretServices,
+        protected array $modeServices,
         ?RegistrationConfigData $config = null,
     ) {
         $this->config = $config;
     }
 
-    public function setConfig(RegistrationConfigData $config): void
+    public function setConfig(RegistrationConfigData $config): self
     {
         $this->config = $config;
+
+        return $this;
     }
 
     public function resolve(string $type, mixed $service): object
@@ -33,10 +37,10 @@ class RegistrationStrategyResolver implements StrategyResolver
         }
 
         // Validate that the property exists
-        $property = $type . 'Strategies';
+        $property = $type . 'Services';
 
         if (!property_exists($this, $property)) {
-            throw new RuntimeException("Unknown strategy type: {$type}");
+            throw new RuntimeException("Unknown service type: {$type}");
         }
 
         $enum = $this->config->$type ?? null;
@@ -45,12 +49,12 @@ class RegistrationStrategyResolver implements StrategyResolver
         }
 
         $enumValue = $enum->value;
-        $strategyMap = $this->$property;
+        $serviceMap = $this->$property;
 
-        if (!isset($strategyMap[$enumValue])) {
-            throw new RuntimeException("Strategy not found for type [{$type}] and value [{$enumValue}].");
+        if (!isset($serviceMap[$enumValue])) {
+            throw new RuntimeException("Service not found for type [{$type}] and value [{$enumValue}].");
         }
 
-        return app()->make($strategyMap[$enumValue], ['service' => $service]);
+        return $this->container->make($serviceMap[$enumValue], ['service' => $service]);
     }
 }

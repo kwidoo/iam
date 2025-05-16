@@ -5,15 +5,14 @@ namespace App\Services\Organizations;
 use App\Contracts\Services\Organizations\RoleSetupService;
 use App\Contracts\Services\PermissionService;
 use App\Contracts\Services\Roles\RoleService;
-use Kwidoo\Mere\Contracts\Data\RegistrationData;
 use App\Data\Permissions\PermissionCreateData;
 use App\Data\Roles\RoleCreateData;
 use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
 use App\Services\Permissions\PermissionNameResolver;
 use App\Services\Roles\RoleNameResolver;
 use Kwidoo\Lifecycle\Traits\RunsLifecycle;
-
 use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Spatie\LaravelData\Contracts\BaseData;
 
 class DefaultRoleSetupService implements RoleSetupService
 {
@@ -29,14 +28,14 @@ class DefaultRoleSetupService implements RoleSetupService
 
     /**
      * @param \App\Models\Organization $organization
-     * @param \App\Data\Registration\DefaultRegistrationData $registrationData
+     * @param \App\Data\Organizations\OrganizationCreateData $data
      *
      * @return void
      */
-    public function initialize(OrganizationInterface $organization, RegistrationData $registrationData): void
+    public function initialize(OrganizationInterface $organization, BaseData $data): void
     {
         $this->runLifecycle(
-            context: $registrationData,
+            context: $data,
             callback: fn() => $this->createDefaults($organization),
         );
     }
@@ -48,13 +47,8 @@ class DefaultRoleSetupService implements RoleSetupService
      */
     protected function createDefaults(OrganizationInterface $organization): void
     {
-        $this->runLifecycle(
-            context: ['organization' => $organization],
-            callback: function () use ($organization) {
-                $this->createFor('admin', $organization);
-                $this->createFor('user', $organization);
-            }
-        );
+        $this->createFor('admin', $organization, 'api');
+        $this->createFor('user', $organization, 'api');
     }
 
     /**
@@ -64,26 +58,20 @@ class DefaultRoleSetupService implements RoleSetupService
      *
      * @return void
      */
-    protected function createFor(string $role, OrganizationInterface $organization, string $guardName = 'web'): void
+    protected function createFor(string $role, OrganizationInterface $organization, string $guardName = 'api'): void
     {
-        $this->runLifecycle(
-            context: ['role' => $role, 'organization' => $organization],
-            callback: function () use ($role, $organization, $guardName) {
-                $this->roleService->create(RoleCreateData::from([
-                    'name' => $this->rnr->resolve($role, $organization->getSlug()),
-                    'organization_id' => $organization->getId(),
-                    'description' => "Default {$role} role for {$organization->getName()}.",
-                    'guard_name' => $guardName,
-                ]));
 
-                $this->permissionService->create(PermissionCreateData::from([
-                    'name' => $this->pnr->resolve($role, $organization->getSlug()),
-                    'organization_id' => $organization->getId(),
-                    'description' => "Default {$role} permissions for {$organization->getName()}.",
-                    'guard_name' => $guardName,
-                ]));
-            }
-        );
+        $this->roleService->create(RoleCreateData::from([
+            'name' => $this->rnr->resolve($role, $organization->slug),
+            'organization_id' => $organization->id,
+            'guard_name' => $guardName,
+        ]));
+
+        $this->permissionService->create(PermissionCreateData::from([
+            'name' => $this->pnr->resolve($role, $organization->slug),
+            'organization_id' => $organization->id,
+            'guard_name' => $guardName,
+        ]));
     }
 
     /**

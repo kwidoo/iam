@@ -1,40 +1,49 @@
 <?php
 
-namespace App\Strategies\Organization;
+namespace App\Services\Organizations;
 
-use Kwidoo\Mere\Contracts\Repositories\OrganizationRepository;
-use App\Contracts\Services\OrganizationCreateService;
 use App\Data\Organizations\OrganizationCreateData;
-use Kwidoo\Mere\Contracts\Data\RegistrationData;
-use App\Enums\RegistrationFlow;
-use App\Services\OrganizationService;
-use Illuminate\Validation\ValidationException;
+use App\Enums\OrganizationFlow;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
+use App\Contracts\Services\Organizations\OrganizationService;
+use App\Contracts\Services\Organizations\RoleSetupService;
+use Spatie\LaravelData\Contracts\BaseData;
 
-class InitialBootstrap implements OrganizationCreateService
+class InitialBootstrap extends UserCreatesOrg
 {
     public function __construct(
-        protected OrganizationService $organizationService,
-        protected OrganizationRepository $repository,
-
-    ) {}
-
-    public function key(): RegistrationFlow
-    {
-        return RegistrationFlow::INITIAL_BOOTSTRAP;
+        protected OrganizationService $service,
+        protected RoleSetupService $roleSetupService,
+    ) {
+        //
     }
 
-    public function create(RegistrationData $data): void
+    public function key(): OrganizationFlow
     {
-        if ($this->repository->count() > 0) {
-            throw ValidationException::withMessages([
-                'strategy' => 'Initial bootstrap is not allowed — organizations already exist.',
-            ]);
-        }
+        return OrganizationFlow::INITIAL_BOOTSTRAP;
+    }
 
-        $data->organization = $this->organizationService->create(OrganizationCreateData::from(
-            name: "Main organization",
-            slug: 'main',
-            ownerId: $data->user->id,
-        ));
+    /**
+     * @param \App\Data\Registration\DefaultRegistrationData $data Registration data containing user and org info
+     *
+     * @return \App\Models\Organization
+     */
+    public function create(BaseData $data): OrganizationInterface
+    {
+        $initial = OrganizationCreateData::from([
+            'name' => "Main organization",
+            'slug' => 'main',
+            'ownerId' => $data->user->id,
+            'flow' => $this->key(),
+        ]);
+
+        $organization = $this->service->create($initial);
+
+        $this->roleSetupService->initialize(
+            $organization,
+            $initial,
+        );
+
+        return $organization;
     }
 }

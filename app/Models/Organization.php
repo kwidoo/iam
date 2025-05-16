@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\RegistrationMode;
+use App\Enums\OrganizationMode;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Exception;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -46,7 +46,7 @@ class Organization extends Model implements OrganizationInterface
     ];
 
     protected $casts = [
-        'registration_mode' => RegistrationMode::class,
+        'registration_mode' => OrganizationMode::class,
     ];
 
     public static function boot()

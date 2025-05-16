@@ -4,10 +4,14 @@ namespace App\Providers;
 
 use App\Adapters\LifecycleBridge;
 use App\Aggregates\RegistrationAggregate;
+use App\Models\Organization;
+use App\Models\User;
+use App\Observers\OrganizationObserver;
 use App\Services\ContactPasswordChecker;
 use Illuminate\Support\ServiceProvider;
-use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle as NewLifecycle;
-use Kwidoo\Lifecycle\Lifecycle\DefaultLifecycle;
+use Kwidoo\Contacts\Contracts\Contactable;
+use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
+use Kwidoo\Lifecycle\Core\Engine\DefaultLifecycle;
 use Kwidoo\Mere\Contracts\Aggregate;
 use Kwidoo\Mere\Contracts\Lifecycle as OldLifecycle;
 use Kwidoo\MultiAuth\Contracts\PasswordCheckerInterface;
@@ -26,19 +30,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PasswordCheckerInterface::class, ContactPasswordChecker::class);
 
         // Bind the new Lifecycle interface to its implementation
-        $this->app->bind(NewLifecycle::class, DefaultLifecycle::class);
-
-        // Bind the old Lifecycle interface to our bridge adapter
-        // This allows all existing code to continue working while delegating to the new implementation
-        $this->app->bind(OldLifecycle::class, function ($app) {
-            return new LifecycleBridge(
-                $app->make(NewLifecycle::class)
-            );
-        });
+        $this->app->bind(Lifecycle::class, DefaultLifecycle::class);
+        $this->app->bind(Contactable::class, User::class);
     }
 
     public function boot(): void
     {
-        // Reserved for future use.
+        Organization::observe(OrganizationObserver::class);
     }
 }

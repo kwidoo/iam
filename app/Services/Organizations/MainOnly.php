@@ -1,42 +1,37 @@
 <?php
 
-namespace App\Strategies\Organization;
+namespace App\Services\Organizations;
 
-use App\Contracts\Services\OrganizationCreateService;
-use App\Contracts\Services\OrganizationService;
-use Kwidoo\Mere\Contracts\Data\RegistrationData;
-use App\Enums\RegistrationFlow;
+use App\Enums\OrganizationFlow;
+use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
+use Spatie\LaravelData\Contracts\BaseData;
 
-
-class MainOnly implements OrganizationCreateService
+class MainOnly extends UserJoinsUserOrg
 {
-    /**
-     * Initialize the strategy with required service.
-     *
-     * @param OrganizationService $service Organization service instance
-     */
-    public function __construct(protected OrganizationService $service) {}
-
     /**
      * Get the registration flow type this strategy handles.
      *
-     * @return RegistrationFlow
+     * @return OrganizationFlow
      */
-    public function key(): RegistrationFlow
+    public function key(): OrganizationFlow
     {
-        return RegistrationFlow::MAIN_ONLY;
+        return OrganizationFlow::MAIN_ONLY;
     }
 
     /**
      * Load the default organization for the user during registration.
      * Associates the user with the main organization if it exists.
      *
-     * @param RegistrationData $data Registration data containing user info
+     * @param \App\Data\Organizations\OrganizationCreateData $data Registration data containing user and org info
      *
-     * @return void
+     * @return \App\Models\Organization
      */
-    public function create(RegistrationData $data): void
+    public function create(BaseData $data): OrganizationInterface
     {
-        $data->organization = $this->service->loadDefault($data);
+        $data->name = 'Main organization';
+        $data->slug = 'main';
+        $data->flow =  $this->key();
+
+        return parent::create($data);
     }
 }

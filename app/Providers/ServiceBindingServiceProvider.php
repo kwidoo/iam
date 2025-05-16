@@ -2,44 +2,43 @@
 
 namespace App\Providers;
 
-use App\Aggregates\RegistrationAggregate;
+use App\Contracts\Services\Organizations\OrganizationAccessService;
+use App\Contracts\Services\Organizations\OrganizationService;
+use App\Contracts\Services\Organizations\RoleSetupService;
+use App\Contracts\Services\PermissionService;
+use App\Contracts\Services\ProfileService;
+use App\Contracts\Services\Registration\RegistrationService;
+use App\Contracts\Services\Roles\RoleService;
+use App\Services\DefaultProfileService;
+use App\Services\DefaultRegistrationService;
+use App\Services\Organizations\DefaultOrganizationService;
+use App\Services\Organizations\DefaultOrganizationAccessService;
+use App\Services\Organizations\DefaultRoleSetupService;
+use App\Services\Permissions\DefaultPermissionService;
+use App\Services\Roles\DefaultRoleService;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\Services\{
-    OrganizationService as OrganizationServiceContract,
-    RoleService as RoleServiceContract,
-    PermissionService as PermissionServiceContract,
-    EventSourcingService as EventSourcingServiceContract,
-    MicroserviceService as MicroserviceServiceContract,
-    RegistrationService as RegistrationServiceContract,
-    ProfileService as ProfileServiceContract,
-    UserService as UserServiceContract,
-};
-use App\Factories\AccessAssignmentFactory;
-use App\Services\{
-    OrganizationService,
-    RoleService,
-    PermissionService,
-    EventSourcingService,
-    MicroserviceService,
-    RegistrationService,
-    ProfileService,
-    UserService,
-};
-use Kwidoo\Mere\Contracts\Aggregate;
+
 
 class ServiceBindingServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(OrganizationServiceContract::class, OrganizationService::class);
-        $this->app->bind(RoleServiceContract::class, RoleService::class);
-        $this->app->bind(PermissionServiceContract::class, PermissionService::class);
-        $this->app->bind(EventSourcingServiceContract::class, EventSourcingService::class);
-        $this->app->bind(MicroserviceServiceContract::class, MicroserviceService::class);
-        $this->app->bind(RegistrationServiceContract::class, RegistrationService::class);
-        $this->app->bind(ProfileServiceContract::class, ProfileService::class);
-        $this->app->bind(UserServiceContract::class, UserService::class);
+        // Bind the new Lifecycle interface to its implementation
+        // $this->app->bind(Lifecycle::class, DefaultLifecycle::class);
 
-        $this->app->bind(Aggregate::class, RegistrationAggregate::class);
+        // Bind service contracts to their implementations
+        $this->app->bind(OrganizationService::class, DefaultOrganizationService::class);
+        $this->app->bind(RoleSetupService::class, DefaultRoleSetupService::class);
+        // $this->app->bind(OrganizationAccessService::class, DefaultOrganizationAccessService::class);
+        $this->app->bind(RoleService::class, DefaultRoleService::class);
+        $this->app->bind(PermissionService::class, DefaultPermissionService::class);
+        $this->app->bind(RegistrationService::class, DefaultRegistrationService::class);
+        // $this->app->bind(EventSourcingServiceContract::class, EventSourcingService::class);
+        // $this->app->bind(MicroserviceServiceContract::class, MicroserviceService::class);
+        // $this->app->bind(RegistrationServiceContract::class, RegistrationService::class);
+        $this->app->bind(ProfileService::class, DefaultProfileService::class);
+        // $this->app->bind(UserServiceContract::class, UserService::class);
+
+        // $this->app->bind(Aggregate::class, RegistrationAggregate::class);
     }
 }

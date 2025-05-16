@@ -2,7 +2,7 @@
 
 namespace App\Contracts\Services\Roles;
 
-use Kwidoo\Mere\Contracts\BaseService;
+use Kwidoo\Mere\Contracts\Services\BaseService;
 use Spatie\Permission\Contracts\Role;
 
 interface RoleService extends BaseService

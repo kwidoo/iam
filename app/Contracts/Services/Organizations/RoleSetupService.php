@@ -3,7 +3,7 @@
 namespace App\Contracts\Services\Organizations;
 
 use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
-use Kwidoo\Mere\Contracts\Data\RegistrationData;
+use Spatie\LaravelData\Contracts\BaseData;
 
 interface RoleSetupService
 {
@@ -11,8 +11,8 @@ interface RoleSetupService
      * Initialize roles and permissions for an organization.
      *
      * @param \App\Models\Organization $organization The organization to initialize roles for
-     * @param \App\Data\Registration\RegistrationData $data The registration data
+     * @param \App\Data\Organizations\OrganizationCreateData $data The registration data
      * @return void
      */
-    public function initialize(OrganizationInterface $organization, RegistrationData $data): void;
+    public function initialize(OrganizationInterface $organization, BaseData $data): void;
 }

@@ -25,7 +25,7 @@ class RoleCreateData extends Data
         #[MapInputName('guard_name')]
         public string $guardName,
 
-        #[Required, StringType]
-        public string $description,
+        // #[Required, StringType]
+        // public string $description,
     ) {}
 }
