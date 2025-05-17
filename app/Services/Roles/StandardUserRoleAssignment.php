@@ -4,5 +4,13 @@ namespace App\Services\Roles;
 
 class StandardUserRoleAssignment extends BaseRoleAssignmentService
 {
-    protected string $roleType = 'default';
+    /**
+     * The key of the role assignment strategy.
+     *
+     * @var string
+     */
+    public function roleType(): string
+    {
+        return 'default';
+    }
 }

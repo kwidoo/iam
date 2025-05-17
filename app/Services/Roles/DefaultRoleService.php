@@ -2,14 +2,15 @@
 
 namespace App\Services\Roles;
 
-use App\Contracts\Repositories\RoleRepository;
+use Kwidoo\Mere\Contracts\Repositories\RoleRepository;
 use App\Contracts\Services\Roles\RoleService;
 use App\Criteria\ByOrganizationId;
 use App\Services\BaseService;
-use App\Services\Traits\RunsLifecycle;
+use Kwidoo\Lifecycle\Traits\RunsLifecycle;
 use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
-use Kwidoo\Mere\Contracts\MenuService;
+use Kwidoo\Mere\Contracts\Services\MenuService;
 use Kwidoo\Mere\Data\ShowQueryData;
+use Spatie\LaravelData\Contracts\BaseData;
 use Spatie\Permission\Contracts\Role;
 
 class DefaultRoleService extends BaseService implements RoleService
@@ -33,7 +34,7 @@ class DefaultRoleService extends BaseService implements RoleService
     public function getByName(string $name, ?string $organizationId = null): Role|null
     {
         return $this->runLifecycle(
-            context: ShowQueryData::from(id: $organizationId),
+            context: ShowQueryData::from(['id' => $organizationId]),
             callback: fn() => $this->handleGetByName($name, $organizationId)
         );
     }
@@ -51,6 +52,19 @@ class DefaultRoleService extends BaseService implements RoleService
         }
 
         return $this->repository->findByField('name', $name)->first();
+    }
+
+    protected function handleCreate(BaseData $data): mixed
+    {
+        return $this->repository->updateOrCreate([
+            'name' => $data->name,
+            'guard_name' => $data->guardName,
+            'organization_id' => $data->organizationId,
+        ], [
+            'name' => $data->name,
+            'guard_name' => $data->guardName,
+            'organization_id' => $data->organizationId,
+        ]);
     }
 
     /**

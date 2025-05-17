@@ -3,13 +3,14 @@
 namespace App\Services\Permissions;
 
 use App\Contracts\Services\PermissionService;
-use App\Contracts\Repositories\PermissionRepository;
-use App\Contracts\Services\OrganizationService;
+use Kwidoo\Mere\Contracts\Repositories\PermissionRepository;
+use App\Contracts\Services\Organizations\OrganizationService;
 use App\Criteria\ByOrganizationId;
 use App\Services\BaseService;
-use App\Services\Traits\RunsLifecycle;
+use Kwidoo\Lifecycle\Traits\RunsLifecycle;
+
 use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
-use Kwidoo\Mere\Contracts\MenuService;
+use Kwidoo\Mere\Contracts\Services\MenuService;
 use Kwidoo\Mere\Data\ShowQueryData;
 use Spatie\Permission\Contracts\Permission;
 
@@ -21,7 +22,7 @@ class DefaultPermissionService extends BaseService implements PermissionService
         MenuService $menuService,
         PermissionRepository $repository,
         Lifecycle $lifecycle,
-        protected OrganizationService $organizationService,
+        //protected OrganizationService $organizationService,
 
     ) {
         parent::__construct($menuService, $repository, $lifecycle);
@@ -36,7 +37,7 @@ class DefaultPermissionService extends BaseService implements PermissionService
     public function getByName(string $name, ?string $organizationId = null): Permission|null
     {
         return $this->runLifecycle(
-            context: ShowQueryData::from(id: $organizationId),
+            context: ShowQueryData::from(['id' => $organizationId]),
             callback: fn() => $this->handleGetByName($name, $organizationId)
         );
     }

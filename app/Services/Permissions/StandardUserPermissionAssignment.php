@@ -4,5 +4,8 @@ namespace App\Services\Permissions;
 
 class StandardUserPermissionAssignment extends BasePermissionAssignmentService
 {
-    protected string $permissionType = 'admin';
+    public function permissionType(): string
+    {
+        return 'default';
+    }
 }

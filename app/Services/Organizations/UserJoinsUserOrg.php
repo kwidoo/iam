@@ -3,8 +3,13 @@
 namespace App\Services\Organizations;
 
 use App\Contracts\Services\OrganizationCreateService;
+use App\Contracts\Services\Organizations\ConnectProfileService;
+use App\Contracts\Services\Organizations\ConnectUserService;
+use App\Contracts\Services\Organizations\OrganizationAccessService;
 use App\Contracts\Services\Organizations\OrganizationService;
 use App\Enums\OrganizationFlow;
+use App\Services\Permissions\StandardUserPermissionAssignment;
+use App\Services\Roles\StandardUserRoleAssignment;
 use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
 use Spatie\LaravelData\Contracts\BaseData;
 
@@ -17,6 +22,10 @@ class UserJoinsUserOrg implements OrganizationCreateService
      */
     public function __construct(
         protected OrganizationService $service,
+        protected StandardUserRoleAssignment $roleAssignment,
+        protected StandardUserPermissionAssignment $permissionAssignment,
+        protected ConnectUserService $connectUserService,
+        protected ConnectProfileService $connectProfileService
     ) {}
 
     /**

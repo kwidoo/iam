@@ -8,11 +8,13 @@ use Spatie\LaravelData\Data;
 
 /**
  * @property \App\Models\Organization $organization
+ * @property \App\Models\User $user
  */
 class UserOrganizationData extends Data
 {
     public function __construct(
         public UserInterface $user,
         public OrganizationInterface $organization,
+
     ) {}
 }

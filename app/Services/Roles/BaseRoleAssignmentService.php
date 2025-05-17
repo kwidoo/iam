@@ -5,32 +5,29 @@ namespace App\Services\Roles;
 
 use App\Contracts\Services\Roles\RoleAssignment;
 use App\Contracts\Services\Roles\RoleService;
-use App\Data\RoleAssignmentData;
-use App\Services\Organizations\UserAndOrganizationResolver;
-use App\Services\Traits\RunsLifecycle;
+use App\Data\Organizations\UserOrganizationData;
+use Kwidoo\Lifecycle\Traits\RunsLifecycle;
+
 use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 
 abstract class BaseRoleAssignmentService implements RoleAssignment
 {
     use RunsLifecycle;
 
-    abstract protected string $roleType;
-
     public function __construct(
         protected RoleService $service,
         protected Lifecycle $lifecycle,
         protected RoleNameResolver $nameResolver,
-        protected UserAndOrganizationResolver $resolver,
     ) {
         //
     }
 
     /**
-     * @param RoleAssignmentData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    public function assign(RoleAssignmentData $data): void
+    public function give(UserOrganizationData $data): void
     {
         $this->runLifecycle(
             context: $data,
@@ -39,11 +36,11 @@ abstract class BaseRoleAssignmentService implements RoleAssignment
     }
 
     /**
-     * @param RoleAssignmentData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    public function revoke(RoleAssignmentData $data): void
+    public function revoke(UserOrganizationData $data): void
     {
         $this->runLifecycle(
             context: $data,
@@ -52,48 +49,38 @@ abstract class BaseRoleAssignmentService implements RoleAssignment
     }
 
     /**
-     * @param RoleAssignmentData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    protected function handleAssign(RoleAssignmentData $data): void
+    protected function handleAssign(UserOrganizationData $data): void
     {
-        [$user, $organization] = $this->resolver->resolve(
-            userId: $data->userId,
-            organizationId: $data->organizationId
-        );
-
         $name = $this->nameResolver->resolve(
-            role: $this->roleType,
-            organizationSlug: $organization->slug,
+            role: $this->roleType(),
+            organizationSlug: $data->organization->slug,
         );
-        $role = $this->service->getByName($name, $organization->id);
+        $role = $this->service->getByName($name, $data->organization->id);
 
-        $user->assignRole($role, $user->id, $organization->id);
+        $data->user->assignRole($role);
     }
 
     /**
-     * @param RoleAssignmentData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    protected function handleRevoke(RoleAssignmentData $data): void
+    protected function handleRevoke(UserOrganizationData $data): void
     {
-        [$user, $organization] = $this->resolver->resolve(
-            userId: $data->userId,
-            organizationId: $data->organizationId
-        );
-
         $name = $this->nameResolver->resolve(
-            role: $this->roleType,
-            organizationSlug: $organization->slug,
+            role: $this->roleType(),
+            organizationSlug: $data->organization->slug,
         );
         $role = $this->service->getByName(
             name: $name,
-            organizationId: $organization->id
+            organizationId: $data->organization->id
         );
 
-        $user->removeRole($role);
+        $data->user->removeRole($role);
     }
 
     /**
@@ -101,6 +88,9 @@ abstract class BaseRoleAssignmentService implements RoleAssignment
      */
     protected function eventKey(): string
     {
-        return "{$this->roleType}.role";
+        $name = $this->roleType();
+        return "$name.role";
     }
+
+    abstract public function roleType(): string;
 }

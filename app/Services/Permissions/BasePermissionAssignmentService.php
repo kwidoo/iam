@@ -3,9 +3,11 @@
 namespace App\Services\Permissions;
 
 use App\Contracts\Services\PermissionService;
-use App\Data\GivePermissionData;
+use App\Data\Organizations\UserOrganizationData;
+use App\Data\Permissions\GivePermissionData;
 use App\Services\Organizations\UserAndOrganizationResolver;
-use App\Services\Traits\RunsLifecycle;
+use Kwidoo\Lifecycle\Traits\RunsLifecycle;
+
 use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 
 
@@ -13,24 +15,21 @@ abstract class BasePermissionAssignmentService implements PermissionAssignment
 {
     use RunsLifecycle;
 
-    abstract protected string $permissionType;
 
     public function __construct(
         protected Lifecycle $lifecycle,
         protected PermissionService $service,
         protected PermissionNameResolver $nameResolver,
-        protected UserAndOrganizationResolver $resolver,
-
     ) {
         //
     }
 
     /**
-     * @param GivePermissionData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    public function assign(GivePermissionData $data): void
+    public function assign(UserOrganizationData $data): void
     {
         $this->runLifecycle(
             context: $data,
@@ -39,11 +38,11 @@ abstract class BasePermissionAssignmentService implements PermissionAssignment
     }
 
     /**
-     * @param GivePermissionData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    public function revoke(GivePermissionData $data): void
+    public function revoke(UserOrganizationData $data): void
     {
         $this->runLifecycle(
             context: $data,
@@ -52,55 +51,48 @@ abstract class BasePermissionAssignmentService implements PermissionAssignment
     }
 
     /**
-     * @param GivePermissionData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    protected function handleAssign(GivePermissionData $data): void
+    protected function handleAssign(UserOrganizationData $data): void
     {
-        [$user, $organization] = $this->resolver->resolve(
-            userId: $data->userId,
-            organizationId: $data->organizationId
-        );
-
         $name = $this->nameResolver->resolve(
-            permission: $this->permissionType,
-            organizationSlug: $organization->slug,
+            permission: $this->permissionType(),
+            organizationSlug: $data->organization->slug,
         );
 
-        $permission = $this->service->getByName($name, $organization->id);
+        $permission = $this->service->getByName($name, $data->organization->id);
 
-        $user->givePermissionTo($permission);
+        $data->user->givePermissionTo($permission);
     }
 
     /**
-     * @param GivePermissionData $data
+     * @param UserOrganizationData $data
      *
      * @return void
      */
-    protected function handleRevoke(GivePermissionData $data): void
+    protected function handleRevoke(UserOrganizationData $data): void
     {
-        [$user, $organization] = $this->resolver->resolve(
-            userId: $data->userId,
-            organizationId: $data->organizationId
-        );
 
         $name = $this->nameResolver->resolve(
-            permission: $this->permissionType,
-            organizationSlug: $organization->slug,
+            permission: $this->permissionType(),
+            organizationSlug: $data->organization->slug,
         );
 
-        $permission = $this->service->getByName($name, $organization->id);
+        $permission = $this->service->getByName($name, $data->organization->id);
 
-
-        $user->revokePermissionTo($permission);
+        $data->user->revokePermissionTo($permission);
     }
+
+    abstract public function permissionType(): string;
 
     /**
      * @return string
      */
     protected function eventKey(): string
     {
-        return "{$this->permissionType}.permission";
+        $name = $this->permissionType();
+        return "$name.permission";
     }
 }

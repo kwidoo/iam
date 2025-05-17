@@ -3,10 +3,15 @@
 namespace App\Services\Organizations;
 
 use App\Contracts\Services\OrganizationCreateService;
+use App\Contracts\Services\Organizations\ConnectProfileService;
+use App\Contracts\Services\Organizations\ConnectUserService;
 use App\Contracts\Services\Organizations\OrganizationService;
 use App\Contracts\Services\Organizations\RoleSetupService;
 use App\Data\Organizations\OrganizationCreateData;
+use App\Data\Organizations\UserOrganizationData;
 use App\Enums\OrganizationFlow;
+use App\Services\Permissions\AdminPermissionAssignment;
+use App\Services\Roles\AdminRoleAssignment;
 use Kwidoo\Mere\Contracts\Models\OrganizationInterface;
 use Kwidoo\Mere\Contracts\Repositories\OrganizationRepository;
 use Spatie\LaravelData\Contracts\BaseData;
@@ -23,6 +28,10 @@ class UserCreatesOrg implements OrganizationCreateService
         protected OrganizationService $service,
         protected RoleSetupService $roleSetupService,
         protected OrganizationRepository $repository,
+        protected ConnectUserService $connectUserService,
+        protected ConnectProfileService $connectProfileService,
+        protected AdminRoleAssignment $roleAssignment,
+        protected AdminPermissionAssignment $permissionAssignment,
     ) {}
 
     /**
@@ -56,6 +65,16 @@ class UserCreatesOrg implements OrganizationCreateService
             $organization,
             $data,
         );
+
+        $this->roleAssignment->give(UserOrganizationData::from([
+            'user' => $data->user,
+            'organization' => $organization,
+        ]));
+
+        $this->permissionAssignment->assign(UserOrganizationData::from([
+            'user' => $data->user,
+            'organization' => $organization,
+        ]));
 
         return $organization;
     }

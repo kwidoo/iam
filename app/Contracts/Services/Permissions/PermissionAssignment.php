@@ -2,10 +2,10 @@
 
 namespace App\Services\Permissions;
 
-use App\Data\GivePermissionData;
+use App\Data\Organizations\UserOrganizationData;
 
 interface PermissionAssignment
 {
-    public function assign(GivePermissionData $data): void;
-    public function revoke(GivePermissionData $data): void;
+    public function assign(UserOrganizationData $data): void;
+    public function revoke(UserOrganizationData $data): void;
 }
