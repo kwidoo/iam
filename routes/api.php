@@ -106,6 +106,10 @@ Route::group(
         Route::post('/admin/organizations/{organization}/generate-permissions', [PermissionController::class, 'generateForOrganization'])
             ->middleware('org.permission:permission.create');
 
+        // User-initiated join organization
+        Route::post('/organizations/{organization}/join', [OrganizationController::class, 'joinOrganization'])
+            ->name('organizations.join');
+
         // Roles and Permissions routes
         Route::get('/admin/roles', [RoleController::class, 'index']);
         Route::post('/admin/roles', [RoleController::class, 'store']);

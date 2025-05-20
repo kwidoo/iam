@@ -13,6 +13,8 @@ use Kwidoo\Lifecycle\Contracts\Lifecycle\Lifecycle;
 use Illuminate\Validation\ValidationException;
 use Kwidoo\Mere\Contracts\Services\MenuService;
 use Spatie\LaravelData\Contracts\BaseData;
+use App\Contracts\Services\Organizations\OrganizationMembershipService; // Added
+use Illuminate\Support\Facades\Auth; // Added
 
 /**
  * @property \App\Models\Organization $organization
@@ -29,6 +31,7 @@ class DefaultOrganizationService extends BaseService implements OrganizationServ
         OrganizationRepository $repository,
         Lifecycle $lifecycle,
         protected RoleSetupService $orgRoleInitializer,
+        protected OrganizationMembershipService $organizationMembershipService, // Added
         protected ?string $slug = 'main',
     ) {
         parent::__construct($menuService, $repository, $lifecycle);
@@ -65,19 +68,41 @@ class DefaultOrganizationService extends BaseService implements OrganizationServ
      *
      * @return \App\Models\Organization
      */
-    protected function handleConnect(OrganizationCreateData $data): OrganizationInterface
+    protected function handleConnect(BaseData $data): OrganizationInterface
     {
-        $this->organization = $this->repository->findByField('slug', $data->slug)->first();
+        if (!isset($data->slug)) {
+            throw new \InvalidArgumentException('Organization slug is required to connect.');
+        }
 
-        if (!$this->organization || !$this->organization->exists) {
+        $organization = $this->repository->findByField('slug', $data->slug)->first();
+
+        if (!$organization || !$organization->exists) {
             throw ValidationException::withMessages([
                 'organization' => 'Invalid organization provided.',
             ]);
         }
 
-        // <- provide default access to use
+        $user = Auth::user();
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'user' => 'User must be authenticated to join an organization.',
+            ]);
+        }
 
-        return $this->organization;
+        // Check if user is already a member
+        if ($organization->users()->where('user_id', $user->id)->exists()) {
+            throw ValidationException::withMessages([
+                'user_id' => 'User is already a member of this organization.'
+            ]);
+        }
+        
+        // Add user to organization with a default role 'member'
+        // This uses the OrganizationMembershipService to ensure all related logic (Spatie roles, events) is handled.
+        $this->organizationMembershipService->addUserToOrganization($organization, $user, 'member');
+
+        // The connect method in this service returns the organization model.
+        // The addUserToOrganization returns the pivot model, so we just return the organization.
+        return $organization;
     }
 
     /**
@@ -88,13 +113,28 @@ class DefaultOrganizationService extends BaseService implements OrganizationServ
      */
     protected function handleCreate(BaseData $data): OrganizationInterface
     {
+        // Ensure ownerId is present, as it's used by the original logic
+        if (!isset($data->ownerId)) {
+            // Attempt to get from auth user if not provided, or throw error
+            $data->ownerId = Auth::id() ?? throw new \InvalidArgumentException('Owner ID is required to create an organization.');
+        }
+        if (!isset($data->name) || !isset($data->slug)) {
+             throw new \InvalidArgumentException('Name and Slug are required to create an organization.');
+        }
+
         $this->organization = $this->repository->create([
             'name' => $data->name,
             'slug' => $data->slug,
             'owner_id' => $data->ownerId,
         ]);
 
-        // <- provide admin access to creator
+        // <- provide admin access to creator - This part is still a comment from original code
+        // If the creator should be added as 'owner' via OrganizationMembershipService:
+        // $owner = \App\Models\User::find($data->ownerId);
+        // if ($owner) {
+        //     $this->organizationMembershipService->addUserToOrganization($this->organization, $owner, 'owner');
+        // }
+
         return $this->organization;
     }
 
